@@ -1,6 +1,6 @@
-# X1Wrt LuCI Theme
+# CleanX LuCI Theme
 
-**X1Wrt** is a clean, Apple-inspired LuCI theme for OpenWrt with a modern glass interface, smooth animation, dark/light mode and live dashboard cards.
+**CleanX** is a clean, Apple-inspired LuCI theme for OpenWrt with a modern glass interface, smooth animation, dark/light mode and live dashboard cards.
 
 This project is built **from scratch** for modern LuCI using `ucode/template/themes/`. It is not a fork of Aurora or Bootstrap.
 
@@ -25,7 +25,7 @@ This project is built **from scratch** for modern LuCI using `ucode/template/the
 This theme uses the **modern LuCI ucode template path**:
 
 ```text
-ucode/template/themes/x1wrt/
+ucode/template/themes/cleanx/
 ```
 
 That is the correct structure for current OpenWrt/LuCI builds. Older themes that only use:
@@ -51,19 +51,19 @@ The preview pages are static mockups so you can judge the style before installin
 ## Repository structure
 
 ```text
-luci-theme-x1wrt/
+luci-theme-cleanx/
 ├── Makefile
 ├── README.md
-├── htdocs/luci-static/x1wrt/
+├── htdocs/luci-static/cleanx/
 │   ├── main.css
 │   ├── login.css
 │   └── images/logo.svg
 ├── htdocs/luci-static/resources/
-│   ├── menu-x1wrt.js
-│   └── x1wrt-dashboard.js
-├── root/etc/uci-defaults/30_luci-theme-x1wrt
-├── root/usr/share/rpcd/acl.d/luci-theme-x1wrt.json
-├── ucode/template/themes/x1wrt/
+│   ├── menu-cleanx.js
+│   └── cleanx-dashboard.js
+├── root/etc/uci-defaults/30_luci-theme-cleanx
+├── root/usr/share/rpcd/acl.d/luci-theme-cleanx.json
+├── ucode/template/themes/cleanx/
 │   ├── header.ut
 │   ├── footer.ut
 │   └── sysauth.ut
@@ -77,7 +77,7 @@ luci-theme-x1wrt/
 
 1. Upload this repository to GitHub.
 2. Go to **Actions**.
-3. Run **Build X1Wrt OpenWrt packages**.
+3. Run **Build CleanX OpenWrt packages**.
 4. Download the generated artifacts.
 
 The workflow uses the official OpenWrt SDK and compiles the package properly instead of manually zipping files.
@@ -87,14 +87,14 @@ The workflow uses the official OpenWrt SDK and compiles the package properly ins
 Copy the `.ipk` to your router, for example:
 
 ```sh
-scp luci-theme-x1wrt_*.ipk root@192.168.1.1:/tmp/
+scp luci-theme-cleanx_*.ipk root@192.168.1.1:/tmp/
 ```
 
 Install and apply:
 
 ```sh
-opkg install /tmp/luci-theme-x1wrt_*.ipk
-uci set luci.main.mediaurlbase='/luci-static/x1wrt'
+opkg install /tmp/luci-theme-cleanx_*.ipk
+uci set luci.main.mediaurlbase='/luci-static/cleanx'
 uci commit luci
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 /etc/init.d/uhttpd restart
@@ -105,14 +105,14 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 Copy the `.apk` to your router:
 
 ```sh
-scp luci-theme-x1wrt*.apk root@192.168.1.1:/tmp/
+scp luci-theme-cleanx*.apk root@192.168.1.1:/tmp/
 ```
 
 Install and apply:
 
 ```sh
-apk add --allow-untrusted /tmp/luci-theme-x1wrt*.apk
-uci set luci.main.mediaurlbase='/luci-static/x1wrt'
+apk add --allow-untrusted /tmp/luci-theme-cleanx*.apk
+uci set luci.main.mediaurlbase='/luci-static/cleanx'
 uci commit luci
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 /etc/init.d/uhttpd restart
@@ -132,13 +132,13 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 If needed, remove the package:
 
 ```sh
-opkg remove luci-theme-x1wrt
+opkg remove luci-theme-cleanx
 ```
 
 or on APK-based systems:
 
 ```sh
-apk del luci-theme-x1wrt
+apk del luci-theme-cleanx
 ```
 
 ## Live dashboard behaviour

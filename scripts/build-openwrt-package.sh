@@ -10,7 +10,7 @@ set -eu
 #   OpenWrt >= 25.12  -> .apk
 
 OWRT_DIR="${1:-}"
-PKG_NAME="luci-theme-x1wrt"
+PKG_NAME="luci-theme-cleanx"
 
 if [ -z "$OWRT_DIR" ] || [ ! -d "$OWRT_DIR" ]; then
 	echo "ERROR: give OpenWrt buildroot/SDK path" >&2

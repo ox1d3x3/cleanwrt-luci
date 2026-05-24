@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Register and select CleanX theme on fresh install.
+# During package upgrade, keep the user's current theme selection untouched.
+
+uci -q batch <<-'UCI'
+	set luci.themes.CleanX='/luci-static/cleanx'
+UCI
+
+if [ "$PKG_UPGRADE" != "1" ]; then
+	uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
+fi
+
+# Theme config used by the frontend JS. Safe defaults only.
+uci -q get cleanx.theme >/dev/null 2>&1 || {
+	uci -q batch <<-'UCI'
+		set cleanx.theme='theme'
+		set cleanx.theme.mode='auto'
+		set cleanx.theme.dashboard='1'
+		set cleanx.theme.wan_interface='auto'
+		set cleanx.theme.animations='balanced'
+	UCI
+}
+
+uci -q commit luci
+uci -q commit cleanx
+
+exit 0

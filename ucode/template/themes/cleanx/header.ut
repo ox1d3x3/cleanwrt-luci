@@ -1,0 +1,141 @@
+{#
+ CleanX LuCI theme
+ SPDX-License-Identifier: Apache-2.0
+
+ Modern ucode-based LuCI theme for OpenWrt 23.05+.
+-#}
+
+{%
+	import { getuid, getspnam } from 'luci.core';
+	import { cursor } from 'uci';
+
+	const boardinfo = ubus.call('system', 'board');
+	const uci = cursor();
+	const cfg = uci.get_all('cleanx', 'theme') || {};
+	const theme_mode = cfg.mode || 'auto';
+	const dashboard = cfg.dashboard == '0' ? '0' : '1';
+	const animations = cfg.animations || 'balanced';
+
+	http.prepare_content('text/html; charset=UTF-8');
+-%}
+<!DOCTYPE html>
+<html lang="{{ dispatcher.lang }}" data-cleanx-mode="{{ entityencode(theme_mode, true) }}" data-cleanx-animations="{{ entityencode(animations, true) }}">
+<head>
+	<meta charset="utf-8">
+	<title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+	<meta name="theme-color" content="#050507" media="(prefers-color-scheme: dark)">
+	<meta name="color-scheme" content="light dark">
+	<script>
+	(function () {
+		var key = 'cleanx.theme';
+		var saved = localStorage.getItem(key) || '{{ entityencode(theme_mode, true) }}' || 'auto';
+		var dark = saved === 'dark' || (saved !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+		document.documentElement.dataset.cleanxTheme = dark ? 'dark' : 'light';
+		document.documentElement.dataset.cleanxThemeChoice = saved;
+	})();
+	</script>
+	{% if (blank_page): %}
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.2.1">
+	{% else %}
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.2.1">
+	{% endif %}
+	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
+	{% if (node?.css): %}
+	<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
+	{% endif %}
+	{% if (css): %}
+	<style title="text/css">{{ css }}</style>
+	{% endif %}
+	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+	<script src="{{ resource }}/cbi.js"></script>
+</head>
+<body class="lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}" data-cleanx-dashboard="{{ dashboard }}">
+	{% if (!blank_page): %}
+	<div id="cleanx-page-loader" aria-hidden="true">
+		<div class="cleanx-loader-mark">CX</div>
+		<div class="cleanx-loader-text">Loading LuCI</div>
+	</div>
+	<div id="cleanx-scroll-progress" aria-hidden="true"></div>
+
+	<div class="cleanx-bg" aria-hidden="true">
+		<div class="cleanx-grid"></div>
+		<div class="cleanx-blob cleanx-blob-a"></div>
+		<div class="cleanx-blob cleanx-blob-b"></div>
+		<div class="cleanx-blob cleanx-blob-c"></div>
+	</div>
+
+	<div class="cleanx-app-shell">
+		<aside class="cleanx-sidebar" id="cleanx-sidebar">
+			<a class="cleanx-brand" href="{{ dispatcher.build_url() }}">
+				<span class="cleanx-brand-mark">CX</span>
+				<span class="cleanx-brand-text">
+					<strong>{{ striptags(boardinfo.hostname ?? 'OpenWrt') }}</strong>
+					<small>{{ version.distname }} {{ version.distversion }}</small>
+				</span>
+			</a>
+			<div class="cleanx-router-pill"><span></span>{{ _('Online') }}</div>
+			<nav class="cleanx-main-nav" aria-label="{{ _('Main navigation') }}">
+				<ul class="nav" id="topmenu" style="display:none"></ul>
+			</nav>
+		</aside>
+
+		<div class="cleanx-main-column">
+			<header class="cleanx-topbar">
+				<button class="cleanx-icon-button cleanx-mobile-menu" id="cleanx-mobile-menu" type="button" aria-label="{{ _('Menu') }}" aria-expanded="false">
+					<span></span><span></span><span></span>
+				</button>
+				<div class="cleanx-page-title">
+					<span>{{ striptags(boardinfo.hostname ?? 'OpenWrt') }}</span>
+					<strong>{{ dispatched?.title ? _(dispatched.title) : _('Dashboard') }}</strong>
+				</div>
+				<div class="cleanx-top-actions">
+					<span id="cleanx-clock" class="cleanx-clock"></span>
+					<ul class="breadcrumb cleanx-mode-menu" id="modemenu" style="display:none"></ul>
+					<button class="cleanx-theme-toggle" id="cleanx-theme-toggle" type="button" title="{{ _('Toggle theme') }}" aria-label="{{ _('Toggle theme') }}">
+						<span class="cleanx-theme-toggle-knob"></span>
+					</button>
+				</div>
+			</header>
+
+			<div class="cleanx-mobile-drawer" id="cleanx-mobile-drawer" aria-hidden="true">
+				<div class="cleanx-mobile-drawer-card">
+					<div class="cleanx-mobile-drawer-head">
+						<strong>{{ _('Menu') }}</strong>
+						<button id="cleanx-mobile-close" type="button" aria-label="{{ _('Close') }}">×</button>
+					</div>
+					<ul id="cleanx-mobile-list" class="cleanx-mobile-list"></ul>
+				</div>
+			</div>
+
+			<main class="cleanx-content" id="maincontent">
+				<div class="cleanx-tabbar" id="tabmenu" style="display:none"></div>
+
+				{% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+				<div class="alert-message warning cleanx-warning">
+					<h4>{{ _('No password set!') }}</h4>
+					<p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+					{% if (dispatcher.lookup('admin/system/admin')): %}
+					<a class="btn" href="{{ dispatcher.build_url('admin/system/admin') }}">{{ _('Go to password configuration...') }}</a>
+					{% endif %}
+				</div>
+				{% endif %}
+
+				{% if (boardinfo.rootfs_type == 'initramfs'): %}
+				<div class="alert-message warning cleanx-warning">
+					<h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
+					<p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+					{% if (dispatcher.lookup('admin/system/flash')): %}
+					<a class="btn" href="{{ dispatcher.build_url('admin/system/flash') }}">{{ _('Go to firmware upgrade...') }}</a>
+					{% endif %}
+				</div>
+				{% endif %}
+
+				<noscript>
+					<div class="alert-message warning cleanx-warning">
+						<h4>{{ _('JavaScript required!') }}</h4>
+						<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+					</div>
+				</noscript>
+	{% endif %}

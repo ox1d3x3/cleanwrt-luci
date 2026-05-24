@@ -1,0 +1,13 @@
+	{% if (!blank_page): %}
+			</main>
+			<footer class="cleanx-footer">
+				<span>Powered by <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }} ({{ version.luciversion }})</a> / <a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">{{ version.distname }} {{ version.distversion }} ({{ version.distrevision }})</a>{% if (lua_active): %} / {{ _('Lua compatibility mode active') }}{% endif %}</span>
+				<span>CleanX Theme v0.2.1</span>
+			</footer>
+		</div>
+	</div>
+	<script>L.require('menu-cleanx')</script>
+	<script>L.require('cleanx-dashboard')</script>
+	{% endif %}
+</body>
+</html>

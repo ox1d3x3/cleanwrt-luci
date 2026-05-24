@@ -4,7 +4,7 @@ set -eu
 PKG="${1:-}"
 
 if [ -z "$PKG" ] || [ ! -f "$PKG" ]; then
-	echo "Usage: $0 ./luci-theme-x1wrt_*.ipk|*.apk" >&2
+	echo "Usage: $0 ./luci-theme-cleanx_*.ipk|*.apk" >&2
 	exit 1
 fi
 
@@ -23,9 +23,9 @@ case "$PKG" in
 		;;
 esac
 
-uci set luci.main.mediaurlbase='/luci-static/x1wrt'
+uci set luci.main.mediaurlbase='/luci-static/cleanx'
 uci commit luci
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache 2>/dev/null || true
 /etc/init.d/uhttpd restart
 
-echo "X1Wrt theme installed and selected. Open LuCI again."
+echo "CleanX theme installed and selected. Open LuCI again."
