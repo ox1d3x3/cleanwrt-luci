@@ -1,0 +1,141 @@
+{#
+ X1Wrt LuCI theme
+ SPDX-License-Identifier: Apache-2.0
+
+ Modern ucode-based LuCI theme for OpenWrt 23.05+.
+-#}
+
+{%
+	import { getuid, getspnam } from 'luci.core';
+	import { cursor } from 'uci';
+
+	const boardinfo = ubus.call('system', 'board');
+	const uci = cursor();
+	const cfg = uci.get_all('x1wrt', 'theme') || {};
+	const theme_mode = cfg.mode || 'auto';
+	const dashboard = cfg.dashboard == '0' ? '0' : '1';
+	const animations = cfg.animations || 'balanced';
+
+	http.prepare_content('text/html; charset=UTF-8');
+-%}
+<!DOCTYPE html>
+<html lang="{{ dispatcher.lang }}" data-x1-mode="{{ entityencode(theme_mode, true) }}" data-x1-animations="{{ entityencode(animations, true) }}">
+<head>
+	<meta charset="utf-8">
+	<title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+	<meta name="theme-color" content="#050507" media="(prefers-color-scheme: dark)">
+	<meta name="color-scheme" content="light dark">
+	<script>
+	(function () {
+		var key = 'x1wrt.theme';
+		var saved = localStorage.getItem(key) || '{{ entityencode(theme_mode, true) }}' || 'auto';
+		var dark = saved === 'dark' || (saved !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+		document.documentElement.dataset.x1Theme = dark ? 'dark' : 'light';
+		document.documentElement.dataset.x1ThemeChoice = saved;
+	})();
+	</script>
+	{% if (blank_page): %}
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.2.0">
+	{% else %}
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.2.0">
+	{% endif %}
+	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
+	{% if (node?.css): %}
+	<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
+	{% endif %}
+	{% if (css): %}
+	<style title="text/css">{{ css }}</style>
+	{% endif %}
+	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+	<script src="{{ resource }}/cbi.js"></script>
+</head>
+<body class="lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}" data-x1-dashboard="{{ dashboard }}">
+	{% if (!blank_page): %}
+	<div id="x1-page-loader" aria-hidden="true">
+		<div class="x1-loader-mark">X1</div>
+		<div class="x1-loader-text">Loading LuCI</div>
+	</div>
+	<div id="x1-scroll-progress" aria-hidden="true"></div>
+
+	<div class="x1-bg" aria-hidden="true">
+		<div class="x1-grid"></div>
+		<div class="x1-blob x1-blob-a"></div>
+		<div class="x1-blob x1-blob-b"></div>
+		<div class="x1-blob x1-blob-c"></div>
+	</div>
+
+	<div class="x1-app-shell">
+		<aside class="x1-sidebar" id="x1-sidebar">
+			<a class="x1-brand" href="{{ dispatcher.build_url() }}">
+				<span class="x1-brand-mark">X1</span>
+				<span class="x1-brand-text">
+					<strong>{{ striptags(boardinfo.hostname ?? 'OpenWrt') }}</strong>
+					<small>{{ version.distname }} {{ version.distversion }}</small>
+				</span>
+			</a>
+			<div class="x1-router-pill"><span></span>{{ _('Online') }}</div>
+			<nav class="x1-main-nav" aria-label="{{ _('Main navigation') }}">
+				<ul class="nav" id="topmenu" style="display:none"></ul>
+			</nav>
+		</aside>
+
+		<div class="x1-main-column">
+			<header class="x1-topbar">
+				<button class="x1-icon-button x1-mobile-menu" id="x1-mobile-menu" type="button" aria-label="{{ _('Menu') }}" aria-expanded="false">
+					<span></span><span></span><span></span>
+				</button>
+				<div class="x1-page-title">
+					<span>{{ striptags(boardinfo.hostname ?? 'OpenWrt') }}</span>
+					<strong>{{ dispatched?.title ? _(dispatched.title) : _('Dashboard') }}</strong>
+				</div>
+				<div class="x1-top-actions">
+					<span id="x1-clock" class="x1-clock"></span>
+					<ul class="breadcrumb x1-mode-menu" id="modemenu" style="display:none"></ul>
+					<button class="x1-theme-toggle" id="x1-theme-toggle" type="button" title="{{ _('Toggle theme') }}" aria-label="{{ _('Toggle theme') }}">
+						<span class="x1-theme-toggle-knob"></span>
+					</button>
+				</div>
+			</header>
+
+			<div class="x1-mobile-drawer" id="x1-mobile-drawer" aria-hidden="true">
+				<div class="x1-mobile-drawer-card">
+					<div class="x1-mobile-drawer-head">
+						<strong>{{ _('Menu') }}</strong>
+						<button id="x1-mobile-close" type="button" aria-label="{{ _('Close') }}">×</button>
+					</div>
+					<ul id="x1-mobile-list" class="x1-mobile-list"></ul>
+				</div>
+			</div>
+
+			<main class="x1-content" id="maincontent">
+				<div class="x1-tabbar" id="tabmenu" style="display:none"></div>
+
+				{% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+				<div class="alert-message warning x1-warning">
+					<h4>{{ _('No password set!') }}</h4>
+					<p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+					{% if (dispatcher.lookup('admin/system/admin')): %}
+					<a class="btn" href="{{ dispatcher.build_url('admin/system/admin') }}">{{ _('Go to password configuration...') }}</a>
+					{% endif %}
+				</div>
+				{% endif %}
+
+				{% if (boardinfo.rootfs_type == 'initramfs'): %}
+				<div class="alert-message warning x1-warning">
+					<h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
+					<p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+					{% if (dispatcher.lookup('admin/system/flash')): %}
+					<a class="btn" href="{{ dispatcher.build_url('admin/system/flash') }}">{{ _('Go to firmware upgrade...') }}</a>
+					{% endif %}
+				</div>
+				{% endif %}
+
+				<noscript>
+					<div class="alert-message warning x1-warning">
+						<h4>{{ _('JavaScript required!') }}</h4>
+						<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+					</div>
+				</noscript>
+	{% endif %}

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Register and select X1Wrt theme on fresh install.
+# During package upgrade, keep the user's current theme selection untouched.
+
+uci -q batch <<-'UCI'
+	set luci.themes.X1Wrt='/luci-static/x1wrt'
+UCI
+
+if [ "$PKG_UPGRADE" != "1" ]; then
+	uci -q set luci.main.mediaurlbase='/luci-static/x1wrt'
+fi
+
+# Theme config used by the frontend JS. Safe defaults only.
+uci -q get x1wrt.theme >/dev/null 2>&1 || {
+	uci -q batch <<-'UCI'
+		set x1wrt.theme='theme'
+		set x1wrt.theme.mode='auto'
+		set x1wrt.theme.dashboard='1'
+		set x1wrt.theme.wan_interface='auto'
+		set x1wrt.theme.animations='balanced'
+	UCI
+}
+
+uci -q commit luci
+uci -q commit x1wrt
+
+exit 0

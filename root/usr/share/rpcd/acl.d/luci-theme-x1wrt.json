@@ -1,0 +1,13 @@
+{
+	"luci-theme-x1wrt": {
+		"description": "X1Wrt theme dashboard read access",
+		"read": {
+			"ubus": {
+				"system": [ "board", "info" ],
+				"network.interface": [ "dump", "status" ],
+				"network.device": [ "status" ]
+			},
+			"uci": [ "network", "x1wrt" ]
+		}
+	}
+}
