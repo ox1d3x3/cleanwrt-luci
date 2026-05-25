@@ -44,9 +44,14 @@ return baseclass.extend({
 			logout: '<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>',
 			admin: '<svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 1-5 5 1 7-6-3.5L6 22l1-7-5-5 7-1z"/></svg>'
 		};
-		const fallback = icons[key] || icons[key.split('_')[0]] || icons.status;
-		const wrap = E('span', { class: 'cleanx-nav-icon', 'aria-hidden': 'true' });
-		wrap.innerHTML = fallback;
+		const fallbackKey = icons[key] ? key : (icons[key.split('_')[0]] ? key.split('_')[0] : 'status');
+		const safeKey = fallbackKey.replace(/[^a-z0-9_-]/g, '-');
+		const wrap = E('span', {
+			class: 'cleanx-nav-icon cleanx-live-icon cleanx-nav-icon-' + safeKey,
+			'data-cleanx-icon': safeKey,
+			'aria-hidden': 'true'
+		});
+		wrap.innerHTML = icons[fallbackKey] || icons.status;
 		return wrap;
 	},
 
@@ -135,6 +140,7 @@ return baseclass.extend({
 			});
 
 			main.querySelectorAll('button, input[type="submit"], input[type="button"], input[type="reset"], a.cbi-button, .cbi-button, a.btn, .btn').forEach((btn) => {
+				if (btn.classList && btn.classList.contains('cbi-dropdown')) return;
 				if (btn.classList.contains('cleanx-enhanced-button')) return;
 				btn.classList.add('cleanx-enhanced-button');
 
@@ -512,9 +518,10 @@ return baseclass.extend({
 			/* Keep LuCI's apply bar compact. Some builds render Save & Apply with
 			 * nested dropdown text; these classes allow CSS to prevent huge wrapped
 			 * buttons without changing submit handlers. */
-			main.querySelectorAll('.cbi-page-actions, .cbi-section-actions, #applyrevert, #cbi_apply_status, #cbi_apply_footer, .uci-change-actions').forEach((bar) => {
+			main.querySelectorAll('.cbi-page-actions, #applyrevert, #cbi_apply_status, #cbi_apply_footer, .uci-change-actions').forEach((bar) => {
 				bar.classList.add('cleanx-compact-actions');
 				bar.querySelectorAll('button, .cbi-button, input[type="submit"], input[type="button"], input[type="reset"]').forEach((btn) => {
+					if (btn.classList && btn.classList.contains('cbi-dropdown')) return;
 					btn.classList.add('cleanx-compact-action-button');
 					const raw = String(btn.textContent || btn.value || '').replace(/\s+/g, ' ').trim();
 					if (raw.length > 28) btn.setAttribute('title', raw);
