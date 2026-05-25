@@ -1,7 +1,7 @@
 	{% if (!blank_page): %}
 			</main>
 			<footer class="cleanx-footer">
-				<a class="cleanx-footer-project" href="https://github.com/ox1d3x3/cleanwrt-luci" target="_blank" rel="noreferrer">Author: @Ox1d3x3 x CleanX Theme v0.3.2</a>
+				<a class="cleanx-footer-project" href="https://github.com/ox1d3x3/cleanwrt-luci" target="_blank" rel="noreferrer">Author: @Ox1d3x3 x CleanX Theme v0.3.3</a>
 			</footer>
 		</div>
 	</div>

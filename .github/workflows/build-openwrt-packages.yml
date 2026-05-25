@@ -44,18 +44,21 @@ jobs:
             sdk_base_url: https://downloads.openwrt.org/releases/24.10.6/targets/mediatek/mt7622/
             format: ipk
             artifact_suffix: openwrt-24.10.6-mt7622-ipk
+            asset_suffix: openwrt-24.10.6-mt7622
 
           # OpenWrt 25.12+ uses apk.
           - label: OpenWrt 25.12.4 APK
             sdk_base_url: https://downloads.openwrt.org/releases/25.12.4/targets/mediatek/mt7622/
             format: apk
             artifact_suffix: openwrt-25.12.4-mt7622-apk
+            asset_suffix: openwrt-25.12.4-mt7622
 
           # Current snapshot also uses apk. Snapshot packages must match snapshot firmware closely.
           - label: OpenWrt Snapshot APK
             sdk_base_url: https://downloads.openwrt.org/snapshots/targets/mediatek/mt7622/
             format: apk
             artifact_suffix: openwrt-snapshot-mt7622-apk
+            asset_suffix: openwrt-snapshot-mt7622
 
     steps:
       - name: Checkout theme source
@@ -209,7 +212,11 @@ jobs:
               base="$(basename "${pkg}")"
               ext="${base##*.}"
               stem="${base%.*}"
-              out="${GITHUB_WORKSPACE}/package-artifacts/${stem}-${{ matrix.artifact_suffix }}.${ext}"
+
+              # Release asset names must not include the package format twice.
+              # Good: luci-theme-cleanx-0.3.3-r1-openwrt-25.12.4-mt7622.apk
+              # Bad:  luci-theme-cleanx-0.3.3-r1-openwrt-25.12.4-mt7622-apk.apk
+              out="${GITHUB_WORKSPACE}/package-artifacts/${stem}-${{ matrix.asset_suffix }}.${ext}"
               cp -v "${pkg}" "${out}"
             done < <(find "${SDK_DIR}/bin" -type f \
               \( \
@@ -370,9 +377,9 @@ jobs:
 
           Use the OpenWrt package format that matches your router firmware:
 
-          - OpenWrt 24.10.x and older: use the `.ipk` package.
-          - OpenWrt 25.12+ and snapshots: use the `.apk` package.
-          - Snapshot APKs should be tested only on a matching snapshot build.
+          - OpenWrt 24.10.x and older: use the file ending in `.ipk`.
+          - OpenWrt 25.12+ and release builds: use the file ending in `.apk` for the matching release.
+          - OpenWrt snapshot: use the snapshot `.apk` only on a matching snapshot build.
 
           After installing, clear LuCI cache and hard refresh the browser:
 

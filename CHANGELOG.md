@@ -2,6 +2,16 @@
 
 All notable user-facing CleanX changes are tracked here. GitHub Actions uses this file when generating automated pre-release notes.
 
+## [0.3.3] - 2026-05-26
+
+### Fixed
+- Fixed automated pre-release package asset names so `.apk` and `.ipk` extensions appear only once.
+- Release package names now use target suffixes such as `openwrt-25.12.4-mt7622.apk` instead of `openwrt-25.12.4-mt7622-apk.apk`.
+- Release notes now explain the correct package format clearly for OpenWrt 24.10 and OpenWrt 25.12/snapshot builds.
+
+### Changed
+- Kept GitHub Actions artifact group names descriptive, but separated them from release asset file names.
+
 ## [0.3.2] - 2026-05-26
 
 ### Added
