@@ -1,52 +1,48 @@
 # CleanX LuCI Theme
 
-**CleanX** is a clean, Apple-inspired LuCI theme for OpenWrt with a modern glass interface, smooth animation, dark/light mode and live dashboard cards.
+**CleanX** is a clean, modern LuCI theme for OpenWrt with a glass-style interface, smooth interactions, dark/light mode and live dashboard cards.
 
-This project is built **from scratch** for modern LuCI using `ucode/template/themes/`. It is not a fork of Aurora or Bootstrap.
+The theme uses the current LuCI `ucode/template/themes/` structure and is designed for OpenWrt 23.05, 24.10 and newer builds.
 
 ## Highlights
 
-- Premium Apple-style glass UI
-- Clean sidebar with SVG icons
+- Clean glass-style interface
+- Responsive sidebar with SVG icons
 - Smooth loader, page reveal, hover and ripple interactions
 - Light/dark mode with local browser memory
 - Mobile-friendly LuCI layout
 - Custom login page
-- Live dashboard on LuCI overview page
+- Live dashboard on the LuCI overview page
 - Live WAN download and upload speed
 - Total RX/TX traffic with automatic B/KB/MB/GB/TB/PB formatting
 - Uptime and RAM usage card
+- Better styling for LuCI forms, CBI sections, tables and action buttons
+- Status/overview memory progress bar support
 - OpenWrt SDK GitHub Actions workflow
 - Builds `.ipk` for OpenWrt 24.10 and older package systems
 - Builds `.apk` for OpenWrt 25.12+ and snapshot package systems
 
-## Important compatibility note
+## Compatibility
 
-This theme uses the **modern LuCI ucode template path**:
+CleanX uses:
 
 ```text
 ucode/template/themes/cleanx/
 ```
 
-That is the correct structure for current OpenWrt/LuCI builds. Older themes that only use:
-
-```text
-luasrc/view/themes/<theme>/header.htm
-```
-
-may look good in static previews, but they are not the right base for current OpenWrt 23.05/24.10/25.x LuCI packaging.
+This is the modern LuCI theme template path used by current OpenWrt builds.
 
 ## Screenshots and preview
 
-Open this file locally after extracting the repo:
+Open this file locally after extracting the repository:
 
 ```text
 preview/index.html
 ```
 
-Included preview screens are available from `preview/index.html`, including login, dashboard, status, network, wireless, firewall, system, software, services, theme settings concept and mobile layout.
+The preview includes login, dashboard, status, network, wireless, firewall, system, software, services, theme settings concept and mobile layout pages.
 
-The preview pages are static mockups so you can judge the style before installing. Real LuCI pages depend on the packages installed on your router.
+The preview pages are static examples. Real LuCI pages depend on the packages installed on your router.
 
 ## Repository structure
 
@@ -76,15 +72,15 @@ luci-theme-cleanx/
 ## Build packages using GitHub Actions
 
 1. Upload this repository to GitHub.
-2. Go to **Actions**.
+2. Open the **Actions** tab.
 3. Run **Build CleanX OpenWrt packages**.
-4. Download the generated artifacts.
+4. Download the generated package artifact.
 
-The workflow uses the official OpenWrt SDK and compiles the package properly instead of manually zipping files.
+The workflow uses the official OpenWrt SDK and compiles the package properly instead of manually compressing files.
 
 ## Install on OpenWrt 24.10 or older
 
-Copy the `.ipk` to your router, for example:
+Copy the `.ipk` to your router:
 
 ```sh
 scp luci-theme-cleanx_*.ipk root@192.168.1.1:/tmp/
@@ -120,7 +116,7 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 
 ## Recovery if LuCI breaks
 
-SSH into the router and switch back to Bootstrap:
+SSH into the router and switch back to the default LuCI theme:
 
 ```sh
 uci set luci.main.mediaurlbase='/luci-static/bootstrap'
@@ -129,7 +125,7 @@ rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 /etc/init.d/uhttpd restart
 ```
 
-If needed, remove the package:
+Remove the package if required:
 
 ```sh
 opkg remove luci-theme-cleanx
@@ -143,7 +139,7 @@ apk del luci-theme-cleanx
 
 ## Live dashboard behaviour
 
-The current live dashboard reads WAN interface counters from LuCI RPC and calculates speed by comparing RX/TX byte counters every few seconds.
+The live dashboard reads WAN interface counters from LuCI RPC and calculates speed by comparing RX/TX byte counters every few seconds.
 
 Current behaviour:
 
@@ -169,6 +165,23 @@ Planned next features:
 - CPU temperature/load cards
 - Realtime mini charts
 - Cleaner package release automation
+
+## Changelog
+
+### v0.2.4
+
+- Removed internal design-reference wording from user-facing files.
+- Cleaned README and preview text so it focuses on user-facing features.
+- Updated version references to 0.2.4.
+- Kept the v0.2.3 status memory/progress bar fixes.
+- Kept the v0.2.2 package manager, Backup/Flash and global CBI button fixes.
+
+### v0.2.3
+
+- Fixed LuCI Status / Overview memory progress bars not rendering correctly.
+- Preserved native LuCI realtime graph/table markup instead of wrapping it as package tables.
+- Improved `.cbi-progressbar` and `.progress` styling for memory, load and status widgets.
+- Added better canvas/SVG compatibility for realtime graph pages.
 
 ## Licence
 

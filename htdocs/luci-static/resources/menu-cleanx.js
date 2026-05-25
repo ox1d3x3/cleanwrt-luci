@@ -6,11 +6,13 @@ return baseclass.extend({
 	__init__() {
 		ui.menu.load().then((tree) => this.render(tree));
 		this.bindShellControls();
+		this.enhanceLuciContent();
 		this.patchChangeIndicator();
 		this.startClock();
 		this.startProgress();
 		this.removeLoader();
 		this.bindRipples();
+		this.bindButtonFeedback();
 		this.installToast();
 	},
 
@@ -80,6 +82,90 @@ return baseclass.extend({
 		document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') setDrawer(false); });
 	},
 
+
+	enhanceLuciContent() {
+		const main = document.getElementById('maincontent') || document.body;
+		const positiveWords = /^(install|update|upgrade|save|apply|add|upload|generate|download|flash|configure|start|enable|connect|scan|submit|ok)$/i;
+		const dangerWords = /^(delete|remove|reset|reboot|stop|disable|discard|erase|terminate|kill)$/i;
+		const neutralWords = /^(clear|refresh|reload|view|edit|restart|restore|backup|browse|choose)$/i;
+
+		const enhance = () => {
+			if (!main) return;
+
+			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+			const isStatusLike = /status|overview|realtime|load/.test(page);
+
+			main.querySelectorAll('table, div.table, .cbi-section-table').forEach((table) => {
+				if (table.closest('.cleanx-dashboard')) return;
+
+				const hasLiveGraph = !!table.querySelector('canvas, svg, .cbi-progressbar, .progress');
+				const shouldStayNative = isStatusLike && hasLiveGraph;
+
+				if (shouldStayNative) {
+					const wrap = table.closest('.cleanx-table-wrap');
+					if (wrap && wrap.parentNode) {
+						wrap.parentNode.insertBefore(table, wrap);
+						if (!wrap.childElementCount) wrap.remove();
+					}
+					table.classList.add('cleanx-status-widget');
+					return;
+				}
+
+				if (table.closest('.cleanx-table-wrap')) return;
+				const wrap = document.createElement('div');
+				wrap.className = 'cleanx-table-wrap';
+				table.parentNode.insertBefore(wrap, table);
+				wrap.appendChild(table);
+			});
+
+			main.querySelectorAll('.cbi-map, .cbi-section, fieldset, .panel, .modal').forEach((node) => {
+				node.classList.add('cleanx-enhanced-card');
+			});
+
+			main.querySelectorAll('button, input[type="submit"], input[type="button"], input[type="reset"], a.cbi-button, .cbi-button, a.btn, .btn').forEach((btn) => {
+				if (btn.classList.contains('cleanx-enhanced-button')) return;
+				btn.classList.add('cleanx-enhanced-button');
+
+				const text = String(btn.textContent || btn.value || btn.getAttribute('aria-label') || '').trim().toLowerCase().replace(/\.+$/g, '');
+				const name = String(btn.getAttribute('name') || '').toLowerCase();
+				const cls = String(btn.className || '').toLowerCase();
+				const key = text || name;
+
+				if (dangerWords.test(key) || /remove|reset|negative|danger/.test(name + ' ' + cls))
+					btn.classList.add('cleanx-action-danger');
+				else if (positiveWords.test(key) || /save|apply|positive|action|add|install|update|upload/.test(name + ' ' + cls))
+					btn.classList.add('cleanx-action-positive');
+				else if (neutralWords.test(key))
+					btn.classList.add('cleanx-action-neutral');
+
+				if (!btn.getAttribute('title') && (btn.textContent || btn.value))
+					btn.setAttribute('title', String(btn.textContent || btn.value).trim());
+			});
+
+			main.querySelectorAll('input, select, textarea').forEach((field) => {
+				field.classList.add('cleanx-enhanced-field');
+			});
+		};
+
+		enhance();
+		window.addEventListener('load', enhance, { once: true });
+		setTimeout(enhance, 250);
+		setTimeout(enhance, 900);
+
+		if (window.MutationObserver && main) {
+			let scheduled = false;
+			const observer = new MutationObserver(() => {
+				if (scheduled) return;
+				scheduled = true;
+				window.requestAnimationFrame(() => {
+					scheduled = false;
+					enhance();
+				});
+			});
+			observer.observe(main, { childList: true, subtree: true });
+		}
+	},
+
 	patchChangeIndicator() {
 		const original = ui.changes?.setIndicator;
 		if (!original) return;
@@ -120,7 +206,7 @@ return baseclass.extend({
 
 	bindRipples() {
 		document.addEventListener('click', (ev) => {
-			const target = ev.target.closest('button, .btn, .cbi-button, .cleanx-main-nav a, .cleanx-mode-menu a');
+			const target = ev.target.closest('button, input[type="submit"], input[type="button"], input[type="reset"], .btn, .cbi-button, [role="button"], .cleanx-main-nav a, .cleanx-mode-menu a');
 			if (!target) return;
 			const cs = getComputedStyle(target);
 			if (cs.position === 'static') target.style.position = 'relative';
@@ -135,6 +221,19 @@ return baseclass.extend({
 			target.appendChild(ripple);
 			setTimeout(() => ripple.remove(), 560);
 		});
+	},
+
+
+	bindButtonFeedback() {
+		document.addEventListener('click', (ev) => {
+			const btn = ev.target.closest('button, input[type="submit"], input[type="button"], a.cbi-button, .cbi-button, .btn');
+			if (!btn || btn.disabled || btn.classList.contains('cleanx-click-busy')) return;
+			const type = (btn.getAttribute('type') || '').toLowerCase();
+			const text = String(btn.textContent || btn.value || '').trim().toLowerCase();
+			if (type === 'button' && !/update|install|upload|save|apply|flash|generate/.test(text)) return;
+			btn.classList.add('cleanx-click-busy');
+			setTimeout(() => btn.classList.remove('cleanx-click-busy'), 1300);
+		}, true);
 	},
 
 	installToast() {

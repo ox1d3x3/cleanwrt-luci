@@ -6,11 +6,11 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=CleanX Theme - clean modern LuCI theme with live dashboard widgets
+LUCI_TITLE:=CleanX Theme - modern LuCI theme with live dashboard widgets
 LUCI_DEPENDS:=+luci-base
 
 PKG_NAME:=luci-theme-cleanx
-PKG_VERSION:=0.2.1
+PKG_VERSION:=0.2.4
 PKG_RELEASE:=1
 PKGARCH:=all
 LUCI_PKGARCH:=all

@@ -1,4 +1,4 @@
-/* CleanX Theme v0.2.1 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.2.4 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -22,7 +22,7 @@
 	--cleanx-radius-lg: 24px;
 	--cleanx-radius-md: 16px;
 	--cleanx-blur: blur(26px) saturate(1.55);
-	--cleanx-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, Arial, sans-serif;
+	--cleanx-font: system-ui, "Segoe UI", Inter, Roboto, Arial, sans-serif;
 	--cleanx-spring: cubic-bezier(.16, 1, .3, 1);
 }
 
@@ -198,4 +198,867 @@ input:focus, select:focus, textarea:focus { border-color: rgba(var(--cleanx-acce
 	.cleanx-hero { grid-template-columns: 1fr; align-items:start; padding: 22px; }
 	.cleanx-stat-grid { grid-template-columns: 1fr; }
 	.cleanx-footer { flex-direction:column; }
+}
+
+/* --------------------------------------------------------------------------
+ * CleanX v0.2.4 LuCI compatibility pass
+ * Fixes CBI/form/table pages such as Package Manager and Backup / Flash.
+ * -------------------------------------------------------------------------- */
+.cleanx-content {
+	isolation: isolate;
+}
+
+.cleanx-content > h1,
+.cleanx-content > h2,
+.cleanx-content > h3,
+.cleanx-content > p,
+.cleanx-content > form,
+.cleanx-content > div:not(.cleanx-dashboard):not(.cleanx-tabbar),
+.cleanx-content > fieldset,
+.cleanx-content > table,
+.cleanx-content > .table,
+.cleanx-content > .cbi-map,
+.cleanx-content > .cbi-section {
+	max-width: 100%;
+}
+
+.cleanx-content > h1,
+.cleanx-content > h2 {
+	margin: 0 0 18px;
+	font-size: clamp(24px, 3.3vw, 36px);
+	line-height: 1.08;
+	letter-spacing: -.055em;
+}
+
+.cleanx-content > p,
+.cbi-map-descr,
+.cbi-section-descr,
+.cbi-value-description,
+.description {
+	color: var(--cleanx-muted);
+	line-height: 1.58;
+	max-width: 1080px;
+}
+
+.cleanx-content p,
+.cleanx-content li,
+.cleanx-content td,
+.cleanx-content th,
+.cleanx-content .td,
+.cleanx-content .th,
+.cleanx-content label,
+.cleanx-content span,
+.cleanx-content small,
+.cleanx-content div {
+	overflow-wrap: anywhere;
+}
+
+.cleanx-content ul,
+.cleanx-content ol {
+	padding-left: 1.35rem;
+}
+
+/* Top-level LuCI maps and sections */
+.cbi-map,
+.cbi-section,
+.panel,
+.modal,
+.ifacebox,
+fieldset {
+	position: relative;
+	margin: 0 0 18px;
+	padding: 20px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 24px !important;
+	background: linear-gradient(180deg, var(--cleanx-surface), var(--cleanx-surface-soft)) !important;
+	backdrop-filter: var(--cleanx-blur);
+	box-shadow: var(--cleanx-shadow-soft);
+	overflow: clip;
+}
+
+.cbi-map > h2,
+.cbi-section > h3,
+fieldset > legend,
+.panel-title,
+.modal-title {
+	margin: 0 0 14px !important;
+	padding: 0 !important;
+	font-size: clamp(18px, 2vw, 24px) !important;
+	line-height: 1.15 !important;
+	font-weight: 860 !important;
+	letter-spacing: -.045em !important;
+	color: var(--cleanx-text) !important;
+}
+
+fieldset > legend {
+	float: left;
+	width: 100%;
+}
+
+fieldset > legend + * {
+	clear: both;
+}
+
+.cbi-section-node,
+.cbi-section-create,
+.cbi-section-remove,
+.cbi-map fieldset,
+.cbi-map .cbi-section {
+	min-width: 0;
+}
+
+.cbi-section .cbi-section {
+	margin-top: 14px;
+	background: rgba(var(--cleanx-bg-rgb), .36) !important;
+	box-shadow: none;
+}
+
+/* CBI form rows */
+.cbi-value {
+	display: grid;
+	grid-template-columns: minmax(160px, 255px) minmax(0, 1fr);
+	align-items: start;
+	gap: 12px 18px;
+	padding: 14px 0;
+	border-top: 1px solid var(--cleanx-border);
+}
+
+.cbi-value:first-child,
+.cbi-section-node > .cbi-value:first-child {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.cbi-value-title {
+	font-size: 13px;
+	font-weight: 800;
+	line-height: 1.35;
+	color: var(--cleanx-text);
+}
+
+.cbi-value-field {
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 9px;
+}
+
+.cbi-value-field > * {
+	max-width: 100%;
+}
+
+.cbi-value-description {
+	flex-basis: 100%;
+	font-size: 12.5px;
+	margin-top: 2px;
+}
+
+.cbi-value-error,
+.cbi-value-error input,
+.cbi-input-invalid {
+	border-color: rgba(255,59,48,.68) !important;
+}
+
+.cbi-value-error .cbi-value-field::after,
+.cbi-input-invalid + .cbi-tooltip-container {
+	color: var(--cleanx-danger);
+}
+
+/* Inputs */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+select,
+textarea,
+.cbi-input-text,
+.cbi-input-password,
+.cbi-input-select {
+	min-height: 38px;
+	padding: 8px 11px !important;
+	border-radius: 14px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: var(--cleanx-surface-strong) !important;
+	color: var(--cleanx-text) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+	font: inherit;
+	font-size: 13.5px;
+}
+
+textarea,
+.cbi-input-textarea {
+	width: 100%;
+	min-height: 120px;
+	line-height: 1.55;
+	resize: vertical;
+}
+
+select,
+.cbi-input-select {
+	padding-right: 34px !important;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	width: 17px;
+	height: 17px;
+	min-height: 0;
+	padding: 0 !important;
+	margin: 0 5px 0 0;
+	accent-color: var(--cleanx-accent);
+	vertical-align: middle;
+}
+
+input[type="file"] {
+	width: min(100%, 520px);
+	min-height: 42px;
+	padding: 6px !important;
+	cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+	margin-right: 10px;
+	min-height: 30px;
+	padding: 0 12px;
+	border: 0;
+	border-radius: 11px;
+	background: var(--cleanx-accent);
+	color: #fff;
+	font-weight: 800;
+	cursor: pointer;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled,
+.cbi-button[disabled],
+.btn[disabled] {
+	opacity: .48;
+	cursor: not-allowed !important;
+	filter: saturate(.75);
+}
+
+/* Buttons: LuCI uses a mix of buttons, input buttons and anchors. */
+button,
+.btn,
+a.btn,
+.cbi-button,
+a.cbi-button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+input[type="file"]::file-selector-button,
+[role="button"] {
+	appearance: none;
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	min-height: 34px;
+	max-width: 100%;
+	padding: 7px 13px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 13px !important;
+	background: linear-gradient(180deg, var(--cleanx-surface-strong), var(--cleanx-surface)) !important;
+	color: var(--cleanx-text) !important;
+	box-shadow: 0 8px 22px rgba(0,0,0,.07);
+	font-family: var(--cleanx-font);
+	font-size: 13px !important;
+	font-weight: 820 !important;
+	line-height: 1.15 !important;
+	text-align: center;
+	text-decoration: none !important;
+	white-space: nowrap;
+	vertical-align: middle;
+	cursor: pointer;
+	transition: transform .16s var(--cleanx-spring), box-shadow .16s var(--cleanx-spring), border-color .16s, background .16s, color .16s;
+}
+
+button:hover,
+.btn:hover,
+a.btn:hover,
+.cbi-button:hover,
+a.cbi-button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover,
+[role="button"]:hover {
+	transform: translateY(-1px);
+	border-color: rgba(var(--cleanx-accent-rgb), .32) !important;
+	box-shadow: 0 13px 30px rgba(0,0,0,.11);
+}
+
+button:active,
+.btn:active,
+.cbi-button:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+input[type="reset"]:active {
+	transform: translateY(0) scale(.985);
+}
+
+.cbi-button-positive,
+.cbi-button-save,
+.cbi-button-apply,
+.cbi-button-action,
+.cbi-button-add,
+.btn.primary,
+.btn-success,
+input[type="submit"].cbi-button-positive,
+input[name="update"],
+input[name="install"],
+.cleanx-action-positive {
+	background: linear-gradient(135deg, var(--cleanx-accent), #2563eb 58%, #7c3aed) !important;
+	color: #fff !important;
+	border-color: transparent !important;
+	box-shadow: 0 14px 32px rgba(var(--cleanx-accent-rgb), .26);
+}
+
+.cbi-button-negative,
+.cbi-button-remove,
+.cbi-button-reset,
+.cbi-button-danger,
+.btn-danger,
+input[type="reset"],
+.cleanx-action-danger {
+	background: rgba(255,59,48,.10) !important;
+	color: var(--cleanx-danger) !important;
+	border-color: rgba(255,59,48,.24) !important;
+}
+
+.cbi-button-neutral,
+.cbi-button-link,
+.cleanx-action-neutral {
+	background: rgba(var(--cleanx-accent-rgb), .09) !important;
+	color: var(--cleanx-accent) !important;
+	border-color: rgba(var(--cleanx-accent-rgb), .16) !important;
+}
+
+.cbi-page-actions,
+.cbi-section-actions,
+.cbi-value-field .cbi-button,
+.actions,
+.btn-group,
+.control-group {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 9px;
+	min-width: 0;
+}
+
+.cbi-page-actions,
+.cbi-section-actions {
+	justify-content: flex-end;
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid var(--cleanx-border);
+}
+
+/* Tables and package manager lists */
+.cleanx-table-wrap {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 20px;
+	background: rgba(var(--cleanx-bg-rgb), .26);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.cleanx-table-wrap > table,
+.cleanx-table-wrap > .table {
+	margin: 0 !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	background: transparent !important;
+}
+
+table,
+.table,
+.cbi-section-table,
+.table.cbi-section-table {
+	width: 100%;
+	max-width: 100%;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 20px !important;
+	background: var(--cleanx-surface) !important;
+	overflow: hidden;
+}
+
+.table {
+	display: table;
+}
+
+.table .tr,
+.cbi-section-table-row {
+	display: table-row;
+}
+
+.table .th,
+.table .td,
+.cbi-section-table-cell,
+.cbi-section-table-titles > div,
+table th,
+table td {
+	display: table-cell;
+	padding: 11px 12px !important;
+	border-bottom: 1px solid var(--cleanx-border) !important;
+	vertical-align: middle;
+	line-height: 1.42;
+	font-size: 13px;
+	min-width: 70px;
+}
+
+.table .th,
+.cbi-section-table-titles,
+table thead th,
+table th {
+	color: var(--cleanx-muted) !important;
+	font-size: 11.5px !important;
+	font-weight: 900 !important;
+	letter-spacing: .055em;
+	text-transform: uppercase;
+	background: rgba(var(--cleanx-bg-rgb), .28) !important;
+}
+
+.table .tr:last-child .td,
+table tbody tr:last-child td {
+	border-bottom: 0 !important;
+}
+
+.table .tr:hover .td,
+table tbody tr:hover td,
+.cbi-section-table-row:hover .cbi-section-table-cell {
+	background: rgba(var(--cleanx-accent-rgb), .045) !important;
+}
+
+.table .td:last-child,
+table td:last-child,
+.cbi-section-table-cell:last-child {
+	white-space: nowrap;
+}
+
+.td > .cbi-button,
+td > .cbi-button,
+.td > button,
+td > button,
+.td > input[type="submit"],
+td > input[type="button"] {
+	min-height: 30px;
+	padding: 6px 11px !important;
+	font-size: 12px !important;
+}
+
+/* Package Manager special layout - catches both old opkg and new apk views. */
+body[data-page*="package-manager"] .cleanx-content > form,
+body[data-page*="software"] .cleanx-content > form,
+body[data-page*="opkg"] .cleanx-content > form {
+	margin-bottom: 18px;
+	padding: 18px;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 22px;
+	background: var(--cleanx-surface);
+	backdrop-filter: var(--cleanx-blur);
+	box-shadow: var(--cleanx-shadow-soft);
+}
+
+body[data-page*="package-manager"] .cleanx-content form > div,
+body[data-page*="software"] .cleanx-content form > div,
+body[data-page*="opkg"] .cleanx-content form > div {
+	min-width: 0;
+}
+
+body[data-page*="package-manager"] input[name="query"],
+body[data-page*="package-manager"] input[type="search"],
+body[data-page*="software"] input[name="query"],
+body[data-page*="opkg"] input[name="query"] {
+	width: min(100%, 340px);
+}
+
+body[data-page*="package-manager"] .cleanx-content > ul,
+body[data-page*="software"] .cleanx-content > ul,
+body[data-page*="opkg"] .cleanx-content > ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 0;
+	margin: 14px 0 18px;
+	list-style: none;
+}
+
+body[data-page*="package-manager"] .cleanx-content > ul a,
+body[data-page*="software"] .cleanx-content > ul a,
+body[data-page*="opkg"] .cleanx-content > ul a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 34px;
+	padding: 7px 12px;
+	border-radius: 999px;
+	background: rgba(var(--cleanx-accent-rgb), .09);
+	font-size: 13px;
+	font-weight: 800;
+}
+
+/* Backup / Flash firmware and upload pages */
+body[data-page*="flash"] .cbi-section,
+body[data-page*="backup"] .cbi-section,
+body[data-page*="flashops"] .cbi-section,
+body[data-page*="flash"] fieldset,
+body[data-page*="backup"] fieldset {
+	padding: 22px !important;
+}
+
+body[data-page*="flash"] textarea,
+body[data-page*="backup"] textarea,
+body[data-page*="flash"] pre,
+body[data-page*="backup"] pre {
+	width: 100%;
+	max-width: 100%;
+	min-height: 170px;
+	padding: 14px !important;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 17px;
+	background: rgba(var(--cleanx-bg-rgb), .34);
+	color: var(--cleanx-text);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12.5px;
+	line-height: 1.55;
+	white-space: pre-wrap;
+	overflow: auto;
+}
+
+/* Alerts, progress and code blocks */
+.alert-message,
+.alert,
+.warning,
+.notice,
+.error,
+#notification,
+.cbi-tooltip {
+	padding: 14px 16px !important;
+	border-radius: 18px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: var(--cleanx-surface-strong) !important;
+	box-shadow: var(--cleanx-shadow-soft);
+	line-height: 1.5;
+}
+
+.alert-message.warning,
+.warning {
+	border-color: rgba(255,159,10,.28) !important;
+	background: rgba(255,159,10,.11) !important;
+}
+
+.alert-message.error,
+.error {
+	border-color: rgba(255,59,48,.28) !important;
+	background: rgba(255,59,48,.10) !important;
+}
+
+pre,
+code,
+kbd,
+samp {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+pre {
+	max-width: 100%;
+	overflow: auto;
+	padding: 14px;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 16px;
+	background: rgba(var(--cleanx-bg-rgb), .36);
+	white-space: pre-wrap;
+}
+
+.progress,
+.cbi-progressbar {
+	height: 14px;
+	border-radius: 999px;
+	background: rgba(var(--cleanx-bg-rgb), .48) !important;
+	border: 1px solid var(--cleanx-border);
+	overflow: hidden;
+}
+
+.progress > div,
+.cbi-progressbar > div {
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, var(--cleanx-accent), #5ac8fa) !important;
+}
+
+/* LuCI tab bars */
+.cleanx-tabbar {
+	margin-bottom: 18px;
+}
+
+.cleanx-tabbar .tabs,
+.tabs,
+ul.tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+.cleanx-tabbar .tabs a,
+.tabs a,
+ul.tabs a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 36px;
+	padding: 8px 13px;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 999px;
+	background: var(--cleanx-surface);
+	color: var(--cleanx-muted);
+	font-size: 13px;
+	font-weight: 820;
+}
+
+.cleanx-tabbar .tabs .active a,
+.tabs .active a,
+ul.tabs .active a {
+	background: var(--cleanx-accent);
+	color: #fff;
+	border-color: transparent;
+	box-shadow: 0 12px 28px rgba(var(--cleanx-accent-rgb), .24);
+}
+
+/* Toasts and click feedback */
+.cleanx-toast-stack {
+	position: fixed;
+	right: 18px;
+	bottom: 18px;
+	z-index: 1200;
+	display: grid;
+	gap: 10px;
+	width: min(360px, calc(100vw - 36px));
+}
+
+.cleanx-toast {
+	padding: 13px 15px;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 18px;
+	background: var(--cleanx-surface-strong);
+	backdrop-filter: var(--cleanx-blur);
+	box-shadow: var(--cleanx-shadow);
+	font-size: 13px;
+	font-weight: 760;
+	animation: cleanxToast .24s var(--cleanx-spring) both;
+}
+
+.cleanx-click-busy {
+	filter: saturate(1.1);
+}
+
+.cleanx-click-busy::after {
+	content: "";
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	animation: cleanxSpin .7s linear infinite;
+}
+
+@keyframes cleanxSpin { to { transform: rotate(360deg); } }
+
+@media (max-width: 900px) {
+	.cbi-value {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+
+	.cbi-page-actions,
+	.cbi-section-actions {
+		justify-content: stretch;
+	}
+
+	.cbi-page-actions > *,
+	.cbi-section-actions > * {
+		flex: 1 1 auto;
+	}
+
+	button,
+	.btn,
+	a.btn,
+	.cbi-button,
+	a.cbi-button,
+	input[type="submit"],
+	input[type="button"],
+	input[type="reset"] {
+		white-space: normal;
+	}
+
+	.cleanx-table-wrap {
+		border-radius: 16px;
+	}
+}
+
+/* Extra table compatibility for div-based LuCI tables */
+.cbi-section-table {
+	display: table;
+	table-layout: auto;
+}
+.cbi-section-table-titles {
+	display: table-row;
+}
+.cbi-section-table-titles > div {
+	display: table-cell;
+}
+
+
+/* CleanX v0.2.4: real LuCI status/graph compatibility
+   Fixes Overview memory bars, realtime graphs and status widgets that use LuCI's
+   div.table + .cbi-progressbar markup instead of normal CBI forms. */
+.cleanx-content canvas,
+.cleanx-content svg {
+	max-width: 100%;
+}
+
+.cleanx-content canvas {
+	display: block;
+	width: 100%;
+	border-radius: 18px;
+}
+
+/* Do not force LuCI status widgets to behave like package tables. */
+body[data-page*="status"] .cleanx-table-wrap,
+body[data-page*="overview"] .cleanx-table-wrap {
+	padding: 0;
+	border-radius: 22px;
+}
+
+body[data-page*="status"] .table,
+body[data-page*="overview"] .table {
+	display: block !important;
+	width: 100%;
+	border-radius: 22px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: linear-gradient(180deg, var(--cleanx-surface), var(--cleanx-surface-soft)) !important;
+	backdrop-filter: var(--cleanx-blur);
+	overflow: visible !important;
+}
+
+body[data-page*="status"] .table .tr,
+body[data-page*="overview"] .table .tr,
+body[data-page*="status"] .cbi-section-table-row,
+body[data-page*="overview"] .cbi-section-table-row {
+	display: grid !important;
+	grid-template-columns: minmax(155px, 28%) minmax(0, 1fr);
+	gap: 14px;
+	align-items: center;
+	padding: 10px 14px;
+	border-bottom: 1px solid var(--cleanx-border);
+}
+
+body[data-page*="status"] .table .tr:last-child,
+body[data-page*="overview"] .table .tr:last-child,
+body[data-page*="status"] .cbi-section-table-row:last-child,
+body[data-page*="overview"] .cbi-section-table-row:last-child {
+	border-bottom: 0;
+}
+
+body[data-page*="status"] .table .td,
+body[data-page*="overview"] .table .td,
+body[data-page*="status"] .cbi-section-table-cell,
+body[data-page*="overview"] .cbi-section-table-cell {
+	display: block !important;
+	min-width: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	white-space: normal !important;
+	line-height: 1.35;
+}
+
+body[data-page*="status"] .table .td.left,
+body[data-page*="overview"] .table .td.left,
+body[data-page*="status"] .cbi-section-table-cell:first-child,
+body[data-page*="overview"] .cbi-section-table-cell:first-child {
+	color: var(--cleanx-muted);
+	font-size: 12.5px;
+	font-weight: 850;
+	letter-spacing: .01em;
+}
+
+body[data-page*="status"] h2,
+body[data-page*="overview"] h2,
+body[data-page*="status"] h3,
+body[data-page*="overview"] h3 {
+	margin-top: 22px;
+	margin-bottom: 12px;
+	font-size: 20px;
+	letter-spacing: -.04em;
+}
+
+.cbi-progressbar,
+.progress {
+	position: relative;
+	display: block !important;
+	width: 100% !important;
+	min-width: 160px;
+	min-height: 16px;
+	height: 16px;
+	border-radius: 999px;
+	background: rgba(var(--cleanx-bg-rgb), .55) !important;
+	border: 1px solid var(--cleanx-border-strong) !important;
+	overflow: hidden !important;
+	box-shadow: inset 0 1px 3px rgba(0,0,0,.12);
+}
+
+.cbi-progressbar > div,
+.cbi-progressbar > span,
+.progress > div,
+.progress > span {
+	display: block !important;
+	height: 100% !important;
+	min-width: 2px;
+	border-radius: inherit;
+	background: linear-gradient(90deg, var(--cleanx-accent), #5ac8fa 55%, #7c3aed) !important;
+	box-shadow: 0 0 22px rgba(var(--cleanx-accent-rgb), .28);
+}
+
+/* Memory/Load sections sometimes use inline widths and right-aligned value cells. */
+body[data-page*="status"] .table .td.right,
+body[data-page*="overview"] .table .td.right,
+body[data-page*="status"] .right,
+body[data-page*="overview"] .right {
+	text-align: right;
+}
+
+/* Realtime SVG/graph pages. */
+body[data-page*="realtime"] .cleanx-content .cbi-section,
+body[data-page*="realtime"] .cleanx-content fieldset,
+body[data-page*="load"] .cleanx-content .cbi-section {
+	overflow: visible !important;
+}
+
+body[data-page*="realtime"] .cleanx-content svg,
+body[data-page*="realtime"] .cleanx-content canvas,
+body[data-page*="load"] .cleanx-content svg,
+body[data-page*="load"] .cleanx-content canvas {
+	width: 100% !important;
+	max-width: 100% !important;
+	height: auto;
+	min-height: 180px;
+	border: 1px solid var(--cleanx-border);
+	border-radius: 20px;
+	background: rgba(var(--cleanx-bg-rgb), .30);
+}
+
+@media (max-width: 700px) {
+	body[data-page*="status"] .table .tr,
+	body[data-page*="overview"] .table .tr,
+	body[data-page*="status"] .cbi-section-table-row,
+	body[data-page*="overview"] .cbi-section-table-row {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
 }
