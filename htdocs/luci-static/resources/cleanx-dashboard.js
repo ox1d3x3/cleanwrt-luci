@@ -42,9 +42,9 @@ return baseclass.extend({
 		const dashboard = E('section', { id: 'cleanx-dashboard', class: 'cleanx-dashboard' }, [
 			E('div', { class: 'cleanx-hero' }, [
 				E('div', {}, [
-					E('p', { class: 'cleanx-eyebrow' }, [ 'CleanX live network' ]),
-					E('h1', {}, [ 'Router Dashboard' ]),
-					E('p', {}, [ 'Live WAN speed, traffic totals, uptime and RAM usage with automatic GB/TB formatting.' ])
+					E('p', { class: 'cleanx-eyebrow' }, [ 'CleanX' ]),
+					E('h1', {}, [ 'Network Overview' ]),
+					E('p', {}, [ 'Current router activity and system health.' ])
 				]),
 				E('div', { class: 'cleanx-pill' }, [ E('span', { class: 'cleanx-live-dot' }), 'WAN: ', E('span', { id: 'cleanx-wan-device' }, [ 'detecting' ]) ])
 			]),
@@ -53,8 +53,7 @@ return baseclass.extend({
 				this.card('Upload', 'cleanx-up-rate', '0 B/s', 'Total TX: ', 'cleanx-total-tx', 'cleanx-up-meter', 'up'),
 				this.card('Total Data', 'cleanx-total-data', '0 B', 'RX + TX since boot', null, 'cleanx-data-meter', 'data'),
 				this.card('System', 'cleanx-system', 'Loading', 'Uptime / RAM', null, 'cleanx-system-meter', 'system')
-			]),
-			E('p', { class: 'cleanx-dashboard-note' }, [ 'Note: totals are interface counters since boot. For monthly totals, add vnStat/nlbwmon support in the next phase.' ])
+			])
 		]);
 		const main = document.getElementById('maincontent') || document.querySelector('main') || document.body;
 		main.prepend(dashboard);
@@ -68,6 +67,8 @@ return baseclass.extend({
 			E('span', { class: 'cleanx-meter' }, [ E('i', { id: meterId, style: 'width:4%' }) ])
 		]);
 	},
+
+	/* Counters come from LuCI RPC. Traffic totals are interface counters since boot; persistent monthly accounting can be added later with vnStat or nlbwmon. */
 
 	async update() {
 		try {

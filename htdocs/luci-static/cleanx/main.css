@@ -2950,3 +2950,330 @@ body[data-page*="opkg"] .cleanx-content table.table {
 .cleanx-table-wrap {
 	overflow-x: auto !important;
 }
+
+
+/* -------------------------------------------------------------------------
+ * CleanX v0.3.0 - user QA polish and OpenWrt 25.x modal hardening
+ * ------------------------------------------------------------------------- */
+:root {
+	--cleanx-bg: #f7f8fb;
+	--cleanx-bg-rgb: 247,248,251;
+	--cleanx-surface: rgba(255,255,255,.78);
+	--cleanx-surface-soft: rgba(255,255,255,.58);
+	--cleanx-surface-strong: rgba(255,255,255,.96);
+	--cleanx-text: #07090d;
+	--cleanx-muted: #334155;
+	--cleanx-muted-2: #64748b;
+	--cleanx-border: rgba(15,23,42,.12);
+	--cleanx-border-strong: rgba(15,23,42,.18);
+	--cleanx-accent: #0a84ff;
+	--cleanx-accent-rgb: 10,132,255;
+	--cleanx-accent-2: #6d5dfc;
+}
+
+[data-cleanx-theme="dark"] {
+	--cleanx-bg: #070a0f;
+	--cleanx-bg-rgb: 7,10,15;
+	--cleanx-surface: rgba(20,24,32,.78);
+	--cleanx-surface-soft: rgba(26,31,42,.58);
+	--cleanx-surface-strong: rgba(31,36,48,.96);
+	--cleanx-text: #f8fafc;
+	--cleanx-muted: #cbd5e1;
+	--cleanx-muted-2: #94a3b8;
+	--cleanx-border: rgba(255,255,255,.12);
+	--cleanx-border-strong: rgba(255,255,255,.20);
+	--cleanx-accent: #38bdf8;
+	--cleanx-accent-rgb: 56,189,248;
+	--cleanx-accent-2: #8b5cf6;
+}
+
+/* Clean background only: no grid/checker/card pattern in the wallpaper. */
+.cleanx-grid,
+.cleanx-bg .cleanx-grid,
+body::before,
+body::after,
+.cleanx-login-screen::before {
+	display: none !important;
+	content: none !important;
+	background: none !important;
+	background-image: none !important;
+}
+
+html,
+body {
+	background-color: var(--cleanx-bg) !important;
+	background-image:
+		radial-gradient(circle at 10% 0%, rgba(14,165,233,.18), transparent 30rem),
+		radial-gradient(circle at 92% 10%, rgba(99,102,241,.16), transparent 31rem),
+		radial-gradient(circle at 50% 115%, rgba(20,184,166,.10), transparent 36rem),
+		linear-gradient(140deg, #f8fafc 0%, #eef4fb 48%, #f8fafc 100%) !important;
+	background-attachment: fixed !important;
+}
+
+html[data-cleanx-theme="dark"],
+[data-cleanx-theme="dark"] body {
+	background-image:
+		radial-gradient(circle at 12% 0%, rgba(56,189,248,.13), transparent 31rem),
+		radial-gradient(circle at 92% 8%, rgba(139,92,246,.14), transparent 32rem),
+		radial-gradient(circle at 50% 115%, rgba(45,212,191,.08), transparent 36rem),
+		linear-gradient(140deg, #070a0f 0%, #0a1020 52%, #070a0f 100%) !important;
+}
+
+.cleanx-bg { background: transparent !important; }
+.cleanx-blob { opacity: .075 !important; filter: blur(118px) saturate(1.04) !important; }
+[data-cleanx-theme="dark"] .cleanx-blob { opacity: .07 !important; }
+
+/* Top bar and shell refinements. */
+.cleanx-topbar {
+	min-height: 58px !important;
+	padding: 10px 22px !important;
+	background: rgba(var(--cleanx-bg-rgb), .74) !important;
+}
+.cleanx-page-title strong { font-size: 21px !important; }
+.cleanx-page-title span { color: var(--cleanx-muted-2) !important; }
+.cleanx-clock {
+	height: 34px !important;
+	min-width: 76px !important;
+	padding: 0 12px !important;
+	color: var(--cleanx-text) !important;
+	background: var(--cleanx-surface-strong) !important;
+}
+.cleanx-theme-toggle {
+	width: 64px !important;
+	height: 34px !important;
+	padding: 3px !important;
+	border-radius: 999px !important;
+	background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(226,232,240,.74)) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.70), 0 10px 24px rgba(15,23,42,.12) !important;
+}
+[data-cleanx-theme="dark"] .cleanx-theme-toggle {
+	background: linear-gradient(135deg, rgba(30,41,59,.96), rgba(15,23,42,.78)) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 12px 28px rgba(0,0,0,.36) !important;
+}
+.cleanx-theme-toggle::before { left: 10px !important; color: #f59e0b !important; font-size: 13px !important; }
+.cleanx-theme-toggle::after { right: 10px !important; color: #93c5fd !important; font-size: 14px !important; }
+.cleanx-theme-toggle-knob {
+	width: 28px !important;
+	height: 28px !important;
+	top: 3px !important;
+	left: 3px !important;
+}
+[data-cleanx-theme="dark"] .cleanx-theme-toggle-knob { transform: translateX(30px) !important; }
+
+/* The small top-left mobile control must show an actual menu icon, not an empty square. */
+.cleanx-mobile-menu {
+	position: relative !important;
+	width: 38px !important;
+	height: 38px !important;
+	padding: 0 !important;
+	border-radius: 14px !important;
+	background: var(--cleanx-surface-strong) !important;
+}
+.cleanx-mobile-menu span { display: none !important; }
+.cleanx-mobile-menu::before {
+	content: "☰" !important;
+	position: absolute !important;
+	inset: 0 !important;
+	display: grid !important;
+	place-items: center !important;
+	font-size: 20px !important;
+	font-weight: 900 !important;
+	line-height: 1 !important;
+	color: var(--cleanx-text) !important;
+}
+
+/* More vibrant, but still clean, navigation icons. */
+.cleanx-nav-icon,
+.cleanx-stat-icon {
+	background: linear-gradient(135deg, rgba(var(--cleanx-accent-rgb), .18), rgba(139,92,246,.15)) !important;
+	color: var(--cleanx-accent) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 18px rgba(var(--cleanx-accent-rgb), .10) !important;
+}
+.cleanx-main-nav li.active > a .cleanx-nav-icon,
+.cleanx-main-nav a:hover .cleanx-nav-icon {
+	background: linear-gradient(135deg, #0ea5e9, #2563eb 56%, #7c3aed) !important;
+	color: #fff !important;
+	box-shadow: 0 12px 26px rgba(var(--cleanx-accent-rgb), .24) !important;
+}
+.cleanx-nav-icon svg,
+.cleanx-stat-icon svg { stroke-width: 2.25 !important; }
+
+/* Dashboard text should be user-facing only, no implementation notes. */
+.cleanx-dashboard-note { display: none !important; }
+.cleanx-hero p { max-width: 58ch; color: var(--cleanx-muted) !important; }
+
+/* Light mode readability: darker text and stronger form contrast. */
+html:not([data-cleanx-theme="dark"]) .cleanx-content,
+html:not([data-cleanx-theme="dark"]) .cleanx-content p,
+html:not([data-cleanx-theme="dark"]) .cleanx-content li,
+html:not([data-cleanx-theme="dark"]) .cleanx-content td,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .td,
+html:not([data-cleanx-theme="dark"]) .cleanx-content label,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-section-descr,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value-description {
+	color: #111827 !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content small,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .muted,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value-description {
+	color: #475569 !important;
+}
+html:not([data-cleanx-theme="dark"]) input,
+html:not([data-cleanx-theme="dark"]) select,
+html:not([data-cleanx-theme="dark"]) textarea {
+	background: rgba(255,255,255,.95) !important;
+	color: #0f172a !important;
+	border-color: rgba(15,23,42,.16) !important;
+}
+
+/* Package Manager install/details modal. LuCI builds this dynamically, so this
+   targets the native modal and dependency tree without changing handlers. */
+#modal_overlay {
+	align-items: center !important;
+	padding: 20px !important;
+	background: rgba(2,6,23,.56) !important;
+	backdrop-filter: blur(22px) saturate(1.2) !important;
+}
+#modal_overlay > .modal,
+#modal_overlay .modal {
+	width: min(920px, calc(100vw - 32px)) !important;
+	max-width: calc(100vw - 32px) !important;
+	max-height: calc(100vh - 40px) !important;
+	padding: 24px !important;
+	border-radius: 28px !important;
+	overflow: auto !important;
+	overscroll-behavior: contain !important;
+	background: var(--cleanx-surface-strong) !important;
+	color: var(--cleanx-text) !important;
+}
+#modal_overlay .modal h2,
+#modal_overlay .modal h3,
+#modal_overlay .modal h4 {
+	margin: 0 0 16px !important;
+	color: var(--cleanx-text) !important;
+	font-size: clamp(18px, 2.3vw, 22px) !important;
+	line-height: 1.2 !important;
+}
+#modal_overlay .modal p,
+#modal_overlay .modal li,
+#modal_overlay .modal td,
+#modal_overlay .modal .td {
+	font-size: 14.5px !important;
+	line-height: 1.55 !important;
+	color: var(--cleanx-text) !important;
+	word-break: normal !important;
+	overflow-wrap: anywhere !important;
+}
+#modal_overlay .modal ul,
+#modal_overlay .modal .cleanx-modal-list {
+	list-style: none !important;
+	margin: 10px 0 12px !important;
+	padding: 0 !important;
+}
+#modal_overlay .modal ul ul,
+#modal_overlay .modal .cleanx-dependency-tree ul {
+	flex-basis: 100% !important;
+	width: 100% !important;
+	margin: 6px 0 0 18px !important;
+	padding-left: 18px !important;
+	border-left: 1px solid var(--cleanx-border) !important;
+}
+#modal_overlay .modal li,
+#modal_overlay .modal .cleanx-dependency-row {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	flex-wrap: wrap !important;
+	gap: 7px 10px !important;
+	min-height: 28px !important;
+	padding: 2px 0 !important;
+	position: relative !important;
+}
+#modal_overlay .modal li strong { color: var(--cleanx-text) !important; }
+#modal_overlay .modal em { color: var(--cleanx-muted) !important; }
+#modal_overlay .modal hr {
+	border: 0 !important;
+	border-top: 1px solid var(--cleanx-border-strong) !important;
+	margin: 18px 0 !important;
+}
+#modal_overlay .modal .cbi-button,
+#modal_overlay .modal button,
+#modal_overlay .modal input[type="button"],
+#modal_overlay .modal input[type="submit"] {
+	position: static !important;
+	z-index: auto !important;
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+	min-height: 32px !important;
+	padding: 7px 13px !important;
+	margin: 0 !important;
+	border-radius: 13px !important;
+	white-space: nowrap !important;
+	flex: 0 0 auto !important;
+	line-height: 1.15 !important;
+}
+#modal_overlay .modal .cleanx-package-state,
+#modal_overlay .modal button[disabled],
+#modal_overlay .modal .cbi-button[disabled] {
+	background: rgba(var(--cleanx-accent-rgb), .10) !important;
+	color: var(--cleanx-muted) !important;
+	border-color: var(--cleanx-border) !important;
+	box-shadow: none !important;
+	opacity: 1 !important;
+	font-size: 12.5px !important;
+}
+#modal_overlay .modal .alert-message,
+#modal_overlay .modal .error,
+#modal_overlay .modal .warning {
+	display: block !important;
+	width: 100% !important;
+	margin: 14px 0 !important;
+	padding: 12px 14px !important;
+	border-radius: 16px !important;
+	border: 1px solid rgba(255,59,48,.26) !important;
+	background: rgba(255,59,48,.10) !important;
+	color: #f87171 !important;
+}
+#modal_overlay .modal .right,
+#modal_overlay .modal .button-row,
+#modal_overlay .modal .cbi-page-actions {
+	position: sticky !important;
+	bottom: -24px !important;
+	background: linear-gradient(180deg, rgba(var(--cleanx-bg-rgb),0), var(--cleanx-surface-strong) 32%) !important;
+	padding-top: 18px !important;
+	padding-bottom: 2px !important;
+	justify-content: flex-end !important;
+	gap: 10px !important;
+}
+
+/* DNS/DHCP style pages often use dense CBI grids and long technical values. */
+body[data-page*="dns"] .cleanx-content table,
+body[data-page*="dhcp"] .cleanx-content table,
+body[data-page*="hosts"] .cleanx-content table,
+body[data-page*="dnsmasq"] .cleanx-content table {
+	display: block !important;
+	width: 100% !important;
+	overflow-x: auto !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+body[data-page*="dns"] .cleanx-content code,
+body[data-page*="dns"] .cleanx-content pre,
+body[data-page*="dhcp"] .cleanx-content code,
+body[data-page*="dhcp"] .cleanx-content pre {
+	white-space: pre-wrap !important;
+	word-break: break-word !important;
+}
+
+@media (max-width: 760px) {
+	.cleanx-topbar { min-height: 56px !important; padding: 9px 14px !important; }
+	.cleanx-page-title strong { font-size: 18px !important; }
+	.cleanx-theme-toggle { width: 60px !important; height: 34px !important; }
+	[data-cleanx-theme="dark"] .cleanx-theme-toggle-knob { transform: translateX(26px) !important; }
+	#modal_overlay { padding: 12px !important; align-items: flex-start !important; }
+	#modal_overlay > .modal,
+	#modal_overlay .modal { width: calc(100vw - 24px) !important; max-height: calc(100vh - 24px) !important; padding: 18px !important; border-radius: 22px !important; }
+	#modal_overlay .modal .right,
+	#modal_overlay .modal .button-row,
+	#modal_overlay .modal .cbi-page-actions { bottom: -18px !important; }
+}

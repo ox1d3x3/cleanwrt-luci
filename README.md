@@ -174,7 +174,7 @@ Planned next features:
 
 ## Changelog
 
-### v0.2.9
+### v0.3.0
 
 - Added `preview/compat/` mock OpenWrt/LuCI pages with fake data for visual QA before installing.
 - Tested against realistic Status Overview, Port Status, memory bars, Software / Package Manager, Backup / Flash, CBI forms, Firewall tables and Realtime Graphs markup.
@@ -185,19 +185,19 @@ Planned next features:
 - Improved Package Manager button/modal compatibility and disabled decorative effects on risky LuCI controls.
 - Improved full-width textarea, label-less CBI values and mobile overflow handling.
 
-### v0.2.4
+### v0.3.0
 
 - Removed internal design-reference wording from user-facing files.
 - Cleaned README and preview text so it focuses on user-facing features.
 
-### v0.2.3
+### v0.3.0
 
 - Fixed LuCI Status / Overview memory progress bars not rendering correctly.
 - Preserved native LuCI realtime graph/table markup instead of wrapping it as package tables.
 - Improved `.cbi-progressbar` and `.progress` styling for memory, load and status widgets.
 - Added better canvas/SVG compatibility for realtime graph pages.
 
-### v0.2.2
+### v0.3.0
 
 - Improved global CBI button, form, table, Package Manager and Backup / Flash styling.
 
@@ -205,7 +205,7 @@ Planned next features:
 
 Apache-2.0
 
-## v0.2.9 real-world compatibility fixes
+## v0.3.0 real-world compatibility fixes
 
 This release includes fixes based on exported OpenWrt 25.12 LuCI pages and fake-data compatibility mocks.
 

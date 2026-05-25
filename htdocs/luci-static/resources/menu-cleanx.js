@@ -20,6 +20,7 @@ return baseclass.extend({
 		this.installToast();
 		this.bindCbiTabsFallback();
 		this.startStatusLiveRefresh();
+		this.fixModalAndShellDetails();
 	},
 
 	icon(name) {
@@ -416,6 +417,48 @@ return baseclass.extend({
 				setTimeout(() => toast.remove(), 220);
 			}, duration);
 		};
+	},
+
+
+	fixModalAndShellDetails() {
+		const mark = () => {
+			const menu = document.getElementById('cleanx-mobile-menu');
+			if (menu && !menu.getAttribute('title')) menu.setAttribute('title', 'Open menu');
+
+			document.querySelectorAll('#modal_overlay .modal').forEach((modal) => {
+				modal.classList.add('cleanx-modal-ready');
+
+				/* LuCI package manager dependency dialogs contain nested UL/LI trees with
+				 * status buttons. Give them predictable layout without replacing native
+				 * LuCI nodes or handlers. */
+				modal.querySelectorAll('ul').forEach((ul) => {
+					ul.classList.add('cleanx-modal-list');
+					if (ul.textContent && /dependencies|installed|not available|required dependency/i.test(ul.textContent))
+						ul.classList.add('cleanx-dependency-tree');
+				});
+
+				modal.querySelectorAll('li').forEach((li) => {
+					if (li.querySelector('button, .cbi-button, input[type="button"], input[type="submit"]'))
+						li.classList.add('cleanx-dependency-row');
+				});
+
+				modal.querySelectorAll('button, .cbi-button, input[type="button"], input[type="submit"]').forEach((btn) => {
+					btn.classList.add('cleanx-modal-button');
+					const label = String(btn.textContent || btn.value || '').trim().toLowerCase();
+					if (/installed|not available|missing|available/.test(label))
+						btn.classList.add('cleanx-package-state');
+				});
+			});
+		};
+
+		mark();
+		window.addEventListener('load', mark, { once: true });
+		setTimeout(mark, 250);
+		setTimeout(mark, 900);
+		if (window.MutationObserver) {
+			const observer = new MutationObserver(() => window.requestAnimationFrame(mark));
+			observer.observe(document.body, { childList: true, subtree: true });
+		}
 	},
 
 	render(tree) {
