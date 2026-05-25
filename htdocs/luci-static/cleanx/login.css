@@ -1,4 +1,4 @@
-/* CleanX login page v0.2.4 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX login page v0.2.5 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg:#f5f5f7; --cleanx-bg-rgb:245,245,247; --cleanx-surface:rgba(255,255,255,.72); --cleanx-surface-strong:rgba(255,255,255,.92);
 	--cleanx-text:#111114; --cleanx-muted:#6e6e73; --cleanx-border:rgba(0,0,0,.10); --cleanx-accent:#0071e3; --cleanx-accent-rgb:0,113,227; --cleanx-danger:#ff3b30;

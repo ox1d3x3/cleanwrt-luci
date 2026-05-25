@@ -1,8 +1,12 @@
 'use strict';
 'require baseclass';
 'require ui';
+'require rpc';
+'require poll';
 
 return baseclass.extend({
+	callSystemInfo: rpc.declare({ object: 'system', method: 'info' }),
+
 	__init__() {
 		ui.menu.load().then((tree) => this.render(tree));
 		this.bindShellControls();
@@ -14,6 +18,7 @@ return baseclass.extend({
 		this.bindRipples();
 		this.bindButtonFeedback();
 		this.installToast();
+		this.startStatusLiveRefresh();
 	},
 
 	icon(name) {
@@ -118,6 +123,8 @@ return baseclass.extend({
 				wrap.appendChild(table);
 			});
 
+			this.fixPortStatusCards(main);
+
 			main.querySelectorAll('.cbi-map, .cbi-section, fieldset, .panel, .modal').forEach((node) => {
 				node.classList.add('cleanx-enhanced-card');
 			});
@@ -166,6 +173,75 @@ return baseclass.extend({
 		}
 	},
 
+
+	fixPortStatusCards(main) {
+		const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+		if (!/status|overview/.test(page)) return;
+
+		main.querySelectorAll('.ifacebox').forEach((box) => {
+			box.classList.add('cleanx-port-card');
+			const parent = box.parentElement;
+			if (parent) parent.classList.add('cleanx-port-grid');
+		});
+	},
+
+	startStatusLiveRefresh() {
+		const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+		if (!/admin-status-overview|status\/overview|\/admin$/.test(page)) return;
+
+		const fmtBytes = (value) => {
+			const units = [ 'B', 'KB', 'MB', 'GB', 'TB', 'PB' ];
+			let n = Number(value || 0), u = 0;
+			while (n >= 1024 && u < units.length - 1) { n /= 1024; u++; }
+			const d = u === 0 || n >= 100 ? 0 : n >= 10 ? 1 : 2;
+			return n.toFixed(d) + ' ' + units[u];
+		};
+
+		const setProgress = (row, value, max) => {
+			if (!row || !max) return;
+			const pct = Math.max(0, Math.min(100, Math.floor((100 / max) * value)));
+			const bar = row.querySelector('.cbi-progressbar, .progress');
+			if (!bar) return;
+			let fill = bar.firstElementChild || bar.appendChild(document.createElement('div'));
+			bar.title = '%s / %s (%d%%)'.format(fmtBytes(value), fmtBytes(max), pct);
+			bar.dataset.cleanxLive = 'true';
+			fill.style.width = pct.toFixed(2) + '%';
+		};
+
+		const findRow = (label) => {
+			label = label.toLowerCase();
+			for (const row of document.querySelectorAll('#maincontent table.table tr, #maincontent .table .tr')) {
+				const first = row.querySelector('td:first-child, .td:first-child, .td.left, td.left');
+				const text = String(first?.textContent || '').trim().toLowerCase();
+				if (text === label) return row;
+			}
+			return null;
+		};
+
+		const update = async () => {
+			try {
+				const system = await this.callSystemInfo();
+				const mem = system?.memory || {};
+				const swap = system?.swap || {};
+				const total = Number(mem.total || 0);
+				if (total) {
+					const available = Number(mem.available || ((mem.free || 0) + (mem.buffered || 0)) || 0);
+					const used = Math.max(total - Number(mem.free || 0), 0);
+					setProgress(findRow('Total Available'), available, total);
+					setProgress(findRow('Used'), used, total);
+					if (mem.buffered) setProgress(findRow('Buffered'), Number(mem.buffered), total);
+					if (mem.cached) setProgress(findRow('Cached'), Number(mem.cached), total);
+				}
+				if (swap.total > 0) setProgress(findRow('Swap free'), Number(swap.free || 0), Number(swap.total || 0));
+			} catch (err) {
+				console.debug('[CleanX] Status memory refresh skipped:', err);
+			}
+		};
+
+		update();
+		poll.add(update, 3);
+	},
+
 	patchChangeIndicator() {
 		const original = ui.changes?.setIndicator;
 		if (!original) return;
@@ -208,6 +284,10 @@ return baseclass.extend({
 		document.addEventListener('click', (ev) => {
 			const target = ev.target.closest('button, input[type="submit"], input[type="button"], input[type="reset"], .btn, .cbi-button, [role="button"], .cleanx-main-nav a, .cleanx-mode-menu a');
 			if (!target) return;
+
+			/* Input elements cannot safely contain ripple child nodes. Do not risk breaking LuCI submit/upload actions. */
+			if (target.tagName === 'INPUT') return;
+
 			const cs = getComputedStyle(target);
 			if (cs.position === 'static') target.style.position = 'relative';
 			target.style.overflow = 'hidden';
@@ -228,6 +308,7 @@ return baseclass.extend({
 		document.addEventListener('click', (ev) => {
 			const btn = ev.target.closest('button, input[type="submit"], input[type="button"], a.cbi-button, .cbi-button, .btn');
 			if (!btn || btn.disabled || btn.classList.contains('cleanx-click-busy')) return;
+			if (/package-manager|software|opkg/.test(String(document.body.dataset.page || ''))) return;
 			const type = (btn.getAttribute('type') || '').toLowerCase();
 			const text = String(btn.textContent || btn.value || '').trim().toLowerCase();
 			if (type === 'button' && !/update|install|upload|save|apply|flash|generate/.test(text)) return;

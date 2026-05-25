@@ -168,13 +168,20 @@ Planned next features:
 
 ## Changelog
 
+### v0.2.5
+
+- Replaced the visible grid/net background with a softer gradient mesh.
+- Fixed Status → Overview port cards where text and tooltips were collapsing into narrow columns.
+- Restored LuCI modal overlay styling used by Package Manager actions such as Update lists and Upload Package.
+- Stopped decorative click effects from touching LuCI input submit/upload controls.
+- Added a lightweight live memory refresh helper for the native Overview memory bars.
+- Improved global long-text handling without splitting normal words.
+- Kept the v0.2.4 text cleanup and package naming fixes.
+
 ### v0.2.4
 
 - Removed internal design-reference wording from user-facing files.
 - Cleaned README and preview text so it focuses on user-facing features.
-- Updated version references to 0.2.4.
-- Kept the v0.2.3 status memory/progress bar fixes.
-- Kept the v0.2.2 package manager, Backup/Flash and global CBI button fixes.
 
 ### v0.2.3
 
@@ -182,6 +189,10 @@ Planned next features:
 - Preserved native LuCI realtime graph/table markup instead of wrapping it as package tables.
 - Improved `.cbi-progressbar` and `.progress` styling for memory, load and status widgets.
 - Added better canvas/SVG compatibility for realtime graph pages.
+
+### v0.2.2
+
+- Improved global CBI button, form, table, Package Manager and Backup / Flash styling.
 
 ## Licence
 

@@ -1,4 +1,4 @@
-/* CleanX Theme v0.2.4 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.2.5 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -201,7 +201,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(var(--cleanx-acce
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.2.4 LuCI compatibility pass
+ * CleanX v0.2.5 LuCI compatibility pass
  * Fixes CBI/form/table pages such as Package Manager and Backup / Flash.
  * -------------------------------------------------------------------------- */
 .cleanx-content {
@@ -915,7 +915,7 @@ ul.tabs .active a {
 }
 
 
-/* CleanX v0.2.4: real LuCI status/graph compatibility
+/* CleanX v0.2.5: real LuCI status/graph compatibility
    Fixes Overview memory bars, realtime graphs and status widgets that use LuCI's
    div.table + .cbi-progressbar markup instead of normal CBI forms. */
 .cleanx-content canvas,
@@ -1060,5 +1060,347 @@ body[data-page*="load"] .cleanx-content canvas {
 	body[data-page*="overview"] .cbi-section-table-row {
 		grid-template-columns: 1fr;
 		gap: 8px;
+	}
+}
+
+/* --------------------------------------------------------------------------
+ * CleanX v0.2.5 real LuCI page compatibility patch
+ * - Replaces grid background with soft gradient mesh
+ * - Fixes Status -> Overview port cards and hidden tooltips
+ * - Restores LuCI modal overlay behaviour used by Package Manager upload/update
+ * - Improves progress bars, long text handling and realtime status widgets
+ * -------------------------------------------------------------------------- */
+
+html,
+body {
+	background:
+		radial-gradient(circle at 15% 5%, rgba(59,130,246,.24), transparent 32%),
+		radial-gradient(circle at 92% 8%, rgba(124,58,237,.20), transparent 30%),
+		radial-gradient(circle at 45% 105%, rgba(16,185,129,.14), transparent 38%),
+		linear-gradient(135deg, rgba(var(--cleanx-bg-rgb), 1) 0%, rgba(var(--cleanx-bg-rgb), .96) 48%, rgba(var(--cleanx-bg-rgb), 1) 100%) !important;
+	background-attachment: fixed;
+}
+
+.cleanx-bg {
+	background:
+		linear-gradient(120deg, rgba(var(--cleanx-accent-rgb), .08), transparent 38%),
+		radial-gradient(circle at 80% 0%, rgba(96,165,250,.18), transparent 36%),
+		radial-gradient(circle at 10% 100%, rgba(52,211,153,.12), transparent 32%);
+}
+
+.cleanx-grid {
+	display: none !important;
+}
+
+.cleanx-blob {
+	opacity: .18;
+	filter: blur(92px) saturate(1.15);
+}
+
+[data-cleanx-theme="dark"] .cleanx-blob {
+	opacity: .15;
+}
+
+/* Keep labels readable. The previous broad anywhere wrapping split normal words. */
+.cleanx-content p,
+.cleanx-content li,
+.cleanx-content td,
+.cleanx-content th,
+.cleanx-content .td,
+.cleanx-content .th,
+.cleanx-content label,
+.cleanx-content span,
+.cleanx-content small,
+.cleanx-content div {
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+
+.cleanx-content a,
+.cleanx-content code,
+.cleanx-content pre,
+.cleanx-content textarea {
+	overflow-wrap: anywhere !important;
+}
+
+/* Modal overlay used by LuCI Package Manager, file upload, update lists and confirmations. */
+#modal_overlay {
+	position: fixed !important;
+	inset: 0 !important;
+	z-index: 1100 !important;
+	display: none;
+	align-items: flex-start;
+	justify-content: center;
+	padding: max(34px, env(safe-area-inset-top)) 18px 34px;
+	overflow: auto;
+	background: rgba(0,0,0,.46);
+	backdrop-filter: blur(18px) saturate(1.25);
+}
+
+body.modal-overlay-active {
+	overflow: hidden !important;
+}
+
+body.modal-overlay-active #modal_overlay {
+	display: flex !important;
+}
+
+#modal_overlay > .modal,
+#modal_overlay .modal {
+	position: relative !important;
+	width: min(760px, 100%) !important;
+	max-width: calc(100vw - 36px) !important;
+	max-height: calc(100vh - 68px) !important;
+	margin: 0 auto !important;
+	overflow: auto !important;
+	padding: 22px !important;
+	border-radius: 26px !important;
+	border: 1px solid var(--cleanx-border-strong) !important;
+	background: var(--cleanx-surface-strong) !important;
+	box-shadow: 0 28px 90px rgba(0,0,0,.42) !important;
+	backdrop-filter: var(--cleanx-blur);
+}
+
+#modal_overlay .modal h4,
+#modal_overlay .modal h3,
+#modal_overlay .modal h2 {
+	margin: 0 0 14px !important;
+	font-size: 21px !important;
+	line-height: 1.15 !important;
+	letter-spacing: -.04em !important;
+}
+
+#modal_overlay .modal .right,
+#modal_overlay .modal .button-row,
+#modal_overlay .modal .cbi-page-actions {
+	display: flex !important;
+	justify-content: flex-end;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 16px;
+}
+
+#modal_overlay .modal .left {
+	min-width: 0;
+}
+
+#modal_overlay .modal input[type="file"] {
+	max-width: 100%;
+}
+
+/* LuCI tooltip behaviour. Do not render embedded tooltips as normal cards. */
+.cbi-tooltip-container {
+	position: relative !important;
+}
+
+.cbi-tooltip-container > .cbi-tooltip {
+	position: absolute !important;
+	left: 0;
+	top: calc(100% + 10px);
+	z-index: 1150;
+	display: none !important;
+	width: max-content;
+	max-width: min(430px, calc(100vw - 40px));
+	padding: 12px 14px !important;
+	border-radius: 16px !important;
+	border: 1px solid var(--cleanx-border-strong) !important;
+	background: var(--cleanx-surface-strong) !important;
+	color: var(--cleanx-text) !important;
+	box-shadow: 0 18px 55px rgba(0,0,0,.26) !important;
+	backdrop-filter: var(--cleanx-blur);
+	font-size: 12.5px !important;
+	font-weight: 650 !important;
+	line-height: 1.55 !important;
+	white-space: normal !important;
+	text-align: left !important;
+}
+
+.cbi-tooltip-container:hover > .cbi-tooltip,
+.cbi-tooltip-container:focus-within > .cbi-tooltip {
+	display: block !important;
+}
+
+.cbi-tooltip-container > .cbi-tooltip.left {
+	left: 0;
+	right: auto;
+}
+
+body > .cbi-tooltip {
+	position: absolute !important;
+	z-index: 1200 !important;
+	max-width: min(430px, calc(100vw - 40px));
+	padding: 10px 12px !important;
+	border-radius: 14px !important;
+	border: 1px solid var(--cleanx-border-strong) !important;
+	background: var(--cleanx-surface-strong) !important;
+	color: var(--cleanx-text) !important;
+	box-shadow: 0 16px 45px rgba(0,0,0,.24) !important;
+	backdrop-filter: var(--cleanx-blur);
+	font-size: 12.5px !important;
+	line-height: 1.45 !important;
+	pointer-events: none;
+}
+
+/* Port status section from luci-mod-status/include/29_ports.js */
+body[data-page*="status"] .cleanx-port-grid,
+body[data-page*="overview"] .cleanx-port-grid,
+body[data-page*="status"] .cleanx-content div[style*="minmax(70px"],
+body[data-page*="overview"] .cleanx-content div[style*="minmax(70px"] {
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+	gap: 14px !important;
+	align-items: stretch !important;
+	margin: 0 0 18px !important;
+}
+
+body[data-page*="status"] .ifacebox,
+body[data-page*="overview"] .ifacebox,
+.cleanx-port-card {
+	width: 100% !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-radius: 22px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: linear-gradient(180deg, var(--cleanx-surface), var(--cleanx-surface-soft)) !important;
+	box-shadow: var(--cleanx-shadow-soft) !important;
+	overflow: visible !important;
+}
+
+body[data-page*="status"] .ifacebox-head,
+body[data-page*="overview"] .ifacebox-head {
+	padding: 11px 13px !important;
+	min-height: 0 !important;
+	border-bottom: 1px solid var(--cleanx-border);
+	background: rgba(var(--cleanx-bg-rgb), .18) !important;
+	font-size: 13px !important;
+	font-weight: 900 !important;
+	line-height: 1.25 !important;
+	white-space: normal !important;
+}
+
+body[data-page*="status"] .ifacebox-body,
+body[data-page*="overview"] .ifacebox-body {
+	padding: 13px !important;
+	min-height: 0 !important;
+	font-size: 13px !important;
+	line-height: 1.45 !important;
+	text-align: left !important;
+	background: transparent !important;
+}
+
+body[data-page*="status"] .ifacebox-body img,
+body[data-page*="overview"] .ifacebox-body img {
+	width: 24px !important;
+	height: 24px !important;
+	margin-right: 8px;
+	vertical-align: middle;
+}
+
+body[data-page*="status"] .ifacebox .ifacebadge,
+body[data-page*="overview"] .ifacebox .ifacebadge {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 5px;
+	max-width: 100%;
+	white-space: nowrap !important;
+}
+
+body[data-page*="status"] .ifacebox .ifacebadge img,
+body[data-page*="overview"] .ifacebox .ifacebadge img {
+	width: 18px !important;
+	height: 18px !important;
+	margin: 0 !important;
+}
+
+body[data-page*="status"] .zonebadge,
+body[data-page*="overview"] .zonebadge {
+	border-radius: 99px;
+}
+
+/* Status tables: keep row layout clean and readable. */
+body[data-page*="status"] .cleanx-status-widget,
+body[data-page*="overview"] .cleanx-status-widget {
+	border-radius: 22px !important;
+	overflow: hidden !important;
+}
+
+body[data-page*="status"] .table .tr,
+body[data-page*="overview"] .table .tr,
+body[data-page*="status"] table.table tr,
+body[data-page*="overview"] table.table tr {
+	grid-template-columns: minmax(190px, 30%) minmax(0, 1fr) !important;
+}
+
+/* Better progress bars with visible value text. */
+.cbi-progressbar,
+.progress {
+	position: relative !important;
+	min-height: 20px !important;
+	height: 20px !important;
+}
+
+.cbi-progressbar::after,
+.progress::after {
+	content: attr(title);
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 8px;
+	color: var(--cleanx-text);
+	font-size: 11px;
+	font-weight: 850;
+	line-height: 1;
+	text-shadow: 0 1px 2px rgba(0,0,0,.22);
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Package Manager / Software action layout. */
+body[data-page*="package-manager"] .cleanx-content,
+body[data-page*="software"] .cleanx-content,
+body[data-page*="opkg"] .cleanx-content {
+	scroll-padding-bottom: 120px;
+}
+
+body[data-page*="package-manager"] .cleanx-content .button-row,
+body[data-page*="software"] .cleanx-content .button-row,
+body[data-page*="opkg"] .cleanx-content .button-row,
+body[data-page*="package-manager"] .cleanx-content .right,
+body[data-page*="software"] .cleanx-content .right,
+body[data-page*="opkg"] .cleanx-content .right {
+	display: flex !important;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 9px;
+}
+
+/* Avoid decorative click spinner/ripple impacting LuCI action inputs. */
+input.cleanx-click-busy::after {
+	content: none !important;
+}
+
+@media (max-width: 720px) {
+	body[data-page*="status"] .cleanx-port-grid,
+	body[data-page*="overview"] .cleanx-port-grid,
+	body[data-page*="status"] .cleanx-content div[style*="minmax(70px"],
+	body[data-page*="overview"] .cleanx-content div[style*="minmax(70px"] {
+		grid-template-columns: 1fr !important;
+	}
+
+	#modal_overlay {
+		padding: 18px 10px;
+	}
+
+	#modal_overlay > .modal,
+	#modal_overlay .modal {
+		max-width: calc(100vw - 20px) !important;
+		max-height: calc(100vh - 36px) !important;
+		padding: 18px !important;
 	}
 }
