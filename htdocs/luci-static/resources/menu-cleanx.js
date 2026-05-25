@@ -18,6 +18,7 @@ return baseclass.extend({
 		this.bindRipples();
 		this.bindButtonFeedback();
 		this.installToast();
+		this.bindCbiTabsFallback();
 		this.startStatusLiveRefresh();
 	},
 
@@ -98,15 +99,15 @@ return baseclass.extend({
 			if (!main) return;
 
 			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
-			const isStatusLike = /status|overview|realtime|load/.test(page);
+			const isStatusLike = /status-overview|status\/overview|admin-status-overview|realtime|load|bandwidth|connections/.test(page);
 
 			/* Conservative table handling: do not wrap status/live widgets or native
 			 * LuCI structures that rely on their own JS and inline layout. */
 			main.querySelectorAll('table, div.table, .cbi-section-table').forEach((table) => {
 				if (table.closest('.cleanx-dashboard, #modal_overlay, .ifacebox, .cleanx-port-grid')) return;
 
-				const hasLiveGraph = !!table.querySelector('canvas, svg, .cbi-progressbar, .progress, .ifacebox, .cbi-tooltip-container');
-				const shouldStayNative = isStatusLike || hasLiveGraph;
+				const hasLiveGraph = !!table.querySelector('canvas, .cbi-progressbar, .progress');
+				const shouldStayNative = isStatusLike && hasLiveGraph;
 
 				if (shouldStayNative) {
 					const wrap = table.closest('.cleanx-table-wrap');
@@ -322,7 +323,8 @@ return baseclass.extend({
 			if (!target) return;
 
 			const page = String(document.body.dataset.page || '').toLowerCase();
-			if (/package-manager|software|opkg|flash|backup/.test(page) || target.closest('#modal_overlay')) return;
+			if (target.closest('#maincontent, #modal_overlay')) return;
+			if (/package-manager|software|opkg|flash|backup/.test(page)) return;
 
 			/* Input elements cannot safely contain ripple child nodes. Do not risk breaking LuCI submit/upload actions. */
 			if (target.tagName === 'INPUT') return;
@@ -350,14 +352,49 @@ return baseclass.extend({
 
 			/* Package manager, flash/backup and modal actions depend on native LuCI
 			 * event handlers. Avoid adding decorative state to them. */
+			if (btn.closest('#maincontent, #modal_overlay')) return;
 			if (/package-manager|software|opkg|flash|backup/.test(String(document.body.dataset.page || ''))) return;
-			if (btn.closest('#modal_overlay')) return;
 
 			const type = (btn.getAttribute('type') || '').toLowerCase();
 			const text = String(btn.textContent || btn.value || '').trim().toLowerCase();
 			if (type === 'button' && !/update|install|upload|save|apply|flash|generate/.test(text)) return;
 			btn.classList.add('cleanx-click-busy');
 			setTimeout(() => btn.classList.remove('cleanx-click-busy'), 1300);
+		}, true);
+	},
+
+
+	bindCbiTabsFallback() {
+		/* LuCI normally binds CBI tabs itself. This fallback only ensures the tab
+		 * remains usable when a page is saved/re-rendered or third-party pages miss
+		 * the native handler. It only touches tabs inside the same cbi-map. */
+		document.addEventListener('click', (ev) => {
+			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
+			if (!a) return;
+
+			const li = a.closest('li[data-tab]');
+			const tab = li && li.getAttribute('data-tab');
+			const menu = a.closest('.cbi-tabmenu');
+			const map = menu && menu.closest('.cbi-map, .cbi-section, #view, main, body');
+			const tabbed = menu && menu.nextElementSibling && menu.nextElementSibling.classList && menu.nextElementSibling.classList.contains('cbi-map-tabbed')
+				? menu.nextElementSibling
+				: (map && map.querySelector('.cbi-map-tabbed'));
+
+			if (!tab || !menu || !tabbed) return;
+
+			ev.preventDefault();
+			menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
+				const active = item === li;
+				item.classList.toggle('cbi-tab', active);
+				item.classList.toggle('cbi-tab-disabled', !active);
+				item.classList.toggle('active', active);
+			});
+			tabbed.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
+				const active = panel.getAttribute('data-tab') === tab;
+				panel.dataset.tabActive = active ? 'true' : 'false';
+				panel.hidden = !active;
+				panel.style.display = active ? '' : 'none';
+			});
 		}, true);
 	},
 

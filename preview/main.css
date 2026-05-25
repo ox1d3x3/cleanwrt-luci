@@ -1,4 +1,4 @@
-/* CleanX Theme v0.2.8 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.2.9 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -200,7 +200,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(var(--cleanx-acce
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.2.8 LuCI compatibility pass
+ * CleanX v0.2.9 LuCI compatibility pass
  * Fixes CBI/form/table pages such as Package Manager and Backup / Flash.
  * -------------------------------------------------------------------------- */
 .cleanx-content {
@@ -914,7 +914,7 @@ ul.tabs .active a {
 }
 
 
-/* CleanX v0.2.8: real LuCI status/graph compatibility
+/* CleanX v0.2.9: real LuCI status/graph compatibility
    Fixes Overview memory bars, realtime graphs and status widgets that use LuCI's
    div.table + .cbi-progressbar markup instead of normal CBI forms. */
 .cleanx-content canvas,
@@ -1063,7 +1063,7 @@ body[data-page*="load"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.2.8 real LuCI page compatibility patch
+ * CleanX v0.2.9 real LuCI page compatibility patch
  * - Replaces grid background with soft gradient mesh
  * - Fixes Status -> Overview port cards and hidden tooltips
  * - Restores LuCI modal overlay behaviour used by Package Manager upload/update
@@ -1402,7 +1402,7 @@ input.cleanx-click-busy::after {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.2.8 deep LuCI compatibility pass
+ * CleanX v0.2.9 deep LuCI compatibility pass
  * - Removes patterned/grid wallpaper completely
  * - Makes status port cards readable on OpenWrt 25.x
  * - Keeps LuCI CBI forms, tables, tabs, modals and tooltips functional
@@ -1907,7 +1907,7 @@ ul.cbi-tabmenu > li.cbi-tab > a {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.2.8 audit patch
+ * CleanX v0.2.9 audit patch
  * Tested against saved OpenWrt 25.x Backup / Flash markup and upstream LuCI
  * status widgets. The goal is compatibility first: no narrow text columns,
  * no tooltip payloads dumped into cards, no theme JS interference with LuCI
@@ -2307,7 +2307,7 @@ body[data-page*="overview"] .progress {
 	}
 }
 
-/* CleanX v0.2.8b: label-less LuCI values, usually TextValue or custom HTML,
+/* CleanX v0.2.9b: label-less LuCI values, usually TextValue or custom HTML,
    should use full width instead of reserving an empty label column. */
 .cbi-value:not(:has(> .cbi-value-title)):not([data-widget="CBI.ButtonValue"]):not([data-widget$="ButtonValue"]) {
 	display: block !important;
@@ -2326,7 +2326,7 @@ body[data-page*="overview"] .progress {
 	max-width: 100% !important;
 }
 
-/* CleanX v0.2.8c: prevent decorative gradient layers and demo tables from
+/* CleanX v0.2.9c: prevent decorative gradient layers and demo tables from
    creating horizontal page scroll. */
 html, body {
 	overflow-x: hidden !important;
@@ -2371,4 +2371,582 @@ html, body {
 		padding-left: 14px !important;
 		padding-right: 14px !important;
 	}
+}
+
+/* -------------------------------------------------------------------------
+ * CleanX v0.2.9 - real-page QA hardening
+ * Based on exported LuCI pages for Overview, Interfaces, System, Startup and
+ * Processes. This block is intentionally last so it can safely override older
+ * compatibility rules without touching LuCI logic.
+ * ------------------------------------------------------------------------- */
+
+/* Smooth gradient background only. No visible grid, checker or boxed pattern. */
+.cleanx-grid,
+.cleanx-bg .cleanx-grid,
+.cleanx-login-screen::before,
+body::before,
+body::after {
+	display: none !important;
+	content: none !important;
+	background: none !important;
+	background-image: none !important;
+}
+
+html,
+body {
+	background-color: var(--cleanx-bg) !important;
+	background-image:
+		radial-gradient(circle at 12% 6%, rgba(14,165,233,.18), transparent 30rem),
+		radial-gradient(circle at 92% 8%, rgba(124,58,237,.15), transparent 32rem),
+		radial-gradient(circle at 48% 108%, rgba(20,184,166,.10), transparent 36rem),
+		linear-gradient(140deg, rgba(var(--cleanx-bg-rgb),1), rgba(var(--cleanx-bg-rgb),.96) 48%, rgba(var(--cleanx-bg-rgb),1)) !important;
+	background-attachment: fixed !important;
+	overflow-x: hidden !important;
+}
+
+[data-cleanx-theme="dark"] html,
+html[data-cleanx-theme="dark"],
+[data-cleanx-theme="dark"] body {
+	background-image:
+		radial-gradient(circle at 11% 4%, rgba(37,99,235,.16), transparent 31rem),
+		radial-gradient(circle at 94% 7%, rgba(124,58,237,.14), transparent 33rem),
+		radial-gradient(circle at 50% 110%, rgba(5,150,105,.10), transparent 36rem),
+		linear-gradient(140deg, #050507, #0a0d13 52%, #050507) !important;
+}
+
+.cleanx-bg {
+	background: transparent !important;
+}
+.cleanx-blob {
+	filter: blur(110px) saturate(1.05) !important;
+	opacity: .10 !important;
+}
+[data-cleanx-theme="dark"] .cleanx-blob {
+	opacity: .085 !important;
+}
+
+/* Modern sun/moon toggle. */
+.cleanx-theme-toggle {
+	position: relative !important;
+	width: 76px !important;
+	height: 38px !important;
+	padding: 4px !important;
+	border-radius: 999px !important;
+	border: 1px solid var(--cleanx-border-strong) !important;
+	background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.42)) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 12px 28px rgba(0,0,0,.08) !important;
+	overflow: hidden !important;
+}
+[data-cleanx-theme="dark"] .cleanx-theme-toggle {
+	background: linear-gradient(135deg, rgba(39,39,46,.82), rgba(18,18,24,.64)) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 16px 36px rgba(0,0,0,.34) !important;
+}
+.cleanx-theme-toggle::before,
+.cleanx-theme-toggle::after {
+	position: absolute !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+	z-index: 1 !important;
+	font-size: 14px !important;
+	line-height: 1 !important;
+	transition: opacity .22s var(--cleanx-spring), transform .22s var(--cleanx-spring) !important;
+}
+.cleanx-theme-toggle::before { content: "☀" !important; left: 12px !important; opacity: .95 !important; color: #f59e0b !important; }
+.cleanx-theme-toggle::after { content: "☾" !important; right: 13px !important; opacity: .40 !important; color: #93c5fd !important; }
+[data-cleanx-theme="dark"] .cleanx-theme-toggle::before { opacity: .36 !important; transform: translateY(-50%) scale(.92) !important; }
+[data-cleanx-theme="dark"] .cleanx-theme-toggle::after { opacity: 1 !important; transform: translateY(-50%) scale(1.04) !important; }
+.cleanx-theme-toggle-knob {
+	position: absolute !important;
+	z-index: 2 !important;
+	top: 4px !important;
+	left: 4px !important;
+	width: 30px !important;
+	height: 30px !important;
+	border-radius: 999px !important;
+	background: linear-gradient(180deg, #fff, #f0f2f7) !important;
+	box-shadow: 0 8px 18px rgba(0,0,0,.20) !important;
+	transform: translateX(0) !important;
+	transition: transform .28s var(--cleanx-spring), background .28s var(--cleanx-spring), box-shadow .28s var(--cleanx-spring) !important;
+}
+[data-cleanx-theme="dark"] .cleanx-theme-toggle-knob {
+	transform: translateX(38px) !important;
+	background: linear-gradient(180deg, #e5e7eb, #cbd5e1) !important;
+	box-shadow: 0 10px 24px rgba(0,0,0,.40) !important;
+}
+
+/* Keep LuCI content readable. Do not split words vertically. */
+.cleanx-content,
+.cleanx-content *:not(code):not(pre):not(textarea):not(.cbi-progressbar):not(.progress) {
+	word-break: normal !important;
+	hyphens: none !important;
+}
+.cleanx-content p,
+.cleanx-content li,
+.cleanx-content td,
+.cleanx-content th,
+.cleanx-content .td,
+.cleanx-content .th,
+.cleanx-content label,
+.cleanx-content .cbi-section-descr,
+.cleanx-content .cbi-value-description,
+.cleanx-content .description {
+	overflow-wrap: break-word !important;
+}
+.cleanx-content .nowrap,
+.cleanx-content .cbi-button,
+.cleanx-content .btn,
+.cleanx-content button,
+.cleanx-content .cbi-value-title,
+.cleanx-content .cbi-tabmenu a,
+.cleanx-content .ifacebox-head,
+.cleanx-content .ifacebox-body small {
+	overflow-wrap: normal !important;
+	word-break: normal !important;
+	white-space: normal !important;
+}
+
+/* CBI tabs must remain clickable and clearly interactive. */
+.cbi-tabmenu {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	flex-wrap: wrap !important;
+	padding: 6px !important;
+	margin: 12px 0 18px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 18px !important;
+	background: rgba(var(--cleanx-bg-rgb), .28) !important;
+	list-style: none !important;
+	overflow: visible !important;
+}
+.cbi-tabmenu > li {
+	display: block !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+}
+.cbi-tabmenu > li > a {
+	display: inline-flex !important;
+	align-items: center !important;
+	min-height: 36px !important;
+	padding: 9px 13px !important;
+	border-radius: 13px !important;
+	color: var(--cleanx-muted) !important;
+	font-size: 13px !important;
+	font-weight: 820 !important;
+	pointer-events: auto !important;
+	cursor: pointer !important;
+	transition: background .18s var(--cleanx-spring), color .18s var(--cleanx-spring), transform .18s var(--cleanx-spring) !important;
+}
+.cbi-tabmenu > li > a:hover {
+	background: rgba(var(--cleanx-accent-rgb), .09) !important;
+	color: var(--cleanx-text) !important;
+	transform: translateY(-1px) !important;
+}
+.cbi-tabmenu > li.cbi-tab > a,
+.cbi-tabmenu > li.active > a {
+	background: var(--cleanx-surface-strong) !important;
+	color: var(--cleanx-text) !important;
+	box-shadow: 0 10px 26px rgba(0,0,0,.07) !important;
+}
+
+/* Tables: readable by default, horizontally safe when content is dense. */
+.cleanx-table-wrap {
+	width: 100% !important;
+	max-width: 100% !important;
+	overflow-x: auto !important;
+	overflow-y: visible !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+.cleanx-content table.table,
+.cleanx-content table.cbi-section-table {
+	width: 100% !important;
+	max-width: 100% !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+	table-layout: auto !important;
+}
+.cleanx-content table.table .th,
+.cleanx-content table.table .td,
+.cleanx-content table.cbi-section-table .th,
+.cleanx-content table.cbi-section-table .td,
+.cleanx-content table.table th,
+.cleanx-content table.table td,
+.cleanx-content table.cbi-section-table th,
+.cleanx-content table.cbi-section-table td {
+	vertical-align: middle !important;
+	min-width: 0 !important;
+}
+.cleanx-content .cbi-section-actions,
+.cleanx-content .td.cbi-section-actions,
+.cleanx-content td.cbi-section-actions,
+.cleanx-content th.cbi-section-actions {
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+	white-space: normal !important;
+}
+.cleanx-content .cbi-section-actions > div,
+.cleanx-content .td.cbi-section-actions > div,
+.cleanx-content td.cbi-section-actions > div {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	flex-wrap: wrap !important;
+	gap: 6px !important;
+}
+
+/* Dense action tables such as Processes and Startup need compact action pills. */
+body[data-page*="processes"] .td.cbi-section-actions .btn,
+body[data-page*="processes"] td.cbi-section-actions .btn,
+body[data-page*="startup"] .td.cbi-section-actions .btn,
+body[data-page*="startup"] td.cbi-section-actions .btn,
+body[data-page*="network"] .td.cbi-section-actions .btn,
+body[data-page*="network"] td.cbi-section-actions .btn,
+body[data-page*="processes"] .td.cbi-section-actions .cbi-button,
+body[data-page*="startup"] .td.cbi-section-actions .cbi-button,
+body[data-page*="network"] .td.cbi-section-actions .cbi-button {
+	min-width: 0 !important;
+	padding: 6px 9px !important;
+	font-size: 11.5px !important;
+	line-height: 1.15 !important;
+	border-radius: 999px !important;
+	white-space: nowrap !important;
+	box-shadow: none !important;
+}
+body[data-page*="processes"] .cleanx-content table.table,
+body[data-page*="startup"] .cleanx-content table.table {
+	font-size: 12.5px !important;
+}
+body[data-page*="processes"] .td[data-title="Command"] span,
+body[data-page*="processes"] td[data-title="Command"] span {
+	word-break: break-word !important;
+	overflow-wrap: anywhere !important;
+}
+
+/* Buttons: style only. Never block native LuCI clicks. */
+.cleanx-content button,
+.cleanx-content .btn,
+.cleanx-content a.btn,
+.cleanx-content .cbi-button,
+.cleanx-content a.cbi-button,
+.cleanx-content input[type="submit"],
+.cleanx-content input[type="button"],
+.cleanx-content input[type="reset"],
+.cleanx-content [role="button"] {
+	pointer-events: auto !important;
+	z-index: auto !important;
+	width: auto !important;
+	max-width: 100% !important;
+	white-space: nowrap !important;
+}
+.cleanx-content input[type="submit"],
+.cleanx-content input[type="button"],
+.cleanx-content input[type="reset"] {
+	min-width: 0 !important;
+}
+
+/* Network Interfaces: prevent device icons/tooltips from overlapping. */
+body[data-page*="network"] .ifacebox,
+body[data-page*="interfaces"] .ifacebox,
+body[data-page*="network"] .cleanx-content .ifacebox,
+body[data-page*="interfaces"] .cleanx-content .ifacebox {
+	width: min(100%, 440px) !important;
+	min-width: 190px !important;
+	max-width: 100% !important;
+	padding: 0 !important;
+	overflow: visible !important;
+	border-radius: 18px !important;
+}
+body[data-page*="network"] .ifacebox-head,
+body[data-page*="interfaces"] .ifacebox-head {
+	min-height: 38px !important;
+	padding: 10px 12px !important;
+	display: flex !important;
+	align-items: center !important;
+	font-size: 13px !important;
+	font-weight: 850 !important;
+	line-height: 1.2 !important;
+	color: #071014 !important;
+	border-radius: 18px 18px 0 0 !important;
+}
+[data-cleanx-theme="dark"] body[data-page*="network"] .ifacebox-head,
+[data-cleanx-theme="dark"] body[data-page*="interfaces"] .ifacebox-head {
+	color: #081014 !important;
+}
+body[data-page*="network"] .ifacebox-body,
+body[data-page*="interfaces"] .ifacebox-body {
+	display: flex !important;
+	align-items: center !important;
+	flex-wrap: wrap !important;
+	gap: 8px !important;
+	padding: 10px 12px !important;
+	min-height: 48px !important;
+	line-height: 1.3 !important;
+	white-space: normal !important;
+}
+body[data-page*="network"] .ifacebox-body > span,
+body[data-page*="interfaces"] .ifacebox-body > span,
+body[data-page*="network"] .ifacebox-body .cbi-tooltip-container,
+body[data-page*="interfaces"] .ifacebox-body .cbi-tooltip-container {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 5px !important;
+	min-width: 0 !important;
+	vertical-align: middle !important;
+}
+body[data-page*="network"] .ifacebox-body br,
+body[data-page*="interfaces"] .ifacebox-body br {
+	display: none !important;
+}
+body[data-page*="network"] .ifacebox-body small,
+body[data-page*="interfaces"] .ifacebox-body small {
+	flex: 1 0 100% !important;
+	display: block !important;
+	margin-top: 4px !important;
+	color: var(--cleanx-muted) !important;
+	font-size: 12px !important;
+}
+body[data-page*="network"] .ifacebox img.middle,
+body[data-page*="interfaces"] .ifacebox img.middle,
+body[data-page*="network"] .ifacebadge img,
+body[data-page*="interfaces"] .ifacebadge img {
+	width: 24px !important;
+	height: 24px !important;
+	object-fit: contain !important;
+	vertical-align: middle !important;
+}
+body[data-page*="network"] .ifacebadge:not(.cbi-tooltip),
+body[data-page*="interfaces"] .ifacebadge:not(.cbi-tooltip) {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 5px !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+}
+body[data-page*="network"] .cbi-tooltip-container > .cbi-tooltip,
+body[data-page*="interfaces"] .cbi-tooltip-container > .cbi-tooltip {
+	display: none !important;
+	position: absolute !important;
+	left: 0 !important;
+	top: calc(100% + 8px) !important;
+	z-index: 5200 !important;
+	max-width: min(420px, calc(100vw - 44px)) !important;
+	white-space: normal !important;
+}
+body[data-page*="network"] .cbi-tooltip-container:hover > .cbi-tooltip,
+body[data-page*="interfaces"] .cbi-tooltip-container:hover > .cbi-tooltip,
+body[data-page*="network"] .cbi-tooltip-container:focus-within > .cbi-tooltip,
+body[data-page*="interfaces"] .cbi-tooltip-container:focus-within > .cbi-tooltip {
+	display: block !important;
+}
+body[data-page*="network"] .cbi-tooltip.ifacebadge.large,
+body[data-page*="interfaces"] .cbi-tooltip.ifacebadge.large {
+	padding: 12px !important;
+	border-radius: 16px !important;
+	background: var(--cleanx-surface-strong) !important;
+	box-shadow: 0 20px 60px rgba(0,0,0,.32) !important;
+}
+
+/* Overview/Port Status: keep readable, but do not dump tooltip payloads. */
+body[data-page*="status"] .cleanx-port-grid,
+body[data-page*="overview"] .cleanx-port-grid,
+body[data-page*="status"] .cleanx-content div[style*="minmax(70px"],
+body[data-page*="overview"] .cleanx-content div[style*="minmax(70px"] {
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr)) !important;
+	gap: 14px !important;
+	width: 100% !important;
+	max-width: 100% !important;
+}
+body[data-page*="status"] .ifacebox .cbi-tooltip,
+body[data-page*="overview"] .ifacebox .cbi-tooltip {
+	display: none !important;
+	visibility: hidden !important;
+}
+body[data-page*="status"] .ifacebox .ifacebox-body,
+body[data-page*="overview"] .ifacebox .ifacebox-body {
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: normal !important;
+}
+body[data-page*="status"] .ifacebox .ifacebox-body .cbi-tooltip-container,
+body[data-page*="overview"] .ifacebox .ifacebox-body .cbi-tooltip-container {
+	width: auto !important;
+	max-width: 100% !important;
+}
+
+/* CBI forms: nested ContainerValue blocks are full-width cards, normal values are responsive rows. */
+.cbi-value[data-widget="CBI.ContainerValue"],
+.cbi-value[data-widget$="ContainerValue"],
+.cbi-value:has(> .cbi-section),
+.cbi-value:has(> fieldset.cbi-section) {
+	display: block !important;
+	grid-template-columns: none !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	padding: 0 !important;
+	margin: 0 0 16px !important;
+	border: 0 !important;
+}
+.cbi-value:not([data-widget="CBI.ContainerValue"]):not(:has(> .cbi-section)) {
+	display: grid !important;
+	grid-template-columns: minmax(180px, 260px) minmax(0, 1fr) !important;
+	gap: 12px 16px !important;
+	align-items: start !important;
+	width: 100% !important;
+	max-width: 100% !important;
+}
+.cbi-value-field,
+.cbi-value-field output,
+.cbi-value-field > div,
+.cbi-value-field > span {
+	min-width: 0 !important;
+	max-width: 100% !important;
+}
+.cbi-value-field output {
+	display: flex !important;
+	align-items: center !important;
+	flex-wrap: wrap !important;
+	gap: 8px !important;
+}
+.cbi-value:not(:has(> .cbi-value-title)):not([data-widget="CBI.ButtonValue"]):not([data-widget$="ButtonValue"]) {
+	display: block !important;
+	grid-template-columns: none !important;
+}
+.cbi-value:not(:has(> .cbi-value-title)) > .cbi-value-field,
+.cbi-value:not(:has(> .cbi-value-title)) > div,
+.cbi-value:not(:has(> .cbi-value-title)) textarea,
+.cbi-value:not(:has(> .cbi-value-title)) .cbi-input-textarea {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
+/* Modal overlay for package update/upload, flash/upload and confirmations. */
+#modal_overlay {
+	position: fixed !important;
+	inset: 0 !important;
+	z-index: 7000 !important;
+	display: none !important;
+	align-items: flex-start !important;
+	justify-content: center !important;
+	padding: max(28px, env(safe-area-inset-top)) 16px 28px !important;
+	overflow: auto !important;
+	background: rgba(0,0,0,.44) !important;
+	backdrop-filter: blur(18px) saturate(1.18) !important;
+}
+body.modal-overlay-active #modal_overlay {
+	display: flex !important;
+}
+#modal_overlay > .modal,
+#modal_overlay .modal {
+	width: min(820px, calc(100vw - 32px)) !important;
+	max-width: calc(100vw - 32px) !important;
+	max-height: calc(100vh - 56px) !important;
+	padding: 22px !important;
+	border-radius: 24px !important;
+	border: 1px solid var(--cleanx-border-strong) !important;
+	background: var(--cleanx-surface-strong) !important;
+	box-shadow: 0 30px 110px rgba(0,0,0,.42) !important;
+	overflow: auto !important;
+}
+#modal_overlay .button-row,
+#modal_overlay .right,
+#modal_overlay .cbi-page-actions {
+	display: flex !important;
+	justify-content: flex-end !important;
+	flex-wrap: wrap !important;
+	gap: 9px !important;
+}
+
+@media (max-width: 900px) {
+	.cleanx-content table.table,
+	.cleanx-content table.cbi-section-table {
+		min-width: 720px !important;
+	}
+	.cleanx-table-wrap table.table,
+	.cleanx-table-wrap table.cbi-section-table {
+		min-width: 720px !important;
+	}
+}
+
+@media (max-width: 760px) {
+	.cbi-value:not([data-widget="CBI.ContainerValue"]):not(:has(> .cbi-section)) {
+		grid-template-columns: 1fr !important;
+	}
+	.cbi-tabmenu {
+		flex-wrap: nowrap !important;
+		overflow-x: auto !important;
+		-webkit-overflow-scrolling: touch !important;
+	}
+	.cbi-tabmenu > li > a {
+		white-space: nowrap !important;
+	}
+	.cleanx-content button,
+	.cleanx-content .btn,
+	.cleanx-content .cbi-button {
+		white-space: normal !important;
+	}
+}
+
+/* CleanX v0.2.9d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
+body[data-page*="processes"] .cleanx-content table.table,
+body[data-page*="startup"] .cleanx-content table.table,
+body[data-page*="network"] .cleanx-content table.table,
+body[data-page*="network"] .cleanx-content table.cbi-section-table,
+body[data-page*="interfaces"] .cleanx-content table.table,
+body[data-page*="interfaces"] .cleanx-content table.cbi-section-table,
+body[data-page*="package-manager"] .cleanx-content table.table,
+body[data-page*="software"] .cleanx-content table.table,
+body[data-page*="opkg"] .cleanx-content table.table {
+	display: block !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	overflow-x: auto !important;
+	overflow-y: visible !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+body[data-page*="processes"] .cleanx-content table.table tbody,
+body[data-page*="startup"] .cleanx-content table.table tbody,
+body[data-page*="network"] .cleanx-content table.table tbody,
+body[data-page*="network"] .cleanx-content table.cbi-section-table tbody,
+body[data-page*="interfaces"] .cleanx-content table.table tbody,
+body[data-page*="interfaces"] .cleanx-content table.cbi-section-table tbody {
+	display: table !important;
+	width: 100% !important;
+	min-width: 720px !important;
+}
+body[data-page*="processes"] .cleanx-content table.table tbody,
+body[data-page*="startup"] .cleanx-content table.table tbody {
+	min-width: 780px !important;
+}
+body[data-page*="status"] .cleanx-content table.table,
+body[data-page*="overview"] .cleanx-content table.table {
+	min-width: 0 !important;
+}
+@media (max-width: 900px) {
+	body[data-page*="status"] .cleanx-content table.table,
+	body[data-page*="overview"] .cleanx-content table.table {
+		min-width: 0 !important;
+	}
+}
+
+/* CleanX v0.2.9e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
+body[data-page*="processes"] .cleanx-content table.table,
+body[data-page*="startup"] .cleanx-content table.table,
+body[data-page*="network"] .cleanx-content table.table,
+body[data-page*="network"] .cleanx-content table.cbi-section-table,
+body[data-page*="interfaces"] .cleanx-content table.table,
+body[data-page*="interfaces"] .cleanx-content table.cbi-section-table,
+body[data-page*="package-manager"] .cleanx-content table.table,
+body[data-page*="software"] .cleanx-content table.table,
+body[data-page*="opkg"] .cleanx-content table.table {
+	min-width: 0 !important;
+	box-sizing: border-box !important;
+}
+.cleanx-content {
+	overflow-x: hidden !important;
+}
+.cleanx-table-wrap {
+	overflow-x: auto !important;
 }

@@ -174,7 +174,7 @@ Planned next features:
 
 ## Changelog
 
-### v0.2.8
+### v0.2.9
 
 - Added `preview/compat/` mock OpenWrt/LuCI pages with fake data for visual QA before installing.
 - Tested against realistic Status Overview, Port Status, memory bars, Software / Package Manager, Backup / Flash, CBI forms, Firewall tables and Realtime Graphs markup.
@@ -204,3 +204,24 @@ Planned next features:
 ## Licence
 
 Apache-2.0
+
+## v0.2.9 real-world compatibility fixes
+
+This release includes fixes based on exported OpenWrt 25.12 LuCI pages and fake-data compatibility mocks.
+
+Fixed areas:
+
+- Overview port/status cards
+- Network Interfaces icon/tooltip layout
+- System CBI tabs and form layout
+- Startup dense action buttons
+- Processes dense action buttons
+- Smooth gradient background without visible grid/box wallpaper
+- Safer LuCI button handling by disabling decorative click effects inside LuCI content controls
+
+Static QA pages are included under:
+
+```text
+preview/real-world-qa/
+preview/compat/
+```
