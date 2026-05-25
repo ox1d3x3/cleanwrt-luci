@@ -1,6 +1,6 @@
 # CleanX LuCI Theme
 
-**CleanX** is a clean, Apple-inspired LuCI theme for OpenWrt with a modern glass interface, smooth animation, dark/light mode and live dashboard cards.
+**CleanX** is a clean, LuCI theme for OpenWrt with a modern glass interface, smooth animation, dark/light mode and live dashboard cards.
 
 This project is built **from scratch** for modern LuCI using `ucode/template/themes/`. It is not a fork of Aurora or Bootstrap.
 
