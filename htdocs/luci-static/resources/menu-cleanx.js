@@ -100,11 +100,13 @@ return baseclass.extend({
 			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
 			const isStatusLike = /status|overview|realtime|load/.test(page);
 
+			/* Conservative table handling: do not wrap status/live widgets or native
+			 * LuCI structures that rely on their own JS and inline layout. */
 			main.querySelectorAll('table, div.table, .cbi-section-table').forEach((table) => {
-				if (table.closest('.cleanx-dashboard')) return;
+				if (table.closest('.cleanx-dashboard, #modal_overlay, .ifacebox, .cleanx-port-grid')) return;
 
-				const hasLiveGraph = !!table.querySelector('canvas, svg, .cbi-progressbar, .progress');
-				const shouldStayNative = isStatusLike && hasLiveGraph;
+				const hasLiveGraph = !!table.querySelector('canvas, svg, .cbi-progressbar, .progress, .ifacebox, .cbi-tooltip-container');
+				const shouldStayNative = isStatusLike || hasLiveGraph;
 
 				if (shouldStayNative) {
 					const wrap = table.closest('.cleanx-table-wrap');
@@ -178,10 +180,44 @@ return baseclass.extend({
 		const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
 		if (!/status|overview/.test(page)) return;
 
+		const markGrid = (grid) => {
+			if (!grid) return;
+			grid.classList.add('cleanx-port-grid');
+			try {
+				grid.style.setProperty('display', 'grid', 'important');
+				grid.style.setProperty('grid-template-columns', 'repeat(auto-fit, minmax(230px, 1fr))', 'important');
+				grid.style.setProperty('gap', '16px', 'important');
+				grid.style.setProperty('width', '100%', 'important');
+				grid.style.setProperty('max-width', '100%', 'important');
+			} catch (_) {}
+		};
+
+		main.querySelectorAll('div[style*="minmax(70px"], div[style*="max-width:100px"], div[style*="min-width:70px"]').forEach((node) => {
+			if (node.querySelector('.ifacebox')) markGrid(node);
+		});
+
 		main.querySelectorAll('.ifacebox').forEach((box) => {
 			box.classList.add('cleanx-port-card');
-			const parent = box.parentElement;
-			if (parent) parent.classList.add('cleanx-port-grid');
+			markGrid(box.parentElement);
+
+			try {
+				box.style.setProperty('width', '100%', 'important');
+				box.style.setProperty('min-width', '0', 'important');
+				box.style.setProperty('max-width', 'none', 'important');
+				box.style.setProperty('margin', '0', 'important');
+			} catch (_) {}
+
+			box.querySelectorAll('.cbi-tooltip-container > .cbi-tooltip').forEach((tip) => {
+				tip.setAttribute('aria-hidden', 'true');
+				try {
+					tip.style.setProperty('display', 'none', 'important');
+					tip.style.setProperty('position', 'absolute', 'important');
+				} catch (_) {}
+			});
+
+			box.querySelectorAll('.ifacebox-body br').forEach((br) => {
+				br.dataset.cleanxHidden = '1';
+			});
 		});
 	},
 
@@ -285,6 +321,9 @@ return baseclass.extend({
 			const target = ev.target.closest('button, input[type="submit"], input[type="button"], input[type="reset"], .btn, .cbi-button, [role="button"], .cleanx-main-nav a, .cleanx-mode-menu a');
 			if (!target) return;
 
+			const page = String(document.body.dataset.page || '').toLowerCase();
+			if (/package-manager|software|opkg|flash|backup/.test(page) || target.closest('#modal_overlay')) return;
+
 			/* Input elements cannot safely contain ripple child nodes. Do not risk breaking LuCI submit/upload actions. */
 			if (target.tagName === 'INPUT') return;
 
@@ -308,7 +347,12 @@ return baseclass.extend({
 		document.addEventListener('click', (ev) => {
 			const btn = ev.target.closest('button, input[type="submit"], input[type="button"], a.cbi-button, .cbi-button, .btn');
 			if (!btn || btn.disabled || btn.classList.contains('cleanx-click-busy')) return;
-			if (/package-manager|software|opkg/.test(String(document.body.dataset.page || ''))) return;
+
+			/* Package manager, flash/backup and modal actions depend on native LuCI
+			 * event handlers. Avoid adding decorative state to them. */
+			if (/package-manager|software|opkg|flash|backup/.test(String(document.body.dataset.page || ''))) return;
+			if (btn.closest('#modal_overlay')) return;
+
 			const type = (btn.getAttribute('type') || '').toLowerCase();
 			const text = String(btn.textContent || btn.value || '').trim().toLowerCase();
 			if (type === 'button' && !/update|install|upload|save|apply|flash|generate/.test(text)) return;

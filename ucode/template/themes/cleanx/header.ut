@@ -37,9 +37,9 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.2.5">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.2.8">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.2.5">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.2.8">
 	{% endif %}
 	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
 	{% if (node?.css): %}
@@ -60,7 +60,6 @@
 	<div id="cleanx-scroll-progress" aria-hidden="true"></div>
 
 	<div class="cleanx-bg" aria-hidden="true">
-		<div class="cleanx-grid"></div>
 		<div class="cleanx-blob cleanx-blob-a"></div>
 		<div class="cleanx-blob cleanx-blob-b"></div>
 		<div class="cleanx-blob cleanx-blob-c"></div>

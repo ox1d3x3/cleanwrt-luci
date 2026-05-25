@@ -19,7 +19,7 @@ The theme uses the current LuCI `ucode/template/themes/` structure and is design
 - Better styling for LuCI forms, CBI sections, tables and action buttons
 - Status/overview memory progress bar support
 - OpenWrt SDK GitHub Actions workflow
-- Builds `.ipk` for OpenWrt 24.10 and older package systems
+- Builds `.ipk` for OpenWrt 24.10.x package systems
 - Builds `.apk` for OpenWrt 25.12+ and snapshot package systems
 
 ## Compatibility
@@ -42,7 +42,13 @@ preview/index.html
 
 The preview includes login, dashboard, status, network, wireless, firewall, system, software, services, theme settings concept and mobile layout pages.
 
-The preview pages are static examples. Real LuCI pages depend on the packages installed on your router.
+For compatibility testing, also open:
+
+```text
+preview/compat/index.html
+```
+
+Those pages use fake OpenWrt/LuCI data and realistic LuCI classes to test Port Status, memory bars, package manager controls, Backup / Flash actions, CBI forms, tables, modals and mobile layouts. Real LuCI pages still depend on the packages installed on your router.
 
 ## Repository structure
 
@@ -168,15 +174,16 @@ Planned next features:
 
 ## Changelog
 
-### v0.2.5
+### v0.2.8
 
-- Replaced the visible grid/net background with a softer gradient mesh.
-- Fixed Status → Overview port cards where text and tooltips were collapsing into narrow columns.
-- Restored LuCI modal overlay styling used by Package Manager actions such as Update lists and Upload Package.
-- Stopped decorative click effects from touching LuCI input submit/upload controls.
-- Added a lightweight live memory refresh helper for the native Overview memory bars.
-- Improved global long-text handling without splitting normal words.
-- Kept the v0.2.4 text cleanup and package naming fixes.
+- Added `preview/compat/` mock OpenWrt/LuCI pages with fake data for visual QA before installing.
+- Tested against realistic Status Overview, Port Status, memory bars, Software / Package Manager, Backup / Flash, CBI forms, Firewall tables and Realtime Graphs markup.
+- Removed the visible grid/net wallpaper layer from the template and preview mocks.
+- Replaced the background with a smooth gradient mesh only.
+- Strengthened Port Status card fixes for LuCI 25.x inline widths.
+- Improved nested CBI ContainerValue layout used by Backup / Flash Firmware.
+- Improved Package Manager button/modal compatibility and disabled decorative effects on risky LuCI controls.
+- Improved full-width textarea, label-less CBI values and mobile overflow handling.
 
 ### v0.2.4
 

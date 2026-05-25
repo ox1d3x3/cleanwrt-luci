@@ -1,4 +1,4 @@
-/* CleanX login page v0.2.5 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX login page v0.2.8 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg:#f5f5f7; --cleanx-bg-rgb:245,245,247; --cleanx-surface:rgba(255,255,255,.72); --cleanx-surface-strong:rgba(255,255,255,.92);
 	--cleanx-text:#111114; --cleanx-muted:#6e6e73; --cleanx-border:rgba(0,0,0,.10); --cleanx-accent:#0071e3; --cleanx-accent-rgb:0,113,227; --cleanx-danger:#ff3b30;
@@ -39,3 +39,41 @@ html, body { margin:0; min-height:100%; background:var(--cleanx-bg); color:var(-
 @keyframes cleanxDriftC { 0%,100%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-24px,-34px,0)} }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:520px){.cleanx-login-card{padding:26px;border-radius:28px}.cleanx-login-screen{padding:16px}}
+
+/* CleanX v0.2.8: remove patterned login wallpaper and use soft gradient only. */
+html, body {
+	background-image:
+		radial-gradient(circle at 10% 6%, rgba(14,165,233,.22), transparent 30rem),
+		radial-gradient(circle at 92% 12%, rgba(124,58,237,.18), transparent 30rem),
+		radial-gradient(circle at 48% 105%, rgba(20,184,166,.12), transparent 34rem),
+		linear-gradient(140deg, rgba(var(--cleanx-bg-rgb),1), rgba(var(--cleanx-bg-rgb),.95), rgba(var(--cleanx-bg-rgb),1)) !important;
+	background-attachment: fixed !important;
+}
+.cleanx-login-screen::before {
+	display: none !important;
+	content: none !important;
+	background: none !important;
+}
+.cleanx-login-bg span {
+	filter: blur(96px) saturate(1.08) !important;
+	opacity: .13 !important;
+}
+[data-cleanx-theme="dark"] .cleanx-login-bg span { opacity: .11 !important; }
+
+/* CleanX v0.2.8: remove every patterned wallpaper layer from auth pages. */
+.cleanx-login-screen::before,
+.cleanx-login-screen::after,
+body::before,
+body::after {
+	display: none !important;
+	content: none !important;
+	background: none !important;
+}
+html, body {
+	background:
+		radial-gradient(circle at 12% 4%, rgba(14,165,233,.22), transparent 30rem),
+		radial-gradient(circle at 88% 12%, rgba(124,58,237,.18), transparent 30rem),
+		radial-gradient(circle at 46% 106%, rgba(20,184,166,.12), transparent 34rem),
+		linear-gradient(140deg, rgba(var(--cleanx-bg-rgb),1), rgba(var(--cleanx-bg-rgb),.95), rgba(var(--cleanx-bg-rgb),1)) !important;
+	background-attachment: fixed !important;
+}

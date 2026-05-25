@@ -37,16 +37,16 @@ jobs:
         include:
           # Redmi AX6S / Xiaomi AX3200 family target: mediatek/mt7622
           # OpenWrt 24.10.x still uses opkg/IPK.
-          - label: OpenWrt 24.10.2 IPK
-            sdk_base_url: https://downloads.openwrt.org/releases/24.10.2/targets/mediatek/mt7622/
+          - label: OpenWrt 24.10.6 IPK
+            sdk_base_url: https://downloads.openwrt.org/releases/24.10.6/targets/mediatek/mt7622/
             format: ipk
-            artifact_suffix: openwrt-24.10.2-mt7622-ipk
+            artifact_suffix: openwrt-24.10.6-mt7622-ipk
 
           # OpenWrt 25.12+ uses apk.
-          - label: OpenWrt 25.12.0 APK
-            sdk_base_url: https://downloads.openwrt.org/releases/25.12.0/targets/mediatek/mt7622/
+          - label: OpenWrt 25.12.4 APK
+            sdk_base_url: https://downloads.openwrt.org/releases/25.12.4/targets/mediatek/mt7622/
             format: apk
-            artifact_suffix: openwrt-25.12.0-mt7622-apk
+            artifact_suffix: openwrt-25.12.4-mt7622-apk
 
           # Current snapshot also uses apk. Snapshot packages must match snapshot firmware closely.
           - label: OpenWrt Snapshot APK
