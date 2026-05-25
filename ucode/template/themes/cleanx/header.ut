@@ -37,9 +37,9 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.2.9">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.3.2">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.2.9">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.3.2">
 	{% endif %}
 	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
 	{% if (node?.css): %}
@@ -83,6 +83,7 @@
 		<div class="cleanx-main-column">
 			<header class="cleanx-topbar">
 				<button class="cleanx-icon-button cleanx-mobile-menu" id="cleanx-mobile-menu" type="button" aria-label="{{ _('Menu') }}" aria-expanded="false">
+					<svg class="cleanx-mobile-menu-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
 					<span></span><span></span><span></span>
 				</button>
 				<div class="cleanx-page-title">

@@ -3,11 +3,27 @@
 		"description": "CleanX theme dashboard read access",
 		"read": {
 			"ubus": {
-				"system": [ "board", "info" ],
-				"network.interface": [ "dump", "status" ],
-				"network.device": [ "status" ]
+				"system": [
+					"board",
+					"info"
+				],
+				"network.interface": [
+					"dump",
+					"status"
+				],
+				"network.device": [
+					"status"
+				]
 			},
-			"uci": [ "network", "cleanx" ]
+			"uci": [
+				"network",
+				"cleanx"
+			],
+			"file": {
+				"/proc/stat": [
+					"read"
+				]
+			}
 		}
 	}
 }

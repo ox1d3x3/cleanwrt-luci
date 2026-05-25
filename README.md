@@ -1,26 +1,26 @@
 # CleanX LuCI Theme
 
-**CleanX** is a clean, modern LuCI theme for OpenWrt with a glass-style interface, smooth interactions, dark/light mode and live dashboard cards.
+**CleanX** is a clean, modern LuCI theme for OpenWrt. It focuses on readable pages, responsive layout, dark/light mode, polished LuCI controls and a useful overview dashboard.
 
-The theme uses the current LuCI `ucode/template/themes/` structure and is designed for OpenWrt 23.05, 24.10 and newer builds.
+CleanX uses the current LuCI `ucode/template/themes/` structure and is designed for OpenWrt 23.05, 24.10, 25.12 and snapshot builds.
 
 ## Highlights
 
-- Clean glass-style interface
+- Clean gradient background with no grid/box wallpaper
 - Responsive sidebar with SVG icons
-- Smooth loader, page reveal, hover and ripple interactions
-- Light/dark mode with local browser memory
-- Mobile-friendly LuCI layout
+- Compact top bar with modern dark/light switch
+- Mobile-friendly menu button and drawer
 - Custom login page
-- Live dashboard on the LuCI overview page
-- Live WAN download and upload speed
-- Total RX/TX traffic with automatic B/KB/MB/GB/TB/PB formatting
-- Uptime and RAM usage card
-- Better styling for LuCI forms, CBI sections, tables and action buttons
-- Status/overview memory progress bar support
-- OpenWrt SDK GitHub Actions workflow
-- Builds `.ipk` for OpenWrt 24.10.x package systems
-- Builds `.apk` for OpenWrt 25.12+ and snapshot package systems
+- Live overview dashboard
+- WAN download and upload speed
+- CPU and RAM usage cards
+- System uptime summary
+- RX/TX traffic totals with B/KB/MB/GB/TB/PB formatting
+- Styled LuCI forms, CBI sections, tables, tabs and action buttons
+- Improved Overview Network and Wireless status output
+- Improved Package Manager install/details modal
+- Improved Backup / Flash, Processes, Startup and System pages
+- GitHub Actions workflow for `.ipk` and `.apk` builds
 
 ## Compatibility
 
@@ -30,25 +30,23 @@ CleanX uses:
 ucode/template/themes/cleanx/
 ```
 
-This is the modern LuCI theme template path used by current OpenWrt builds.
+The package is architecture-independent and is built through the OpenWrt SDK.
 
-## Screenshots and preview
+## Preview and QA mocks
 
-Open this file locally after extracting the repository:
+Open the preview gallery after extracting the repository:
 
 ```text
 preview/index.html
 ```
 
-The preview includes login, dashboard, status, network, wireless, firewall, system, software, services, theme settings concept and mobile layout pages.
-
-For compatibility testing, also open:
+Open the v0.3.2 QA mocks here:
 
 ```text
-preview/compat/index.html
+preview/qa-v031/index.html
 ```
 
-Those pages use fake OpenWrt/LuCI data and realistic LuCI classes to test Port Status, memory bars, package manager controls, Backup / Flash actions, CBI forms, tables, modals and mobile layouts. Real LuCI pages still depend on the packages installed on your router.
+The QA mocks include fake OpenWrt/LuCI data for the Overview dashboard, Network output, Wireless output, Package Manager install modal and compact mobile top bar.
 
 ## Repository structure
 
@@ -69,9 +67,8 @@ luci-theme-cleanx/
 │   ├── header.ut
 │   ├── footer.ut
 │   └── sysauth.ut
+├── preview/
 ├── scripts/
-│   ├── build-openwrt-package.sh
-│   └── install-theme.sh
 └── .github/workflows/build-openwrt-packages.yml
 ```
 
@@ -82,7 +79,7 @@ luci-theme-cleanx/
 3. Run **Build CleanX OpenWrt packages**.
 4. Download the generated package artifact.
 
-The workflow uses the official OpenWrt SDK and compiles the package properly instead of manually compressing files.
+The workflow uses the official OpenWrt SDK and creates packages for the matching OpenWrt package system.
 
 ## Install on OpenWrt 24.10 or older
 
@@ -143,85 +140,49 @@ or on APK-based systems:
 apk del luci-theme-cleanx
 ```
 
-## Live dashboard behaviour
+## Dashboard behaviour
 
-The live dashboard reads WAN interface counters from LuCI RPC and calculates speed by comparing RX/TX byte counters every few seconds.
+The overview dashboard reads LuCI RPC data from the router.
 
 Current behaviour:
 
-- Live download and upload speed: real-time calculation
-- RX/TX total data: since boot/interface counter reset
-- GB/TB/PB conversion: automatic
+- WAN speed is calculated from RX/TX byte counter changes.
+- Traffic totals are interface counters since boot/interface reset.
+- RAM usage comes from `system.info`.
+- CPU usage uses `/proc/stat` when available and falls back to load-based estimation if file RPC is unavailable.
+- System uptime updates on the overview dashboard.
 
-For persistent monthly/yearly totals, add one of these in a future phase:
-
-- `vnstat` for long-term interface traffic history
-- `nlbwmon` for per-client/per-MAC traffic accounting
-
-## Roadmap
-
-Planned next features:
-
-- LuCI theme settings page
-- WAN interface selector
-- Accent colour selector
-- Animation mode selector
-- Persistent traffic totals using `vnstat` or `nlbwmon`
-- Wi-Fi and connected-client cards
-- CPU temperature/load cards
-- Realtime mini charts
-- Cleaner package release automation
+For persistent monthly or yearly traffic totals, add `vnstat` or `nlbwmon` in a future release.
 
 ## Changelog
 
-### v0.3.0
+### v0.3.2
 
-- Added `preview/compat/` mock OpenWrt/LuCI pages with fake data for visual QA before installing.
-- Tested against realistic Status Overview, Port Status, memory bars, Software / Package Manager, Backup / Flash, CBI forms, Firewall tables and Realtime Graphs markup.
-- Removed the visible grid/net wallpaper layer from the template and preview mocks.
-- Replaced the background with a smooth gradient mesh only.
-- Strengthened Port Status card fixes for LuCI 25.x inline widths.
-- Improved nested CBI ContainerValue layout used by Backup / Flash Firmware.
-- Improved Package Manager button/modal compatibility and disabled decorative effects on risky LuCI controls.
-- Improved full-width textarea, label-less CBI values and mobile overflow handling.
+- Added CPU and RAM cards to the overview dashboard.
+- Added small dashboard summary line for system uptime, total traffic and RAM total.
+- Restyled Overview Hide/Show controls as modern pills.
+- Fixed Overview Network output so labels and values do not run together.
+- Fixed Overview Wireless output so radio and SSID details are readable.
+- Improved Package Manager install/details modal dependency layout.
+- Compact top bar controls and dark/light switch.
+- Added a visible SVG mobile menu icon.
+- Updated footer to link to the CleanX project repository.
+- Cleaned user-facing text so it does not include internal prompt/design wording.
+- Added v0.3.2 QA mock pages.
 
-### v0.3.0
+## Author
 
-- Removed internal design-reference wording from user-facing files.
-- Cleaned README and preview text so it focuses on user-facing features.
-
-### v0.3.0
-
-- Fixed LuCI Status / Overview memory progress bars not rendering correctly.
-- Preserved native LuCI realtime graph/table markup instead of wrapping it as package tables.
-- Improved `.cbi-progressbar` and `.progress` styling for memory, load and status widgets.
-- Added better canvas/SVG compatibility for realtime graph pages.
-
-### v0.3.0
-
-- Improved global CBI button, form, table, Package Manager and Backup / Flash styling.
+[Author: @Ox1d3x3 x CleanX Theme](https://github.com/ox1d3x3/cleanwrt-luci)
 
 ## Licence
 
 Apache-2.0
 
-## v0.3.0 real-world compatibility fixes
 
-This release includes fixes based on exported OpenWrt 25.12 LuCI pages and fake-data compatibility mocks.
+## Release workflow
 
-Fixed areas:
+CleanX automatically creates a GitHub **pre-release** after a successful OpenWrt SDK build from `main`, `master`, or a manual workflow run.
 
-- Overview port/status cards
-- Network Interfaces icon/tooltip layout
-- System CBI tabs and form layout
-- Startup dense action buttons
-- Processes dense action buttons
-- Smooth gradient background without visible grid/box wallpaper
-- Safer LuCI button handling by disabling decorative click effects inside LuCI content controls
+Each pre-release includes the built `.ipk` and `.apk` packages, build logs, build summaries, release notes and SHA256 checksums. Stable releases are intentionally manual so router-tested builds can be promoted after validation.
 
-Static QA pages are included under:
-
-```text
-preview/real-world-qa/
-preview/compat/
-```
+See [`RELEASE_PROCESS.md`](RELEASE_PROCESS.md) for the full process.

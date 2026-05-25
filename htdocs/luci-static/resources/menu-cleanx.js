@@ -428,25 +428,49 @@ return baseclass.extend({
 			document.querySelectorAll('#modal_overlay .modal').forEach((modal) => {
 				modal.classList.add('cleanx-modal-ready');
 
-				/* LuCI package manager dependency dialogs contain nested UL/LI trees with
-				 * status buttons. Give them predictable layout without replacing native
-				 * LuCI nodes or handlers. */
-				modal.querySelectorAll('ul').forEach((ul) => {
-					ul.classList.add('cleanx-modal-list');
-					if (ul.textContent && /dependencies|installed|not available|required dependency/i.test(ul.textContent))
-						ul.classList.add('cleanx-dependency-tree');
-				});
-
-				modal.querySelectorAll('li').forEach((li) => {
-					if (li.querySelector('button, .cbi-button, input[type="button"], input[type="submit"]'))
-						li.classList.add('cleanx-dependency-row');
-				});
-
+				/* LuCI package manager dependency dialogs contain nested UL/LI trees
+				 * with state buttons. Keep native nodes and handlers intact, but wrap
+				 * plain text so CSS can align package names and state pills cleanly. */
 				modal.querySelectorAll('button, .cbi-button, input[type="button"], input[type="submit"]').forEach((btn) => {
 					btn.classList.add('cleanx-modal-button');
 					const label = String(btn.textContent || btn.value || '').trim().toLowerCase();
 					if (/installed|not available|missing|available/.test(label))
 						btn.classList.add('cleanx-package-state');
+				});
+
+				modal.querySelectorAll('ul').forEach((ul) => {
+					ul.classList.add('cleanx-modal-list');
+					if (ul.textContent && /dependencies|installed|not available|required dependency|package/i.test(ul.textContent))
+						ul.classList.add('cleanx-dependency-tree');
+					if (ul.querySelector('.cleanx-package-state'))
+						ul.classList.add('cleanx-dependency-tree');
+				});
+
+				modal.querySelectorAll('li').forEach((li) => {
+					if (!li.querySelector('button, .cbi-button, input[type="button"], input[type="submit"], .cleanx-package-state')) return;
+					li.classList.add('cleanx-dependency-row');
+
+					if (li.querySelector(':scope > .cleanx-dependency-label')) return;
+
+					const label = document.createElement('span');
+					label.className = 'cleanx-dependency-label';
+					let moved = false;
+
+					Array.from(li.childNodes).forEach((node) => {
+						if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+							label.appendChild(node);
+							moved = true;
+						}
+						else if (node.nodeType === Node.ELEMENT_NODE) {
+							const el = node;
+							if (el.matches('button, .cbi-button, input[type="button"], input[type="submit"], ul, ol')) return;
+							if (el.classList && el.classList.contains('cleanx-dependency-label')) return;
+							label.appendChild(el);
+							moved = true;
+						}
+					});
+
+					if (moved) li.insertBefore(label, li.firstChild);
 				});
 			});
 		};
