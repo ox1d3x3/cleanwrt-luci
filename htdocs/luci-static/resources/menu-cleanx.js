@@ -21,6 +21,7 @@ return baseclass.extend({
 		this.bindCbiTabsFallback();
 		this.startStatusLiveRefresh();
 		this.fixModalAndShellDetails();
+		this.polishDnsAndActionControls();
 	},
 
 	icon(name) {
@@ -473,6 +474,54 @@ return baseclass.extend({
 					if (moved) li.insertBefore(label, li.firstChild);
 				});
 			});
+		};
+
+		mark();
+		window.addEventListener('load', mark, { once: true });
+		setTimeout(mark, 250);
+		setTimeout(mark, 900);
+		if (window.MutationObserver) {
+			const observer = new MutationObserver(() => window.requestAnimationFrame(mark));
+			observer.observe(document.body, { childList: true, subtree: true });
+		}
+	},
+
+
+	polishDnsAndActionControls() {
+		const mark = () => {
+			const main = document.getElementById('maincontent') || document.body;
+			if (!main) return;
+
+			/* DNS/DHCP option lists can contain many CBI.MultiValue, NetworkSelect
+			 * and IPSelect entries. Mark them for compact grid styling while leaving
+			 * native LuCI dropdown events and inputs untouched. */
+			main.querySelectorAll('.cbi-value[data-widget="CBI.MultiValue"], .cbi-value[data-widget="CBI.NetworkSelect"], .cbi-value[data-widget="CBI.IPSelect"]').forEach((value) => {
+				value.classList.add('cleanx-dense-choice-value');
+				const name = String(value.dataset.name || value.id || '').toLowerCase();
+				if (/cache_rr|cache.*rr/.test(name)) value.classList.add('cleanx-cache-rr-value');
+				if (/interface|listen|notinterface|address/.test(name)) value.classList.add('cleanx-network-choice-value');
+
+				value.querySelectorAll('.cbi-dropdown').forEach((drop) => {
+					drop.classList.add('cleanx-choice-grid');
+					if (value.classList.contains('cleanx-cache-rr-value')) drop.classList.add('cleanx-cache-rr-grid');
+					if (value.classList.contains('cleanx-network-choice-value')) drop.classList.add('cleanx-network-select-grid');
+					drop.querySelectorAll(':scope > ul > li').forEach((item) => item.classList.add('cleanx-choice-option'));
+				});
+			});
+
+			/* Keep LuCI's apply bar compact. Some builds render Save & Apply with
+			 * nested dropdown text; these classes allow CSS to prevent huge wrapped
+			 * buttons without changing submit handlers. */
+			main.querySelectorAll('.cbi-page-actions, .cbi-section-actions, #applyrevert, #cbi_apply_status, #cbi_apply_footer, .uci-change-actions').forEach((bar) => {
+				bar.classList.add('cleanx-compact-actions');
+				bar.querySelectorAll('button, .cbi-button, input[type="submit"], input[type="button"], input[type="reset"]').forEach((btn) => {
+					btn.classList.add('cleanx-compact-action-button');
+					const raw = String(btn.textContent || btn.value || '').replace(/\s+/g, ' ').trim();
+					if (raw.length > 28) btn.setAttribute('title', raw);
+				});
+			});
+
+			main.querySelectorAll('.cbi-progressbar, .progress').forEach((bar) => bar.classList.add('cleanx-readable-progress'));
 		};
 
 		mark();

@@ -40,7 +40,11 @@ Open the preview gallery after extracting the repository:
 preview/index.html
 ```
 
-Open the v0.3.3 QA mocks here:
+Open the v0.3.4 QA mocks here:
+
+```text
+preview/qa-v034/index.html
+```
 
 ```text
 preview/qa-v031/index.html
@@ -156,7 +160,7 @@ For persistent monthly or yearly traffic totals, add `vnstat` or `nlbwmon` in a 
 
 ## Changelog
 
-### v0.3.3
+### v0.3.4
 
 - Added CPU and RAM cards to the overview dashboard.
 - Added small dashboard summary line for system uptime, total traffic and RAM total.
@@ -168,7 +172,7 @@ For persistent monthly or yearly traffic totals, add `vnstat` or `nlbwmon` in a 
 - Added a visible SVG mobile menu icon.
 - Updated footer to link to the CleanX project repository.
 - Cleaned user-facing text so it does not include internal prompt/design wording.
-- Added v0.3.3 QA mock pages.
+- Added v0.3.4 QA mock pages.
 
 ## Author
 

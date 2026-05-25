@@ -2,7 +2,7 @@
 
 All notable user-facing CleanX changes are tracked here. GitHub Actions uses this file when generating automated pre-release notes.
 
-## [0.3.3] - 2026-05-26
+## [0.3.4] - 2026-05-26
 
 ### Fixed
 - Fixed automated pre-release package asset names so `.apk` and `.ipk` extensions appear only once.

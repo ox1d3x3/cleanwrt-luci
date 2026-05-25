@@ -1,4 +1,4 @@
-/* CleanX login page v0.3.2 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX login page v0.3.4 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg:#f5f5f7; --cleanx-bg-rgb:245,245,247; --cleanx-surface:rgba(255,255,255,.72); --cleanx-surface-strong:rgba(255,255,255,.92);
 	--cleanx-text:#111114; --cleanx-muted:#6e6e73; --cleanx-border:rgba(0,0,0,.10); --cleanx-accent:#0071e3; --cleanx-accent-rgb:0,113,227; --cleanx-danger:#ff3b30;
@@ -40,7 +40,7 @@ html, body { margin:0; min-height:100%; background:var(--cleanx-bg); color:var(-
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:520px){.cleanx-login-card{padding:26px;border-radius:28px}.cleanx-login-screen{padding:16px}}
 
-/* CleanX v0.3.2: remove patterned login wallpaper and use soft gradient only. */
+/* CleanX v0.3.4: remove patterned login wallpaper and use soft gradient only. */
 html, body {
 	background-image:
 		radial-gradient(circle at 10% 6%, rgba(14,165,233,.22), transparent 30rem),
@@ -60,7 +60,7 @@ html, body {
 }
 [data-cleanx-theme="dark"] .cleanx-login-bg span { opacity: .11 !important; }
 
-/* CleanX v0.3.2: remove every patterned wallpaper layer from auth pages. */
+/* CleanX v0.3.4: remove every patterned wallpaper layer from auth pages. */
 .cleanx-login-screen::before,
 .cleanx-login-screen::after,
 body::before,
@@ -78,7 +78,7 @@ html, body {
 	background-attachment: fixed !important;
 }
 
-/* CleanX v0.3.2 - remove patterned login wallpaper, keep smooth gradient only. */
+/* CleanX v0.3.4 - remove patterned login wallpaper, keep smooth gradient only. */
 .cleanx-login-screen::before,
 .cleanx-login-screen::after,
 body::before,

@@ -1,4 +1,4 @@
-/* CleanX Theme v0.3.2 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.3.4 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -200,7 +200,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(var(--cleanx-acce
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.2 LuCI compatibility pass
+ * CleanX v0.3.4 LuCI compatibility pass
  * Fixes CBI/form/table pages such as Package Manager and Backup / Flash.
  * -------------------------------------------------------------------------- */
 .cleanx-content {
@@ -914,7 +914,7 @@ ul.tabs .active a {
 }
 
 
-/* CleanX v0.3.2: real LuCI status/graph compatibility
+/* CleanX v0.3.4: real LuCI status/graph compatibility
    Fixes Overview memory bars, realtime graphs and status widgets that use LuCI's
    div.table + .cbi-progressbar markup instead of normal CBI forms. */
 .cleanx-content canvas,
@@ -1063,7 +1063,7 @@ body[data-page*="load"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.2 real LuCI page compatibility patch
+ * CleanX v0.3.4 real LuCI page compatibility patch
  * - Replaces grid background with soft gradient mesh
  * - Fixes Status -> Overview port cards and hidden tooltips
  * - Restores LuCI modal overlay behaviour used by Package Manager upload/update
@@ -1402,7 +1402,7 @@ input.cleanx-click-busy::after {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.2 deep LuCI compatibility pass
+ * CleanX v0.3.4 deep LuCI compatibility pass
  * - Removes patterned/grid wallpaper completely
  * - Makes status port cards readable on OpenWrt 25.x
  * - Keeps LuCI CBI forms, tables, tabs, modals and tooltips functional
@@ -1907,7 +1907,7 @@ ul.cbi-tabmenu > li.cbi-tab > a {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.2 audit patch
+ * CleanX v0.3.4 audit patch
  * Tested against saved OpenWrt 25.x Backup / Flash markup and upstream LuCI
  * status widgets. The goal is compatibility first: no narrow text columns,
  * no tooltip payloads dumped into cards, no theme JS interference with LuCI
@@ -2307,7 +2307,7 @@ body[data-page*="overview"] .progress {
 	}
 }
 
-/* CleanX v0.3.2b: label-less LuCI values, usually TextValue or custom HTML,
+/* CleanX v0.3.4b: label-less LuCI values, usually TextValue or custom HTML,
    should use full width instead of reserving an empty label column. */
 .cbi-value:not(:has(> .cbi-value-title)):not([data-widget="CBI.ButtonValue"]):not([data-widget$="ButtonValue"]) {
 	display: block !important;
@@ -2326,7 +2326,7 @@ body[data-page*="overview"] .progress {
 	max-width: 100% !important;
 }
 
-/* CleanX v0.3.2c: prevent decorative gradient layers and demo tables from
+/* CleanX v0.3.4c: prevent decorative gradient layers and demo tables from
    creating horizontal page scroll. */
 html, body {
 	overflow-x: hidden !important;
@@ -2374,7 +2374,7 @@ html, body {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.2 - real-page QA hardening
+ * CleanX v0.3.4 - real-page QA hardening
  * Based on exported LuCI pages for Overview, Interfaces, System, Startup and
  * Processes. This block is intentionally last so it can safely override older
  * compatibility rules without touching LuCI logic.
@@ -2889,7 +2889,7 @@ body.modal-overlay-active #modal_overlay {
 	}
 }
 
-/* CleanX v0.3.2d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
+/* CleanX v0.3.4d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
 body[data-page*="processes"] .cleanx-content table.table,
 body[data-page*="startup"] .cleanx-content table.table,
 body[data-page*="network"] .cleanx-content table.table,
@@ -2931,7 +2931,7 @@ body[data-page*="overview"] .cleanx-content table.table {
 	}
 }
 
-/* CleanX v0.3.2e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
+/* CleanX v0.3.4e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
 body[data-page*="processes"] .cleanx-content table.table,
 body[data-page*="startup"] .cleanx-content table.table,
 body[data-page*="network"] .cleanx-content table.table,
@@ -2953,7 +2953,7 @@ body[data-page*="opkg"] .cleanx-content table.table {
 
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.2 - user QA polish and OpenWrt 25.x modal hardening
+ * CleanX v0.3.4 - user QA polish and OpenWrt 25.x modal hardening
  * ------------------------------------------------------------------------- */
 :root {
 	--cleanx-bg: #f7f8fb;
@@ -3279,7 +3279,7 @@ body[data-page*="dhcp"] .cleanx-content pre {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.2 - overview live cards and real LuCI section polish
+ * CleanX v0.3.4 - overview live cards and real LuCI section polish
  * - CPU/RAM dashboard cards with uptime line
  * - Cleaner Overview Network/Wireless output cards
  * - Modern Hide/Show controls
@@ -3597,7 +3597,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-stat-card strong {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.2 final polish pass
+ * CleanX v0.3.4 final polish pass
  * Real-world LuCI overview/package-manager fixes from saved pages and mocks.
  * ------------------------------------------------------------------------- */
 
@@ -3962,4 +3962,422 @@ body[data-page*="status"] table.table:has(.cbi-progressbar) td {
 	color: var(--cleanx-text) !important;
 	border-color: rgba(var(--cleanx-accent-rgb), .28) !important;
 	background: rgba(var(--cleanx-accent-rgb), .08) !important;
+}
+
+/* -------------------------------------------------------------------------
+ * CleanX v0.3.4 - DNS multi-select, Overview progress and action-bar polish
+ * ------------------------------------------------------------------------- */
+
+/* Stronger light-mode readability without changing the dark theme that already works. */
+html:not([data-cleanx-theme="dark"]) {
+	--cleanx-text: #060914;
+	--cleanx-muted: #3f4654;
+	--cleanx-muted-2: #697386;
+	--cleanx-border: rgba(15,23,42,.13);
+	--cleanx-border-strong: rgba(15,23,42,.20);
+	--cleanx-surface: rgba(255,255,255,.90);
+	--cleanx-surface-soft: rgba(248,250,252,.72);
+	--cleanx-surface-strong: rgba(255,255,255,.98);
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content,
+html:not([data-cleanx-theme="dark"]) .cleanx-content p,
+html:not([data-cleanx-theme="dark"]) .cleanx-content li,
+html:not([data-cleanx-theme="dark"]) .cleanx-content td,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .td,
+html:not([data-cleanx-theme="dark"]) .cleanx-content label {
+	color: #111827 !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value-description,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .description,
+html:not([data-cleanx-theme="dark"]) .cbi-map-descr,
+html:not([data-cleanx-theme="dark"]) .cbi-section-descr {
+	color: #4b5563 !important;
+}
+
+/* Overview dashboard: make CPU/RAM cards feel deliberate and keep uptime as a compact bottom line. */
+.cleanx-dashboard .cleanx-hero p:not(.cleanx-eyebrow) {
+	max-width: 720px !important;
+	color: var(--cleanx-muted) !important;
+}
+.cleanx-stat-grid-live .cleanx-stat-card {
+	isolation: isolate;
+}
+.cleanx-stat-grid-live .cleanx-stat-card strong {
+	font-size: clamp(28px, 3.1vw, 42px) !important;
+	line-height: .98 !important;
+}
+.cleanx-stat-grid-live .cleanx-stat-card small {
+	color: var(--cleanx-muted) !important;
+	font-weight: 760 !important;
+}
+.cleanx-stat-grid-live .cleanx-meter {
+	height: 7px !important;
+	background: rgba(var(--cleanx-accent-rgb), .12) !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-stat-grid-live .cleanx-meter {
+	background: #dbe8f7 !important;
+}
+.cleanx-dashboard-meta {
+	font-size: 12px !important;
+	padding: 9px 12px !important;
+	border-radius: 16px !important;
+}
+.cleanx-dashboard-meta strong {
+	font-variant-numeric: tabular-nums !important;
+}
+
+/* Native Overview memory/progress bars: readable text in light mode and dark mode. */
+.cleanx-content .cbi-progressbar,
+.cleanx-content .progress {
+	position: relative !important;
+	min-width: 120px !important;
+	height: 20px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 999px !important;
+	background: rgba(var(--cleanx-bg-rgb), .58) !important;
+	box-shadow: inset 0 1px 2px rgba(0,0,0,.07) !important;
+	overflow: hidden !important;
+	color: var(--cleanx-text) !important;
+	font-size: 11px !important;
+	font-weight: 850 !important;
+	line-height: 20px !important;
+	text-align: center !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-progressbar,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .progress {
+	background: #eef4fb !important;
+	color: #07111f !important;
+}
+.cleanx-content .cbi-progressbar > div,
+.cleanx-content .progress > div,
+.cleanx-content .progress-bar {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	height: 100% !important;
+	min-width: 0 !important;
+	border-radius: inherit !important;
+	background: linear-gradient(90deg, #38bdf8, #2563eb 58%, #7c3aed) !important;
+	color: #fff !important;
+	text-shadow: 0 1px 2px rgba(0,0,0,.42) !important;
+	white-space: nowrap !important;
+}
+.cleanx-content .cbi-progressbar > span,
+.cleanx-content .progress > span {
+	position: absolute !important;
+	inset: 0 !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 0 8px !important;
+	color: inherit !important;
+	text-shadow: 0 1px 0 rgba(255,255,255,.55) !important;
+	pointer-events: none !important;
+}
+[data-cleanx-theme="dark"] .cleanx-content .cbi-progressbar > span,
+[data-cleanx-theme="dark"] .cleanx-content .progress > span {
+	text-shadow: 0 1px 2px rgba(0,0,0,.55) !important;
+}
+
+/* LuCI Save / Save & Apply / Reset action strip: compact, professional and no wrapped giant buttons. */
+.cbi-page-actions,
+.cbi-section-actions,
+#applyrevert,
+#cbi_apply_status,
+#cbi_apply_footer,
+.uci-change-legend,
+.uci-change-actions {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	flex-wrap: wrap !important;
+	gap: 8px !important;
+	min-height: 0 !important;
+}
+.cbi-page-actions .cbi-button,
+.cbi-page-actions button,
+.cbi-page-actions input[type="submit"],
+.cbi-section-actions .cbi-button,
+.cbi-section-actions button,
+#applyrevert .cbi-button,
+#applyrevert button,
+#cbi_apply_status .cbi-button,
+#cbi_apply_status button,
+.uci-change-actions .cbi-button,
+.uci-change-actions button {
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: 210px !important;
+	min-height: 36px !important;
+	height: 36px !important;
+	padding: 0 14px !important;
+	border-radius: 13px !important;
+	white-space: nowrap !important;
+	line-height: 1 !important;
+	font-size: 13px !important;
+	font-weight: 850 !important;
+	flex: 0 0 auto !important;
+}
+.cbi-page-actions .cbi-button-apply,
+.cbi-page-actions .cbi-button-save,
+#applyrevert .cbi-button-apply,
+#applyrevert .cbi-button-save {
+	min-width: 96px !important;
+}
+.cbi-page-actions .dropdown,
+.cbi-page-actions .cbi-dropdown,
+#applyrevert .dropdown,
+#applyrevert .cbi-dropdown {
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: 260px !important;
+}
+.cbi-page-actions .cbi-button * ,
+#applyrevert .cbi-button * ,
+.cbi-page-actions button * ,
+#applyrevert button * {
+	white-space: nowrap !important;
+}
+
+/* DNS / DHCP multi-selects: LuCI exposes long multiple-choice dropdowns as UL/LI.
+ * Render them as compact selectable grids instead of a single huge vertical list. */
+.cbi-value[data-widget="CBI.MultiValue"] > .cbi-value-field,
+.cbi-value[data-widget="CBI.NetworkSelect"] > .cbi-value-field,
+.cbi-value[data-widget="CBI.IPSelect"] > .cbi-value-field,
+.cbi-value[data-name="cache_rr"] > .cbi-value-field,
+.cbi-value[data-name="interface"] > .cbi-value-field,
+.cbi-value[data-name="listen_address"] > .cbi-value-field,
+.cbi-value[data-name="notinterface"] > .cbi-value-field {
+	display: block !important;
+}
+.cleanx-content .cbi-dropdown[multiple],
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown {
+	width: 100% !important;
+	max-width: 100% !important;
+	min-height: 42px !important;
+	padding: 10px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 18px !important;
+	background: rgba(var(--cleanx-bg-rgb), .34) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
+	overflow: hidden !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-dropdown[multiple],
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown {
+	background: #f8fafc !important;
+}
+.cleanx-content .cbi-dropdown[multiple] > ul,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown > ul,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul {
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+	align-items: stretch !important;
+	gap: 8px !important;
+	width: 100% !important;
+	max-height: 310px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none !important;
+	overflow: auto !important;
+	overscroll-behavior: contain !important;
+	scrollbar-width: thin !important;
+}
+.cleanx-content .cbi-value[data-name="cache_rr"] .cbi-dropdown > ul {
+	grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)) !important;
+	max-height: 240px !important;
+}
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul,
+.cleanx-content .cbi-value[data-name="interface"] .cbi-dropdown > ul,
+.cleanx-content .cbi-value[data-name="listen_address"] .cbi-dropdown > ul,
+.cleanx-content .cbi-value[data-name="notinterface"] .cbi-dropdown > ul {
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)) !important;
+	max-height: 360px !important;
+}
+.cleanx-content .cbi-dropdown[multiple] > ul > li,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown > ul > li,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul > li,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul > li {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	min-width: 0 !important;
+	min-height: 34px !important;
+	padding: 7px 9px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 13px !important;
+	background: var(--cleanx-surface-strong) !important;
+	box-shadow: 0 5px 14px rgba(0,0,0,.04) !important;
+	color: var(--cleanx-text) !important;
+	line-height: 1.32 !important;
+	cursor: pointer !important;
+	transition: transform .14s var(--cleanx-spring), border-color .14s, background .14s !important;
+}
+.cleanx-content .cbi-dropdown[multiple] > ul > li:hover,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown > ul > li:hover,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul > li:hover,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul > li:hover {
+	transform: translateY(-1px) !important;
+	border-color: rgba(var(--cleanx-accent-rgb), .34) !important;
+	background: rgba(var(--cleanx-accent-rgb), .08) !important;
+}
+.cleanx-content .cbi-dropdown[multiple] > ul > li > form,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown > ul > li > form,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul > li > form,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul > li > form {
+	flex: 0 0 auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.cleanx-content .cbi-dropdown[multiple] > ul > li label,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown > ul > li label,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul > li label,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul > li label {
+	min-width: 0 !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	font-size: 12.5px !important;
+	font-weight: 760 !important;
+	line-height: 1.32 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: anywhere !important;
+}
+.cleanx-content .cbi-dropdown[multiple] .ifacebadge,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .ifacebadge,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .ifacebadge {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+	white-space: normal !important;
+}
+.cleanx-content .cbi-dropdown[multiple] .ifacebadge img,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .ifacebadge img,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .ifacebadge img {
+	width: 18px !important;
+	height: 18px !important;
+	margin: 0 !important;
+	flex: 0 0 auto !important;
+}
+.cleanx-content .cbi-dropdown[multiple] > ul > li[data-value="-- custom --"],
+.cleanx-content .cbi-dropdown[multiple] > ul > li[data-value=""],
+.cleanx-content .cbi-dropdown[multiple] > ul > li:last-child {
+	background: rgba(var(--cleanx-accent-rgb), .07) !important;
+	border-style: dashed !important;
+}
+.cleanx-content .cbi-dropdown[multiple]::after,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown::after,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown::after,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown::after {
+	content: "Scroll inside this list if more options are available" !important;
+	display: block !important;
+	margin-top: 8px !important;
+	color: var(--cleanx-muted) !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+}
+
+@media (max-width: 760px) {
+	.cleanx-content .cbi-dropdown[multiple] > ul,
+	.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown > ul,
+	.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown > ul,
+	.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown > ul {
+		grid-template-columns: 1fr !important;
+		max-height: 280px !important;
+	}
+	.cbi-page-actions,
+	.cbi-section-actions,
+	#applyrevert,
+	.uci-change-actions {
+		justify-content: stretch !important;
+	}
+	.cbi-page-actions .cbi-button,
+	.cbi-page-actions button,
+	#applyrevert .cbi-button,
+	#applyrevert button {
+		flex: 1 1 auto !important;
+		max-width: none !important;
+	}
+}
+
+/* v0.3.4 action-bar dropdowns: LuCI renders Save & Apply as a cbi-dropdown
+ * containing selected and alternate choices. In the compact action bar, show only
+ * the selected label plus the arrow until LuCI opens the dropdown. */
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]),
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]),
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]),
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 8px !important;
+	height: 36px !important;
+	min-height: 36px !important;
+	max-width: 220px !important;
+	overflow: hidden !important;
+}
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul,
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul,
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > ul,
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul {
+	display: inline-flex !important;
+	align-items: center !important;
+	min-width: 0 !important;
+	max-width: 155px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none !important;
+	overflow: hidden !important;
+}
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li,
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li,
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > ul > li,
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li {
+	display: none !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: nowrap !important;
+}
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[selected],
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[display="0"],
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[selected],
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[display="0"],
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[selected],
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[display="0"],
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[selected],
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > ul > li[display="0"] {
+	display: block !important;
+}
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > .more,
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > .more,
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > .more,
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > .more,
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > div,
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > div,
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > div,
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > div {
+	display: none !important;
+}
+.cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]) > .open,
+.cbi-section-actions > .cbi-dropdown.cbi-button:not([multiple]) > .open,
+#applyrevert > .cbi-dropdown.cbi-button:not([multiple]) > .open,
+.uci-change-actions > .cbi-dropdown.cbi-button:not([multiple]) > .open {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	font-size: 11px !important;
+	line-height: 1 !important;
+	opacity: .88 !important;
 }

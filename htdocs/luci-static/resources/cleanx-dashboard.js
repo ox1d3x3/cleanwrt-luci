@@ -47,7 +47,7 @@ return baseclass.extend({
 				E('div', {}, [
 					E('p', { class: 'cleanx-eyebrow' }, [ 'CleanX' ]),
 					E('h1', {}, [ 'Network Overview' ]),
-					E('p', {}, [ 'Router activity and system health at a glance.' ])
+					E('p', {}, [ 'Current router status.' ])
 				]),
 				E('div', { class: 'cleanx-pill' }, [ E('span', { class: 'cleanx-live-dot' }), 'WAN: ', E('span', { id: 'cleanx-wan-device' }, [ 'detecting' ]) ])
 			]),
