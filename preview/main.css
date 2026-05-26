@@ -1,4 +1,4 @@
-/* CleanX Theme v0.3.7 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.3.9 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -200,7 +200,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(var(--cleanx-acce
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.7 LuCI compatibility pass
+ * CleanX v0.3.9 LuCI compatibility pass
  * Fixes CBI/form/table pages such as Package Manager and Backup / Flash.
  * -------------------------------------------------------------------------- */
 .cleanx-content {
@@ -914,7 +914,7 @@ ul.tabs .active a {
 }
 
 
-/* CleanX v0.3.7: real LuCI status/graph compatibility
+/* CleanX v0.3.9: real LuCI status/graph compatibility
    Fixes Overview memory bars, realtime graphs and status widgets that use LuCI's
    div.table + .cbi-progressbar markup instead of normal CBI forms. */
 .cleanx-content canvas,
@@ -1063,7 +1063,7 @@ body[data-page*="load"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.7 real LuCI page compatibility patch
+ * CleanX v0.3.9 real LuCI page compatibility patch
  * - Replaces grid background with soft gradient mesh
  * - Fixes Status -> Overview port cards and hidden tooltips
  * - Restores LuCI modal overlay behaviour used by Package Manager upload/update
@@ -1402,7 +1402,7 @@ input.cleanx-click-busy::after {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.7 deep LuCI compatibility pass
+ * CleanX v0.3.9 deep LuCI compatibility pass
  * - Removes patterned/grid wallpaper completely
  * - Makes status port cards readable on OpenWrt 25.x
  * - Keeps LuCI CBI forms, tables, tabs, modals and tooltips functional
@@ -1907,7 +1907,7 @@ ul.cbi-tabmenu > li.cbi-tab > a {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.7 audit patch
+ * CleanX v0.3.9 audit patch
  * Tested against saved OpenWrt 25.x Backup / Flash markup and upstream LuCI
  * status widgets. The goal is compatibility first: no narrow text columns,
  * no tooltip payloads dumped into cards, no theme JS interference with LuCI
@@ -2307,7 +2307,7 @@ body[data-page*="overview"] .progress {
 	}
 }
 
-/* CleanX v0.3.7b: label-less LuCI values, usually TextValue or custom HTML,
+/* CleanX v0.3.9b: label-less LuCI values, usually TextValue or custom HTML,
    should use full width instead of reserving an empty label column. */
 .cbi-value:not(:has(> .cbi-value-title)):not([data-widget="CBI.ButtonValue"]):not([data-widget$="ButtonValue"]) {
 	display: block !important;
@@ -2326,7 +2326,7 @@ body[data-page*="overview"] .progress {
 	max-width: 100% !important;
 }
 
-/* CleanX v0.3.7c: prevent decorative gradient layers and demo tables from
+/* CleanX v0.3.9c: prevent decorative gradient layers and demo tables from
    creating horizontal page scroll. */
 html, body {
 	overflow-x: hidden !important;
@@ -2374,7 +2374,7 @@ html, body {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.7 - real-page QA hardening
+ * CleanX v0.3.9 - real-page QA hardening
  * Based on exported LuCI pages for Overview, Interfaces, System, Startup and
  * Processes. This block is intentionally last so it can safely override older
  * compatibility rules without touching LuCI logic.
@@ -2889,7 +2889,7 @@ body.modal-overlay-active #modal_overlay {
 	}
 }
 
-/* CleanX v0.3.7d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
+/* CleanX v0.3.9d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
 body[data-page*="processes"] .cleanx-content table.table,
 body[data-page*="startup"] .cleanx-content table.table,
 body[data-page*="network"] .cleanx-content table.table,
@@ -2931,7 +2931,7 @@ body[data-page*="overview"] .cleanx-content table.table {
 	}
 }
 
-/* CleanX v0.3.7e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
+/* CleanX v0.3.9e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
 body[data-page*="processes"] .cleanx-content table.table,
 body[data-page*="startup"] .cleanx-content table.table,
 body[data-page*="network"] .cleanx-content table.table,
@@ -2953,7 +2953,7 @@ body[data-page*="opkg"] .cleanx-content table.table {
 
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.7 - user QA polish and OpenWrt 25.x modal hardening
+ * CleanX v0.3.9 - user QA polish and OpenWrt 25.x modal hardening
  * ------------------------------------------------------------------------- */
 :root {
 	--cleanx-bg: #f7f8fb;
@@ -3279,7 +3279,7 @@ body[data-page*="dhcp"] .cleanx-content pre {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.7 - overview live cards and real LuCI section polish
+ * CleanX v0.3.9 - overview live cards and real LuCI section polish
  * - CPU/RAM dashboard cards with uptime line
  * - Cleaner Overview Network/Wireless output cards
  * - Modern Hide/Show controls
@@ -3597,7 +3597,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-stat-card strong {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.7 final polish pass
+ * CleanX v0.3.9 final polish pass
  * Real-world LuCI overview/package-manager fixes from saved pages and mocks.
  * ------------------------------------------------------------------------- */
 
@@ -3965,7 +3965,7 @@ body[data-page*="status"] table.table:has(.cbi-progressbar) td {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.7 - DNS multi-select, Overview progress and action-bar polish
+ * CleanX v0.3.9 - DNS multi-select, Overview progress and action-bar polish
  * ------------------------------------------------------------------------- */
 
 /* Stronger light-mode readability without changing the dark theme that already works. */
@@ -4310,7 +4310,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI
 	}
 }
 
-/* v0.3.7 action-bar dropdowns: LuCI renders Save & Apply as a cbi-dropdown
+/* v0.3.9 action-bar dropdowns: LuCI renders Save & Apply as a cbi-dropdown
  * containing selected and alternate choices. In the compact action bar, show only
  * the selected label plus the arrow until LuCI opens the dropdown. */
 .cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]),
@@ -4383,7 +4383,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.7 - native LuCI control safety pass
+ * CleanX v0.3.9 - native LuCI control safety pass
  * -------------------------------------------------------------------------
  * This block intentionally overrides older compatibility rules at the end of
  * the file. It keeps LuCI's JavaScript-owned dropdowns, action bars, CBI tables
@@ -4843,7 +4843,7 @@ body[data-page*="processes"] .cleanx-content .td:nth-last-child(-n+3) {
 
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.7 - live animated icon system
+ * CleanX v0.3.9 - live animated icon system
  * --------------------------------------------------------------------------
  * Subtle GPU-friendly animations for navigation, dashboard and shell icons.
  * Kept CSS-only so LuCI controls and RPC handlers stay untouched.

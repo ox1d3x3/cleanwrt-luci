@@ -2,7 +2,7 @@
 
 
 
-## v0.3.8 - Workflow recovery
+## v0.3.9 - Workflow recovery
 
 ### Fixed
 - Replaced the stale `Build UniWRT packages` workflow with a CleanX-specific pre-release workflow.
@@ -16,7 +16,7 @@
 
 All notable user-facing CleanX changes are tracked here. GitHub Actions uses this file when generating automated pre-release notes.
 
-## [0.3.7] - 2026-05-26
+## [0.3.9] - 2026-05-26
 
 ### Fixed
 - Fixed automated pre-release package asset names so `.apk` and `.ipk` extensions appear only once.
@@ -50,3 +50,17 @@ All notable user-facing CleanX changes are tracked here. GitHub Actions uses thi
 - Overview Network and Wireless sections now space labels and values cleanly.
 - Show/Hide buttons are styled as modern compact controls.
 - Footer now links to the CleanX project repository.
+
+## v0.3.9 - Stable-candidate LuCI control recovery
+
+### Fixed
+- Recovered native LuCI tab behaviour for System and Startup pages.
+- Hid the broken Local Startup tab on the Startup page to avoid a dead UI path.
+- Added final conservative overrides for DNS/DHCP multi-select fields so long options render inline, scrollable and clickable without floating over later fields.
+- Improved LED edit modal checkbox alignment and click targets.
+- Compacted Startup and Processes action buttons and reduced excessive row height.
+- Added full-width Realtime Graphs, Load and Channel Analysis graph container rules to prevent clipped half-graphs.
+- Kept Diagnostics IPv4/IPv6 actions split into separate visible buttons while leaving LuCI handlers intact.
+
+### QA
+- Added focused mock pages under `preview/qa-v039/` for DNS/DHCP, LED modal, Startup, Diagnostics and graph pages.

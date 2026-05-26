@@ -23,6 +23,7 @@ return baseclass.extend({
 		this.startStatusLiveRefresh();
 		this.fixModalAndShellDetails();
 		this.polishDnsAndActionControls();
+		this.stabiliseNativeLuciControls();
 	},
 
 	icon(name) {
@@ -438,10 +439,11 @@ return baseclass.extend({
 		}
 	},
 
+
 	bindCbiTabsFallback() {
-		/* LuCI owns CBI tabs. This is a delayed fallback only: it does not run in
-		 * capture phase and it does not stop native handlers. It switches panels
-		 * only after the click if the page did not already activate the tab. */
+		/* Native LuCI owns CBI tabs. CleanX only repairs tabs after a click when
+		 * the native handler did not switch the panel. This avoids blocking System,
+		 * Startup and other tabbed pages. */
 		document.addEventListener('click', (ev) => {
 			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
 			if (!a) return;
@@ -449,19 +451,25 @@ return baseclass.extend({
 			const li = a.closest('li[data-tab]');
 			const tab = li && li.getAttribute('data-tab');
 			const menu = a.closest('.cbi-tabmenu');
-			const panelRoot = menu && menu.nextElementSibling && (
-				menu.nextElementSibling.classList.contains('cbi-map-tabbed') ||
-				menu.nextElementSibling.classList.contains('cbi-section-node-tabbed') ||
-				menu.nextElementSibling.matches('[data-initialized][class*="tabbed"]')
-			) ? menu.nextElementSibling : null;
+			let panelRoot = menu ? menu.nextElementSibling : null;
 
-			if (!tab || !menu || !panelRoot) return;
-			ev.preventDefault();
+			if (!tab || !menu) return;
+			if (!panelRoot || !(
+				panelRoot.classList.contains('cbi-map-tabbed') ||
+				panelRoot.classList.contains('cbi-section-node-tabbed') ||
+				(panelRoot.matches && panelRoot.matches('[data-initialized][class*="tabbed"]'))
+			)) {
+				panelRoot = menu.parentElement && menu.parentElement.querySelector(':scope > .cbi-map-tabbed, :scope > .cbi-section-node-tabbed, :scope > [data-initialized][class*="tabbed"]');
+			}
+			if (!panelRoot) return;
 
 			window.setTimeout(() => {
-				const safeTab = (window.CSS && CSS.escape) ? CSS.escape(tab) : tab.replace(/\"/g, '\\\"');
+				const safeTab = (window.CSS && CSS.escape) ? CSS.escape(tab) : tab.replace(/"/g, '\\"');
 				const targetPanel = panelRoot.querySelector(':scope > [data-tab="' + safeTab + '"]');
-				if (targetPanel && targetPanel.dataset.tabActive === 'true') return;
+				if (!targetPanel) return;
+
+				const nativeActive = targetPanel.dataset.tabActive === 'true' || targetPanel.hidden === false || targetPanel.style.display !== 'none';
+				if (nativeActive && li.classList.contains('cbi-tab')) return;
 
 				menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
 					const active = item === li;
@@ -476,7 +484,7 @@ return baseclass.extend({
 					panel.hidden = !active;
 					panel.style.display = active ? '' : 'none';
 				});
-			}, 0);
+			}, 80);
 		}, false);
 	},
 
@@ -612,6 +620,69 @@ return baseclass.extend({
 		setTimeout(mark, 900);
 		if (window.MutationObserver) {
 			const observer = new MutationObserver(() => window.requestAnimationFrame(mark));
+			observer.observe(document.body, { childList: true, subtree: true });
+		}
+	},
+
+
+	stabiliseNativeLuciControls() {
+		/* Final safety layer: keep LuCI controls native and only add page flags or
+		 * harmless helper behaviour. This is intentionally conservative. */
+		const markPage = () => {
+			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+			document.body.classList.toggle('cleanx-page-dnsdhcp', /dhcp|dns/.test(page));
+			document.body.classList.toggle('cleanx-page-leds', /led/.test(page));
+			document.body.classList.toggle('cleanx-page-startup', /startup|init/.test(page));
+			document.body.classList.toggle('cleanx-page-graphs', /realtime|load|channel_analysis|channel/.test(page));
+		};
+
+		const hideBrokenLocalStartup = () => {
+			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+			if (!/startup/.test(page)) return;
+			document.querySelectorAll('.cbi-tabmenu > li[data-tab]').forEach((li) => {
+				const label = String(li.textContent || '').trim().toLowerCase();
+				const tab = String(li.getAttribute('data-tab') || '').toLowerCase();
+				if (!/local/.test(label + ' ' + tab)) return;
+				li.classList.add('cleanx-hidden-local-startup-tab');
+				li.style.display = 'none';
+				const menu = li.closest('.cbi-tabmenu');
+				const root = menu && (menu.nextElementSibling || menu.parentElement.querySelector(':scope > .cbi-section-node-tabbed, :scope > .cbi-map-tabbed'));
+				if (root) root.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
+					const panelTab = String(panel.getAttribute('data-tab') || '').toLowerCase();
+					if (/local/.test(panelTab)) {
+						panel.hidden = true;
+						panel.style.display = 'none';
+						panel.dataset.tabActive = 'false';
+					}
+				});
+				if (li.classList.contains('cbi-tab')) {
+					const first = menu.querySelector(':scope > li[data-tab]:not(.cleanx-hidden-local-startup-tab) > a');
+					first && first.click();
+				}
+			});
+		};
+
+		const repairCheckboxRows = () => {
+			/* Improve hit targets without rebuilding LuCI DOM. */
+			document.querySelectorAll('#modal_overlay .cbi-dropdown li, .cleanx-content .cbi-dropdown li').forEach((li) => {
+				if (li.dataset.cleanxCheckboxRow === '1') return;
+				if (!li.querySelector('input[type="checkbox"], input[type="radio"]')) return;
+				li.dataset.cleanxCheckboxRow = '1';
+				li.addEventListener('click', (ev) => {
+					if (ev.target.matches('input, label, a, button, select, textarea')) return;
+					const input = li.querySelector('input[type="checkbox"], input[type="radio"]');
+					if (input && !input.disabled) input.click();
+				}, false);
+			});
+		};
+
+		const run = () => { markPage(); hideBrokenLocalStartup(); repairCheckboxRows(); };
+		run();
+		window.addEventListener('load', run, { once: true });
+		setTimeout(run, 250);
+		setTimeout(run, 1000);
+		if (window.MutationObserver) {
+			const observer = new MutationObserver(() => window.requestAnimationFrame(run));
 			observer.observe(document.body, { childList: true, subtree: true });
 		}
 	},
