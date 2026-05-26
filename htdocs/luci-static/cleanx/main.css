@@ -1,4 +1,4 @@
-/* CleanX Theme v0.5.0 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.5.1 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -5766,7 +5766,7 @@ body[data-page*="channel"] .cleanx-content .table {
 
 
 /*
- * CleanX v0.5.0 - table/control stability pass
+ * CleanX v0.5.1 - table/control stability pass
  * This block intentionally overrides older aggressive table/dropdown styling.
  * Goal: keep LuCI native controls functional while polishing spacing, buttons
  * and overflow on real OpenWrt 25.x pages.
@@ -6265,7 +6265,7 @@ body[data-page*="channel"] .cleanx-content svg {
 
 
 /*
- * CleanX v0.5.0 - native LuCI recovery pass
+ * CleanX v0.5.1 - native LuCI recovery pass
  * Safety-first overrides for real OpenWrt pages. This block intentionally
  * reduces aggressive table/dropdown styling from older builds and keeps LuCI's
  * own JS-controlled controls clickable.
@@ -6729,7 +6729,7 @@ body[data-page*="channel_analysis"] .cleanx-content svg {
 
 
 /*
- * CleanX v0.5.0 - conservative native LuCI audit pass
+ * CleanX v0.5.1 - conservative native LuCI audit pass
  * This block is intentionally last. It corrects regressions from aggressive
  * table/dropdown styling while keeping LuCI's own JavaScript controls native.
  */
@@ -7059,7 +7059,7 @@ body[data-page*="channel"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.5.0 - data-table stability audit
+ * CleanX v0.5.1 - data-table stability audit
  *
  * Most remaining regressions were caused by LuCI technical tables being forced
  * to fit inside the viewport. That made MAC addresses, IPv6, package names and
@@ -7538,7 +7538,7 @@ body[data-page*="channel"] .cleanx-content canvas {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.5.0 - topbar title alignment polish
+ * CleanX v0.5.1 - topbar title alignment polish
  * Keeps the router name + page title visually centred between the menu and
  * right-side controls instead of drifting because of unequal side widths.
  * ------------------------------------------------------------------------- */
@@ -7605,7 +7605,7 @@ body[data-page*="channel"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.5.0 - real table/layout recovery pass
+ * CleanX v0.5.1 - real table/layout recovery pass
  * Goal: stop LuCI technical tables from collapsing into vertical text while
  * keeping native LuCI controls clickable. This is intentionally conservative:
  * use horizontal scrolling for dense data instead of squeezing columns.
@@ -7967,7 +7967,7 @@ body[data-page*="channel_analysis"] .cleanx-content canvas {
 
 
 /* ==========================================================================
- * CleanX v0.5.0 - real LuCI table + graph recovery
+ * CleanX v0.5.1 - real LuCI table + graph recovery
  * --------------------------------------------------------------------------
  * This block is deliberately conservative: keep native LuCI controls intact,
  * stop technical tables from collapsing into vertical text, and let wide data
@@ -8349,7 +8349,7 @@ body[data-page*="channel_analysis"] .cleanx-content .right {
 
 
 /* ========================================================================== */
-/* CleanX v0.5.0 - saved-page alignment recovery                              */
+/* CleanX v0.5.1 - saved-page alignment recovery                              */
 /* Focus: keep OpenWrt technical data readable. Do not squeeze LuCI tables into */
 /* narrow columns; allow controlled horizontal scrolling instead.               */
 /* ========================================================================== */
@@ -8792,4 +8792,185 @@ body[data-page="admin-status-overview"] .cleanx-content .ifacebadge {
 	line-height: 1.18 !important;
 	overflow: visible !important;
 	padding-bottom: 2px !important;
+}
+
+/* ========================================================================== */
+/* CleanX v0.5.1 - graph fill + separated information rows + startup compact  */
+/* ========================================================================== */
+
+/* Form/detail rows: give each label/field/description group a clear separator.
+ * This reduces the "description touches information" issue on DNS, DHCP,
+ * firewall, system and other LuCI CBI pages without changing native controls. */
+.cleanx-content .cbi-value {
+	border-bottom: 1px solid rgba(148, 163, 184, .16) !important;
+	padding-top: .85rem !important;
+	padding-bottom: .85rem !important;
+	margin: 0 !important;
+}
+.cleanx-content .cbi-value:last-child { border-bottom-color: transparent !important; }
+.cleanx-content .cbi-section-descr,
+.cleanx-content .cbi-value-description {
+	margin-top: .45rem !important;
+	padding-top: .38rem !important;
+	border-top: 1px dashed rgba(148, 163, 184, .16) !important;
+}
+.cleanx-content .cbi-value-field > .cbi-value-description:first-child,
+.cleanx-content .cbi-value-field > small:first-child {
+	margin-top: .55rem !important;
+	display: block !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value {
+	border-bottom-color: rgba(100, 116, 139, .18) !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-section-descr,
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value-description {
+	border-top-color: rgba(100, 116, 139, .18) !important;
+}
+
+/* Startup/service list: keep the service name and its buttons visually close.
+ * The old full-width table made a huge empty area between Initscript and buttons. */
+body[data-page*="startup"] .cleanx-content .cleanx-table-wrap {
+	display: block !important;
+	width: max-content !important;
+	max-width: 100% !important;
+	margin-top: .85rem !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup,
+body.cleanx-page-startup .cleanx-content table.cleanx-table-startup {
+	width: 820px !important;
+	min-width: 820px !important;
+	max-width: none !important;
+	table-layout: fixed !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th,
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td {
+	padding-top: .52rem !important;
+	padding-bottom: .52rem !important;
+	line-height: 1.25 !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup .cleanx-col-start-priority,
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th:nth-child(1),
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td:nth-child(1) {
+	width: 120px !important;
+	min-width: 120px !important;
+	max-width: 120px !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup .cleanx-col-initscript,
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th:nth-child(2),
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td:nth-child(2) {
+	width: 230px !important;
+	min-width: 230px !important;
+	max-width: 230px !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup .cleanx-col-actions,
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th:nth-child(3),
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td:nth-child(3),
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td.cbi-section-actions {
+	width: 440px !important;
+	min-width: 440px !important;
+	max-width: 440px !important;
+	text-align: left !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td.cbi-section-actions > div {
+	display: inline-flex !important;
+	justify-content: flex-start !important;
+	align-items: center !important;
+	gap: .38rem !important;
+	flex-wrap: nowrap !important;
+	white-space: nowrap !important;
+}
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td.cbi-section-actions .btn,
+body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td.cbi-section-actions .cbi-button {
+	height: 27px !important;
+	min-height: 27px !important;
+	padding: 0 .62rem !important;
+	margin: 0 !important;
+	font-size: .72rem !important;
+}
+@media (max-width: 900px) {
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup,
+	body.cleanx-page-startup .cleanx-content table.cleanx-table-startup {
+		width: 760px !important;
+		min-width: 760px !important;
+	}
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th:nth-child(1),
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td:nth-child(1) { width: 90px !important; min-width: 90px !important; max-width: 90px !important; }
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th:nth-child(2),
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td:nth-child(2) { width: 190px !important; min-width: 190px !important; max-width: 190px !important; }
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup th:nth-child(3),
+	body[data-page*="startup"] .cleanx-content table.cleanx-table-startup td:nth-child(3) { width: 480px !important; min-width: 480px !important; max-width: 480px !important; }
+}
+
+/* Graph pages: let graph plots fill their card instead of leaving a large empty
+ * strip or clipping at one side. The container expands with viewport height and
+ * scrolls only when LuCI's canvas/SVG is wider than available. */
+body.cleanx-page-graphs .cleanx-content .cbi-section,
+body[data-page*="realtime"] .cleanx-content .cbi-section,
+body[data-page*="load"] .cleanx-content .cbi-section,
+body[data-page*="channel_analysis"] .cleanx-content .cbi-section {
+	padding: 1rem !important;
+	overflow: hidden !important;
+}
+body.cleanx-page-graphs .cleanx-content div[style*="height:300px"],
+body[data-page*="realtime"] .cleanx-content div[style*="height:300px"],
+body[data-page*="load"] .cleanx-content div[style*="height:300px"],
+body[data-page*="channel_analysis"] .cleanx-content div[style*="height:300px"],
+body.cleanx-page-graphs .cleanx-content div[id*="graph"],
+body[data-page*="realtime"] .cleanx-content div[id*="graph"],
+body[data-page*="load"] .cleanx-content div[id*="graph"],
+body[data-page*="channel_analysis"] .cleanx-content div[id*="graph"] {
+	width: 100% !important;
+	max-width: 100% !important;
+	height: clamp(360px, 46vh, 540px) !important;
+	min-height: 360px !important;
+	box-sizing: border-box !important;
+	overflow: hidden !important;
+	border-radius: 18px !important;
+	border: 1px solid rgba(148,163,184,.28) !important;
+	background: #f8fafc !important;
+	padding: 0 !important;
+	margin: .85rem 0 1rem !important;
+}
+body.cleanx-page-graphs .cleanx-content svg,
+body[data-page*="realtime"] .cleanx-content svg,
+body[data-page*="load"] .cleanx-content svg,
+body[data-page*="channel_analysis"] .cleanx-content svg,
+body.cleanx-page-graphs .cleanx-content canvas,
+body[data-page*="realtime"] .cleanx-content canvas,
+body[data-page*="load"] .cleanx-content canvas,
+body[data-page*="channel_analysis"] .cleanx-content canvas {
+	width: 100% !important;
+	max-width: 100% !important;
+	height: 100% !important;
+	min-height: 0 !important;
+	display: block !important;
+	background: #f8fafc !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-sizing: border-box !important;
+}
+body[data-page*="channel_analysis"] .cleanx-content svg,
+body[data-page*="channel_analysis"] .cleanx-content canvas {
+	min-height: 360px !important;
+}
+body.cleanx-page-graphs .cleanx-content .graph-legend,
+body[data-page*="realtime"] .cleanx-content .graph-legend,
+body[data-page*="load"] .cleanx-content .graph-legend,
+body[data-page*="channel_analysis"] .cleanx-content .graph-legend,
+body.cleanx-page-graphs .cleanx-content table,
+body[data-page*="load"] .cleanx-content table,
+body[data-page*="realtime"] .cleanx-content table,
+body[data-page*="channel_analysis"] .cleanx-content table {
+	width: 100% !important;
+	max-width: 100% !important;
+	min-width: 0 !important;
+}
+@media (max-width: 700px) {
+	body.cleanx-page-graphs .cleanx-content div[style*="height:300px"],
+	body[data-page*="realtime"] .cleanx-content div[style*="height:300px"],
+	body[data-page*="load"] .cleanx-content div[style*="height:300px"],
+	body[data-page*="channel_analysis"] .cleanx-content div[style*="height:300px"] {
+		height: 340px !important;
+		min-height: 340px !important;
+	}
 }
