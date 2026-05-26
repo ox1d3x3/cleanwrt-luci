@@ -37,9 +37,9 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.4.9">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.5.0">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.4.9">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.5.0">
 	{% endif %}
 
 	<script>

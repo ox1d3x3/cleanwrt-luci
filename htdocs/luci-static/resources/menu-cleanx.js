@@ -37,6 +37,7 @@ return baseclass.extend({
 		safe('button feedback', this.bindButtonFeedback);
 		safe('toast', this.installToast);
 		safe('cbi tabs', this.bindCbiTabsFallback);
+		safe('stable cbi tabs', this.bindCbiTabsStable);
 		safe('status refresh', this.startStatusLiveRefresh);
 		safe('modal details', this.fixModalAndShellDetails);
 		safe('dns controls', this.polishDnsAndActionControls);
@@ -827,6 +828,108 @@ return baseclass.extend({
 			if (ev.target.closest('.cleanx-apply-group')) return;
 			document.querySelectorAll('.cleanx-apply-menu.open').forEach((menu) => menu.classList.remove('open'));
 		});
+	},
+
+
+	classifyLuciTables() {
+		/* Classify LuCI tables by visible header text so CSS can give each table
+		 * stable readable column widths without altering LuCI's native handlers. */
+		const slug = (value) => String(value || '')
+			.toLowerCase()
+			.replace(/\(.+?\)/g, '')
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '') || 'col';
+		const text = (node) => String(node && node.textContent || '').replace(/\s+/g, ' ').trim();
+		const headersOf = (table) => Array.from(table.querySelectorAll('tr:first-child th, thead th'))
+			.map((th) => text(th)).filter(Boolean);
+		const classify = () => {
+			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+			document.querySelectorAll('#maincontent table').forEach((table) => {
+				if (table.closest('#modal_overlay, .cleanx-dashboard, .ifacebox, .cleanx-port-grid')) return;
+				const headers = headersOf(table);
+				const joined = headers.join(' | ').toLowerCase();
+				if (!headers.length && !/processes|startup|load|realtime|channel/.test(page)) return;
+
+				table.classList.add('cleanx-data-table', 'cleanx-technical-table');
+				if (/package name|version|size/.test(joined) || /package-manager|software|opkg/.test(page)) table.classList.add('cleanx-table-software');
+				else if (/pid|owner|command|cpu usage|memory usage/.test(joined) || /processes/.test(page)) table.classList.add('cleanx-table-processes');
+				else if (/start priority|initscript/.test(joined) || /startup|init/.test(page)) table.classList.add('cleanx-table-startup');
+				else if (/hostname|mac addresses|lease time|duid|iaid|remaining time|active dhcp/.test(joined) || /dhcp/.test(page)) table.classList.add('cleanx-table-dhcp');
+				else if (/device|target|gateway|source|metric|protocol|neighbour|neighbor|priority|rule/.test(joined) || /routes|routing/.test(page)) table.classList.add('cleanx-table-routing');
+				else if (/name|match|action|enable|zone|input|output|masquerading|forward/.test(joined) || /firewall|rules|zones/.test(page)) table.classList.add('cleanx-table-firewall');
+				else if (/led|trigger|interval|default state/.test(joined) || /leds/.test(page)) table.classList.add('cleanx-table-led');
+				else if (/ssid|bssid|signal|noise|rx rate|tx rate|wireless|radio/.test(joined) || /wireless/.test(page)) table.classList.add('cleanx-table-wireless');
+				else if (/interface|device|mac address|type|mtu|rx|tx/.test(joined) || /interfaces|network/.test(page)) table.classList.add('cleanx-table-interfaces');
+				else if (/dns/.test(page)) table.classList.add('cleanx-table-dns');
+
+				const rows = Array.from(table.querySelectorAll('tr'));
+				if (!rows.length || !headers.length) return;
+				rows.forEach((row) => {
+					Array.from(row.children).forEach((cell, index) => {
+						const header = headers[index] || (cell.classList && cell.classList.contains('cbi-section-actions') ? 'actions' : '');
+						if (header) cell.classList.add('cleanx-col-' + slug(header));
+						if (cell.classList && cell.classList.contains('cbi-section-actions')) cell.classList.add('cleanx-col-actions');
+					});
+				});
+
+				/* Some LuCI rows place action buttons in a final TD without header text. */
+				Array.from(table.querySelectorAll('tr')).forEach((row) => {
+					const cells = Array.from(row.children);
+					const last = cells[cells.length - 1];
+					if (last && last.querySelector('button, .cbi-button, a.btn, input[type="button"], input[type="submit"]'))
+						last.classList.add('cleanx-col-actions');
+				});
+			});
+		};
+		classify();
+		window.addEventListener('load', classify, { once: true });
+		setTimeout(classify, 250);
+		setTimeout(classify, 1000);
+		if (window.MutationObserver) {
+			const observer = new MutationObserver(() => window.requestAnimationFrame(classify));
+			observer.observe(document.getElementById('maincontent') || document.body, { childList: true, subtree: true });
+		}
+	},
+
+	bindCbiTabsStable() {
+		/* OpenWrt 25.x tab panels are sometimes rendered with data-tab-active only.
+		 * This lightweight controller mirrors LuCI's behaviour when the native
+		 * listener does not switch the visible panel. */
+		const findRoot = (menu) => {
+			let node = menu && menu.nextElementSibling;
+			if (node && node.matches && node.matches('.cbi-section-node-tabbed, .cbi-map-tabbed, [class*="tabbed"]')) return node;
+			for (let p = menu && menu.parentElement; p; p = p.parentElement) {
+				node = p.querySelector(':scope > .cbi-section-node-tabbed, :scope > .cbi-map-tabbed, :scope > [class*="tabbed"]');
+				if (node) return node;
+			}
+			return null;
+		};
+		const activate = (menu, li, root) => {
+			const tab = li && li.getAttribute('data-tab');
+			if (!tab || !root) return;
+			menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
+				const active = item === li;
+				item.classList.toggle('cbi-tab', active);
+				item.classList.toggle('cbi-tab-disabled', !active);
+				item.classList.toggle('active', active);
+			});
+			root.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
+				const active = panel.getAttribute('data-tab') === tab;
+				panel.dataset.tabActive = active ? 'true' : 'false';
+				panel.hidden = !active;
+				panel.style.display = active ? '' : 'none';
+			});
+		};
+		document.addEventListener('click', (ev) => {
+			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
+			if (!a) return;
+			const li = a.closest('li[data-tab]');
+			const menu = a.closest('.cbi-tabmenu');
+			const root = findRoot(menu);
+			if (!li || !menu || !root) return;
+			if ((a.getAttribute('href') || '').endsWith('#')) ev.preventDefault();
+			window.setTimeout(() => activate(menu, li, root), 40);
+		}, true);
 	},
 
 	render(tree) {

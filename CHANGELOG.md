@@ -1,6 +1,17 @@
 # Changelog
 
-## v0.4.9
+
+## v0.5.0
+
+- Added saved-page alignment recovery for DHCP, DNS, Diagnostics, System, Load and Traffic Rules pages.
+- Added runtime technical table classification for LuCI data-heavy tables.
+- Fixed table cells collapsing into vertical text by using readable natural table widths with controlled horizontal scrolling.
+- Fixed CBI value label/field alignment across DNS/DHCP/System style forms.
+- Improved DNS/DHCP multi-select dropdowns so long option lists open as compact scrollable grids.
+- Improved graph containment for Load, Realtime Graphs and Channel Analysis.
+- Added stronger fallback tab switching for CBI tab pages on OpenWrt 25.x.
+
+## v0.5.0
 
 ### Fixed
 - Added a loader failsafe so LuCI can no longer remain stuck behind the CleanX loading screen if an optional JavaScript enhancer fails.
@@ -8,7 +19,7 @@
 - Updated cache-busting version strings for CleanX CSS assets.
 
 
-## v0.4.9
+## v0.5.0
 
 - Fixed GitHub Actions auto-trigger behaviour after GitHub Desktop push.
 - Replaced stale UniWRT workflow references with CleanX workflow naming.
@@ -16,7 +27,7 @@
 - Kept package assets architecture-independent with `all-openwrt-*` release naming.
 
 
-## v0.4.9
+## v0.5.0
 
 - GitHub Desktop commit safety fix.
 - Removed long saved-browser QA page filenames from the tracked repo package.
@@ -26,7 +37,7 @@
 
 
 
-## v0.4.9
+## v0.5.0
 
 - Added a real LuCI table recovery pass for DHCP, DNS, Routing, Firewall, LED, Interfaces, Wireless, Software, Startup and Processes.
 - Stopped technical table cells from collapsing into vertical letters.
