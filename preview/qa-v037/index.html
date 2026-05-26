@@ -1,0 +1,28 @@
+<!doctype html>
+<html data-cleanx-theme="dark" data-cleanx-animations="balanced">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CleanX v0.3.7 Native Control QA</title>
+<link rel="stylesheet" href="../../htdocs/luci-static/cleanx/main.css">
+<style>body{padding:24px}.qa{max-width:1180px;margin:auto}.qa-section{margin:20px 0}.cbi-dropdown{outline:none}.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}.hint{color:var(--cleanx-muted);font-size:13px}</style>
+</head>
+<body data-page="admin-network-diagnostics">
+<div class="cleanx-bg"><div class="cleanx-blob cleanx-blob-a"></div><div class="cleanx-blob cleanx-blob-b"></div></div>
+<main class="cleanx-content qa" id="maincontent">
+<h1>CleanX v0.3.7 QA mock</h1>
+<p class="hint">Mock coverage for diagnostics split buttons, DNS/DHCP grids, CBI tabs and LED checkbox controls.</p>
+<section class="cbi-map qa-section"><h2>Diagnostics split actions</h2>
+<input value="openwrt.org">
+<span class="cleanx-split-actions"><button class="cbi-button cbi-button-action cleanx-split-action cleanx-split-ipv4">IPv4 Ping</button><button class="cbi-button cbi-button-action cleanx-split-action cleanx-split-ipv6">IPv6 Ping</button></span>
+<input value="openwrt.org">
+<span class="cleanx-split-actions"><button class="cbi-button cbi-button-action cleanx-split-action cleanx-split-ipv4">IPv4 Traceroute</button><button class="cbi-button cbi-button-action cleanx-split-action cleanx-split-ipv6">IPv6 Traceroute</button></span>
+<button class="cbi-button cbi-button-action">Nslookup</button>
+</section>
+<section class="cbi-map qa-section"><h2>DNS/DHCP choice grids</h2>
+<div class="cbi-value" data-widget="CBI.MultiValue" data-name="cache_rr"><label class="cbi-value-title">Cache arbitrary RR</label><div class="cbi-value-field"><div class="cbi-dropdown" multiple><ul><li><input type="checkbox"><label>ANY</label></li><li><input type="checkbox"><label>A</label></li><li><input type="checkbox"><label>AAAA</label></li><li><input type="checkbox"><label>ALIAS</label></li><li><input type="checkbox"><label>CAA</label></li><li><input type="checkbox"><label>CERT</label></li><li><input type="checkbox"><label>CNAME</label></li><li><input type="checkbox"><label>HTTPS</label></li><li><input type="checkbox"><label>OPENPGPKEY</label></li><li><input type="checkbox"><label>SVCB</label></li><li><input type="checkbox"><label>TLSA</label></li><li><input type="checkbox"><label>TXT</label></li><li><input type="checkbox"><label>URI</label></li></ul><span class="more">-- Please choose --</span><span class="open">▾</span></div><div class="cbi-value-description">Options should be side-by-side and clickable, not floating over the next field.</div></div></div>
+<div class="cbi-value" data-widget="CBI.NetworkSelect" data-name="interface"><label class="cbi-value-title">Listen interfaces</label><div class="cbi-value-field"><div class="cbi-dropdown" multiple><ul><li><input type="checkbox"><label><span class="ifacebadge">lan: Bridge &quot;br-lan&quot;</span></label></li><li><input type="checkbox"><label><span class="ifacebadge">wan: Switch port &quot;wan&quot; Wireless Network: Master &quot;ConnectWIFI6&quot;</span></label></li><li><input type="checkbox"><label><span class="ifacebadge">guest: Bridge &quot;br-guest&quot;</span></label></li><li><input type="checkbox"><label><span class="ifacebadge">tailscale0: Ethernet Adapter</span></label></li></ul><span class="more">unspecified</span><span class="open">▾</span></div></div></div>
+</section>
+<section class="cbi-map qa-section"><h2>CBI tabs</h2><ul class="cbi-tabmenu"><li class="cbi-tab" data-tab="general"><a href="#">General Settings</a></li><li class="cbi-tab-disabled" data-tab="logging"><a href="#">Logging</a></li><li class="cbi-tab-disabled" data-tab="timesync"><a href="#">Time Synchronisation</a></li><li class="cbi-tab-disabled" data-tab="language"><a href="#">Language and Style</a></li></ul><div class="cbi-section-node cbi-section-node-tabbed"><div data-tab="general" data-tab-active="true"><p>General content visible.</p></div><div data-tab="logging" data-tab-active="false"><p>Logging content.</p></div><div data-tab="timesync" data-tab-active="false"><p>Time content.</p></div><div data-tab="language" data-tab-active="false"><p>Language content.</p></div></div></section>
+<section class="cbi-map qa-section"><h2>LED / checkbox controls</h2><div class="grid2"><label><input type="checkbox"> Link On</label><label><input type="checkbox"> Link 1G On</label><label><input type="checkbox"> Link 2.5G On</label><label><input type="checkbox"> Transmit</label><label><input type="checkbox"> Receive</label><label><input type="radio" name="led"> Default state on</label></div></section>
+</main>
+</body></html>

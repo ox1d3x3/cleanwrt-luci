@@ -214,8 +214,8 @@ jobs:
               stem="${base%.*}"
 
               # Release asset names must not include the package format twice.
-              # Good: luci-theme-cleanx-0.3.6-r1-openwrt-25.12.4-mt7622.apk
-              # Bad:  luci-theme-cleanx-0.3.6-r1-openwrt-25.12.4-mt7622-apk.apk
+              # Good: luci-theme-cleanx-0.3.7-r1-openwrt-25.12.4-mt7622.apk
+              # Bad:  luci-theme-cleanx-0.3.7-r1-openwrt-25.12.4-mt7622-apk.apk
               out="${GITHUB_WORKSPACE}/package-artifacts/${stem}-${{ matrix.asset_suffix }}.${ext}"
               cp -v "${pkg}" "${out}"
             done < <(find "${SDK_DIR}/bin" -type f \

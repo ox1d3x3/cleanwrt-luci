@@ -1,4 +1,4 @@
-/* CleanX Theme v0.3.6 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.3.7 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -200,7 +200,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(var(--cleanx-acce
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.6 LuCI compatibility pass
+ * CleanX v0.3.7 LuCI compatibility pass
  * Fixes CBI/form/table pages such as Package Manager and Backup / Flash.
  * -------------------------------------------------------------------------- */
 .cleanx-content {
@@ -914,7 +914,7 @@ ul.tabs .active a {
 }
 
 
-/* CleanX v0.3.6: real LuCI status/graph compatibility
+/* CleanX v0.3.7: real LuCI status/graph compatibility
    Fixes Overview memory bars, realtime graphs and status widgets that use LuCI's
    div.table + .cbi-progressbar markup instead of normal CBI forms. */
 .cleanx-content canvas,
@@ -1063,7 +1063,7 @@ body[data-page*="load"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.6 real LuCI page compatibility patch
+ * CleanX v0.3.7 real LuCI page compatibility patch
  * - Replaces grid background with soft gradient mesh
  * - Fixes Status -> Overview port cards and hidden tooltips
  * - Restores LuCI modal overlay behaviour used by Package Manager upload/update
@@ -1402,7 +1402,7 @@ input.cleanx-click-busy::after {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.6 deep LuCI compatibility pass
+ * CleanX v0.3.7 deep LuCI compatibility pass
  * - Removes patterned/grid wallpaper completely
  * - Makes status port cards readable on OpenWrt 25.x
  * - Keeps LuCI CBI forms, tables, tabs, modals and tooltips functional
@@ -1907,7 +1907,7 @@ ul.cbi-tabmenu > li.cbi-tab > a {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.6 audit patch
+ * CleanX v0.3.7 audit patch
  * Tested against saved OpenWrt 25.x Backup / Flash markup and upstream LuCI
  * status widgets. The goal is compatibility first: no narrow text columns,
  * no tooltip payloads dumped into cards, no theme JS interference with LuCI
@@ -2307,7 +2307,7 @@ body[data-page*="overview"] .progress {
 	}
 }
 
-/* CleanX v0.3.6b: label-less LuCI values, usually TextValue or custom HTML,
+/* CleanX v0.3.7b: label-less LuCI values, usually TextValue or custom HTML,
    should use full width instead of reserving an empty label column. */
 .cbi-value:not(:has(> .cbi-value-title)):not([data-widget="CBI.ButtonValue"]):not([data-widget$="ButtonValue"]) {
 	display: block !important;
@@ -2326,7 +2326,7 @@ body[data-page*="overview"] .progress {
 	max-width: 100% !important;
 }
 
-/* CleanX v0.3.6c: prevent decorative gradient layers and demo tables from
+/* CleanX v0.3.7c: prevent decorative gradient layers and demo tables from
    creating horizontal page scroll. */
 html, body {
 	overflow-x: hidden !important;
@@ -2374,7 +2374,7 @@ html, body {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.6 - real-page QA hardening
+ * CleanX v0.3.7 - real-page QA hardening
  * Based on exported LuCI pages for Overview, Interfaces, System, Startup and
  * Processes. This block is intentionally last so it can safely override older
  * compatibility rules without touching LuCI logic.
@@ -2889,7 +2889,7 @@ body.modal-overlay-active #modal_overlay {
 	}
 }
 
-/* CleanX v0.3.6d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
+/* CleanX v0.3.7d: dense LuCI tables should scroll inside content, not push the whole page horizontally. */
 body[data-page*="processes"] .cleanx-content table.table,
 body[data-page*="startup"] .cleanx-content table.table,
 body[data-page*="network"] .cleanx-content table.table,
@@ -2931,7 +2931,7 @@ body[data-page*="overview"] .cleanx-content table.table {
 	}
 }
 
-/* CleanX v0.3.6e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
+/* CleanX v0.3.7e: table element itself must stay inside the page; the tbody carries the scrollable min-width. */
 body[data-page*="processes"] .cleanx-content table.table,
 body[data-page*="startup"] .cleanx-content table.table,
 body[data-page*="network"] .cleanx-content table.table,
@@ -2953,7 +2953,7 @@ body[data-page*="opkg"] .cleanx-content table.table {
 
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.6 - user QA polish and OpenWrt 25.x modal hardening
+ * CleanX v0.3.7 - user QA polish and OpenWrt 25.x modal hardening
  * ------------------------------------------------------------------------- */
 :root {
 	--cleanx-bg: #f7f8fb;
@@ -3279,7 +3279,7 @@ body[data-page*="dhcp"] .cleanx-content pre {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.6 - overview live cards and real LuCI section polish
+ * CleanX v0.3.7 - overview live cards and real LuCI section polish
  * - CPU/RAM dashboard cards with uptime line
  * - Cleaner Overview Network/Wireless output cards
  * - Modern Hide/Show controls
@@ -3597,7 +3597,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-stat-card strong {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.6 final polish pass
+ * CleanX v0.3.7 final polish pass
  * Real-world LuCI overview/package-manager fixes from saved pages and mocks.
  * ------------------------------------------------------------------------- */
 
@@ -3965,7 +3965,7 @@ body[data-page*="status"] table.table:has(.cbi-progressbar) td {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.6 - DNS multi-select, Overview progress and action-bar polish
+ * CleanX v0.3.7 - DNS multi-select, Overview progress and action-bar polish
  * ------------------------------------------------------------------------- */
 
 /* Stronger light-mode readability without changing the dark theme that already works. */
@@ -4310,7 +4310,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI
 	}
 }
 
-/* v0.3.6 action-bar dropdowns: LuCI renders Save & Apply as a cbi-dropdown
+/* v0.3.7 action-bar dropdowns: LuCI renders Save & Apply as a cbi-dropdown
  * containing selected and alternate choices. In the compact action bar, show only
  * the selected label plus the arrow until LuCI opens the dropdown. */
 .cbi-page-actions > .cbi-dropdown.cbi-button:not([multiple]),
@@ -4383,7 +4383,7 @@ html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.3.6 - native LuCI control safety pass
+ * CleanX v0.3.7 - native LuCI control safety pass
  * -------------------------------------------------------------------------
  * This block intentionally overrides older compatibility rules at the end of
  * the file. It keeps LuCI's JavaScript-owned dropdowns, action bars, CBI tables
@@ -4843,7 +4843,7 @@ body[data-page*="processes"] .cleanx-content .td:nth-last-child(-n+3) {
 
 
 /* --------------------------------------------------------------------------
- * CleanX v0.3.6 - live animated icon system
+ * CleanX v0.3.7 - live animated icon system
  * --------------------------------------------------------------------------
  * Subtle GPU-friendly animations for navigation, dashboard and shell icons.
  * Kept CSS-only so LuCI controls and RPC handlers stay untouched.
@@ -5080,4 +5080,300 @@ html[data-cleanx-animations="off"] .cleanx-live-dot,
 html[data-cleanx-animations="off"] .cleanx-router-pill span,
 html[data-cleanx-animations="off"] .cleanx-theme-toggle-knob {
 	animation: none !important;
+}
+
+/* -------------------------------------------------------------------------
+ * CleanX v0.3.7 - native LuCI control recovery and diagnostics split actions
+ * -------------------------------------------------------------------------
+ * This final block intentionally prioritises LuCI behaviour over decoration.
+ * Dropdowns, tabs, checkboxes and CBI action buttons keep their native event
+ * handlers. Styling is applied around those controls, not by replacing them.
+ */
+
+/* Diagnostics: replace IPv4/IPv6 LuCI action dropdowns with separate visible
+ * buttons, while keeping the original dropdown in the DOM for LuCI handlers. */
+.cleanx-native-split-source {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0 0 0 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+	opacity: .001 !important;
+	pointer-events: none !important;
+}
+.cleanx-split-actions {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	flex-wrap: wrap !important;
+	vertical-align: middle !important;
+	margin: 0 8px 0 0 !important;
+}
+.cleanx-split-action,
+.cleanx-content .cleanx-split-action.cbi-button {
+	width: auto !important;
+	min-width: 96px !important;
+	max-width: none !important;
+	height: 36px !important;
+	min-height: 36px !important;
+	padding: 0 14px !important;
+	border-radius: 13px !important;
+	font-size: 13px !important;
+	font-weight: 880 !important;
+	line-height: 1 !important;
+	white-space: nowrap !important;
+	box-shadow: 0 12px 24px rgba(var(--cleanx-accent-rgb), .18) !important;
+}
+.cleanx-split-action.cleanx-split-ipv6 {
+	background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+}
+.cleanx-split-action.cleanx-split-ipv4 {
+	background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+}
+
+/* CBI tabs: keep native-looking tabs and make fallback switching target both
+ * cbi-map-tabbed and cbi-section-node-tabbed panels. */
+.cleanx-content .cbi-section-node-tabbed > [data-tab],
+.cleanx-content .cbi-map-tabbed > [data-tab] {
+	max-width: 100% !important;
+}
+.cleanx-content .cbi-section-node-tabbed > [data-tab][data-tab-active="false"],
+.cleanx-content .cbi-map-tabbed > [data-tab][data-tab-active="false"] {
+	display: none !important;
+}
+.cleanx-content .cbi-section-node-tabbed > [data-tab][data-tab-active="true"],
+.cleanx-content .cbi-map-tabbed > [data-tab][data-tab-active="true"] {
+	display: block !important;
+}
+.cleanx-content .cbi-tabmenu > li > a {
+	user-select: none !important;
+}
+
+/* DNS/DHCP/LED multi-choice dropdowns: no floating overlay. Show options in a
+ * normal inline grid so checkboxes are clickable and the form does not overlap
+ * later fields. This intentionally avoids position:absolute for native LuCI
+ * option lists. */
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button),
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button),
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button),
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) {
+	position: relative !important;
+	display: block !important;
+	width: min(100%, 860px) !important;
+	max-width: 100% !important;
+	height: auto !important;
+	min-height: 0 !important;
+	padding: 10px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 16px !important;
+	background: rgba(var(--cleanx-bg-rgb), .22) !important;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.05) !important;
+	overflow: visible !important;
+	z-index: auto !important;
+}
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button),
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button),
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button),
+html:not([data-cleanx-theme="dark"]) .cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) {
+	background: #f8fafc !important;
+}
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > ul,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > ul,
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) > ul {
+	position: static !important;
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)) !important;
+	gap: 8px !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+	max-height: 260px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	list-style: none !important;
+	overflow: auto !important;
+	overscroll-behavior: contain !important;
+	pointer-events: auto !important;
+	z-index: auto !important;
+}
+.cleanx-content .cbi-value[data-name="cache_rr"] .cbi-dropdown:not(.cbi-button) > ul,
+.cleanx-content .cbi-value[id*="cache_rr"] .cbi-dropdown:not(.cbi-button) > ul {
+	grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)) !important;
+	max-height: 220px !important;
+}
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > ul,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > ul {
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) !important;
+	max-height: 300px !important;
+}
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul > li,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > ul > li,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > ul > li,
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) > ul > li {
+	position: relative !important;
+	display: flex !important;
+	align-items: center !important;
+	gap: 9px !important;
+	min-width: 0 !important;
+	min-height: 36px !important;
+	padding: 8px 10px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 12px !important;
+	background: var(--cleanx-surface-strong) !important;
+	color: var(--cleanx-text) !important;
+	line-height: 1.28 !important;
+	list-style: none !important;
+	cursor: pointer !important;
+	pointer-events: auto !important;
+	box-shadow: 0 5px 14px rgba(0,0,0,.035) !important;
+}
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul > li:hover,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > ul > li:hover,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > ul > li:hover,
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) > ul > li:hover {
+	border-color: rgba(var(--cleanx-accent-rgb), .45) !important;
+	background: rgba(var(--cleanx-accent-rgb), .08) !important;
+}
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) > .more,
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) > .open,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > .more,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > .open,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > .more,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > .open,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > .more,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > .open {
+	display: none !important;
+}
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) input[type="checkbox"],
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) input[type="radio"],
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] input[type="checkbox"],
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] input[type="checkbox"],
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] input[type="checkbox"] {
+	position: static !important;
+	display: inline-block !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+	pointer-events: auto !important;
+	flex: 0 0 auto !important;
+	z-index: 2 !important;
+}
+.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) label,
+.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] label,
+.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] label,
+.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] label,
+.cleanx-content .cbi-dropdown .ifacebadge {
+	min-width: 0 !important;
+	max-width: 100% !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: anywhere !important;
+	cursor: pointer !important;
+	pointer-events: auto !important;
+}
+
+/* Native checkbox/radio fields in modals and LED pages must remain easy to
+ * click. Keep labels aligned with inputs and do not let older overlays catch
+ * the pointer. */
+.cleanx-content input[type="checkbox"],
+.cleanx-content input[type="radio"],
+#modal_overlay input[type="checkbox"],
+#modal_overlay input[type="radio"] {
+	pointer-events: auto !important;
+	cursor: pointer !important;
+	z-index: 3 !important;
+}
+.cleanx-content .cbi-checkbox,
+#modal_overlay .cbi-checkbox,
+.cleanx-content .cbi-value-field label,
+#modal_overlay .cbi-value-field label {
+	pointer-events: auto !important;
+	cursor: pointer !important;
+}
+#modal_overlay .modal .cbi-value-field,
+.cleanx-content .cbi-value-field {
+	position: relative !important;
+	z-index: auto !important;
+}
+
+/* Keep normal single selects and input fields simple. Do not turn regular
+ * fields into overlays. */
+.cleanx-content select,
+.cleanx-content .cbi-input-select,
+.cleanx-content input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+.cleanx-content textarea {
+	max-width: 100% !important;
+}
+
+/* Page action bars stay compact, but table action cells remain table cells. */
+.cleanx-content .cbi-page-actions,
+.cleanx-content #applyrevert,
+.cleanx-content #cbi_apply_status,
+.cleanx-content #cbi_apply_footer,
+.cleanx-content .uci-change-actions {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: 8px !important;
+	flex-wrap: wrap !important;
+}
+.cleanx-content table .cbi-section-actions,
+.cleanx-content .table .cbi-section-actions {
+	z-index: auto !important;
+}
+.cleanx-content table td.cbi-section-actions,
+.cleanx-content table th.cbi-section-actions {
+	display: table-cell !important;
+}
+.cleanx-content .table .td.cbi-section-actions {
+	display: flex !important;
+}
+
+/* Load/realtime graph containers: professional card treatment without changing
+ * LuCI graph drawing logic. */
+body[data-page*="load"] .cleanx-content .cbi-section,
+body[data-page*="realtime"] .cleanx-content .cbi-section,
+body[data-page*="bandwidth"] .cleanx-content .cbi-section {
+	background: var(--cleanx-surface) !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 22px !important;
+	padding: 18px !important;
+	overflow-x: auto !important;
+}
+body[data-page*="load"] .cleanx-content canvas,
+body[data-page*="realtime"] .cleanx-content canvas,
+body[data-page*="load"] .cleanx-content svg,
+body[data-page*="realtime"] .cleanx-content svg {
+	background: rgba(var(--cleanx-bg-rgb), .18) !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 16px !important;
+	padding: 6px !important;
+}
+
+@media (max-width: 760px) {
+	.cleanx-split-actions {
+		display: grid !important;
+		grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+		width: 100% !important;
+		margin: 8px 0 !important;
+	}
+	.cleanx-split-action,
+	.cleanx-content .cleanx-split-action.cbi-button {
+		min-width: 0 !important;
+		width: 100% !important;
+	}
+	.cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul,
+	.cleanx-content .cbi-value[data-widget="CBI.NetworkSelect"] .cbi-dropdown:not(.cbi-button) > ul,
+	.cleanx-content .cbi-value[data-widget="CBI.IPSelect"] .cbi-dropdown:not(.cbi-button) > ul,
+	.cleanx-content .cbi-dropdown[multiple]:not(.cbi-button) > ul {
+		grid-template-columns: 1fr !important;
+		max-height: 300px !important;
+	}
 }

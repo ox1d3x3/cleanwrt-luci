@@ -40,7 +40,7 @@ Open the preview gallery after extracting the repository:
 preview/index.html
 ```
 
-Open the v0.3.6 QA mocks here:
+Open the v0.3.7 QA mocks here:
 
 ```text
 preview/qa-v034/index.html
@@ -160,7 +160,7 @@ For persistent monthly or yearly traffic totals, add `vnstat` or `nlbwmon` in a 
 
 ## Changelog
 
-### v0.3.6
+### v0.3.7
 
 - Added CPU and RAM cards to the overview dashboard.
 - Added small dashboard summary line for system uptime, total traffic and RAM total.
@@ -172,7 +172,7 @@ For persistent monthly or yearly traffic totals, add `vnstat` or `nlbwmon` in a 
 - Added a visible SVG mobile menu icon.
 - Updated footer to link to the CleanX project repository.
 - Cleaned user-facing text so it does not include internal prompt/design wording.
-- Added v0.3.6 QA mock pages.
+- Added v0.3.7 QA mock pages.
 
 ## Author
 
@@ -191,11 +191,11 @@ Each pre-release includes the built `.ipk` and `.apk` packages, build logs, buil
 
 See [`RELEASE_PROCESS.md`](RELEASE_PROCESS.md) for the full process.
 
-### v0.3.6 QA focus
+### v0.3.7 QA focus
 
 This build fixes native LuCI dropdown/action compatibility reported on DNS, Diagnostics, Startup, LED Configuration, System, Load and Processes pages. It keeps dropdowns compact by default and opens long DNS/DHCP lists as side-by-side grids only when the control is focused/open.
 
-Open the v0.3.6 QA mock after extracting:
+Open the v0.3.7 QA mock after extracting:
 
 ```text
 preview/qa-v035/index.html

@@ -11,6 +11,7 @@ return baseclass.extend({
 		ui.menu.load().then((tree) => this.render(tree));
 		this.bindShellControls();
 		this.enhanceLuciContent();
+		this.splitDiagnosticDropdownActions();
 		this.patchChangeIndicator();
 		this.startClock();
 		this.startProgress();
@@ -372,10 +373,75 @@ return baseclass.extend({
 	},
 
 
+
+
+	splitDiagnosticDropdownActions() {
+		/* Diagnostics renders IPv4/IPv6 actions as a compact LuCI dropdown. For
+		 * usability, expose those IPv4/IPv6 actions as real separate buttons while
+		 * leaving the original LuCI control in the DOM so its event handlers remain
+		 * available. This only touches action dropdowns containing IPv4/IPv6 labels. */
+		const split = () => {
+			const main = document.getElementById('maincontent') || document.body;
+			if (!main) return;
+
+			main.querySelectorAll('.cbi-dropdown.cbi-button, button.cbi-dropdown, .btn.cbi-dropdown').forEach((drop) => {
+				if (drop.dataset.cleanxSplit === '1') return;
+				if (drop.closest('.cbi-page-actions, #applyrevert, #cbi_apply_status, #cbi_apply_footer, .uci-change-actions')) return;
+				if (drop.matches('[multiple]') || drop.closest('.cbi-value')) return;
+
+				const items = Array.from(drop.querySelectorAll(':scope > ul > li'));
+				const labels = items.map((item) => String(item.textContent || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
+				if (labels.length < 2 || labels.length > 4) return;
+				if (!labels.every((label) => /\bIPv[46]\b/i.test(label))) return;
+
+				const group = document.createElement('span');
+				group.className = 'cleanx-split-actions';
+				group.setAttribute('role', 'group');
+				group.setAttribute('aria-label', labels.join(' / '));
+
+				items.forEach((item, index) => {
+					const label = labels[index];
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.className = 'cbi-button cbi-button-action cleanx-split-action' + (/IPv6/i.test(label) ? ' cleanx-split-ipv6' : ' cleanx-split-ipv4');
+					btn.textContent = label.replace(/^IPv4\s+/i, 'IPv4 ').replace(/^IPv6\s+/i, 'IPv6 ');
+					btn.title = label;
+					btn.addEventListener('click', (ev) => {
+						ev.preventDefault();
+						ev.stopPropagation();
+						try {
+							item.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+							item.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+							item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+							window.setTimeout(() => drop.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })), 0);
+						}
+						catch (_) {
+							try { item.click(); window.setTimeout(() => drop.click(), 0); } catch (__) {}
+						}
+					});
+					group.appendChild(btn);
+				});
+
+				drop.classList.add('cleanx-native-split-source');
+				drop.dataset.cleanxSplit = '1';
+				drop.insertAdjacentElement('beforebegin', group);
+			});
+		};
+
+		split();
+		window.addEventListener('load', split, { once: true });
+		setTimeout(split, 250);
+		setTimeout(split, 1000);
+		if (window.MutationObserver) {
+			const observer = new MutationObserver(() => window.requestAnimationFrame(split));
+			observer.observe(document.body, { childList: true, subtree: true });
+		}
+	},
+
 	bindCbiTabsFallback() {
-		/* LuCI normally binds CBI tabs itself. This fallback only ensures the tab
-		 * remains usable when a page is saved/re-rendered or third-party pages miss
-		 * the native handler. It only touches tabs inside the same cbi-map. */
+		/* LuCI owns CBI tabs. This is a delayed fallback only: it does not run in
+		 * capture phase and it does not stop native handlers. It switches panels
+		 * only after the click if the page did not already activate the tab. */
 		document.addEventListener('click', (ev) => {
 			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
 			if (!a) return;
@@ -383,28 +449,37 @@ return baseclass.extend({
 			const li = a.closest('li[data-tab]');
 			const tab = li && li.getAttribute('data-tab');
 			const menu = a.closest('.cbi-tabmenu');
-			const map = menu && menu.closest('.cbi-map, .cbi-section, #view, main, body');
-			const tabbed = menu && menu.nextElementSibling && menu.nextElementSibling.classList && menu.nextElementSibling.classList.contains('cbi-map-tabbed')
-				? menu.nextElementSibling
-				: (map && map.querySelector('.cbi-map-tabbed'));
+			const panelRoot = menu && menu.nextElementSibling && (
+				menu.nextElementSibling.classList.contains('cbi-map-tabbed') ||
+				menu.nextElementSibling.classList.contains('cbi-section-node-tabbed') ||
+				menu.nextElementSibling.matches('[data-initialized][class*="tabbed"]')
+			) ? menu.nextElementSibling : null;
 
-			if (!tab || !menu || !tabbed) return;
-
+			if (!tab || !menu || !panelRoot) return;
 			ev.preventDefault();
-			menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
-				const active = item === li;
-				item.classList.toggle('cbi-tab', active);
-				item.classList.toggle('cbi-tab-disabled', !active);
-				item.classList.toggle('active', active);
-			});
-			tabbed.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
-				const active = panel.getAttribute('data-tab') === tab;
-				panel.dataset.tabActive = active ? 'true' : 'false';
-				panel.hidden = !active;
-				panel.style.display = active ? '' : 'none';
-			});
-		}, true);
+
+			window.setTimeout(() => {
+				const safeTab = (window.CSS && CSS.escape) ? CSS.escape(tab) : tab.replace(/\"/g, '\\\"');
+				const targetPanel = panelRoot.querySelector(':scope > [data-tab="' + safeTab + '"]');
+				if (targetPanel && targetPanel.dataset.tabActive === 'true') return;
+
+				menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
+					const active = item === li;
+					item.classList.toggle('cbi-tab', active);
+					item.classList.toggle('cbi-tab-disabled', !active);
+					item.classList.toggle('active', active);
+				});
+
+				panelRoot.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
+					const active = panel.getAttribute('data-tab') === tab;
+					panel.dataset.tabActive = active ? 'true' : 'false';
+					panel.hidden = !active;
+					panel.style.display = active ? '' : 'none';
+				});
+			}, 0);
+		}, false);
 	},
+
 
 	installToast() {
 		window.cleanxToast = (message, type = 'info', duration = 3500) => {
