@@ -1,4 +1,4 @@
-/* CleanX Theme v0.3.9 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.4.0 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -5761,5 +5761,504 @@ body[data-page*="channel"] .cleanx-content .table {
 	body[data-page*="processes"] .cleanx-content td.cbi-section-actions {
 		justify-content: flex-start !important;
 		max-width: none !important;
+	}
+}
+
+
+/*
+ * CleanX v0.4.0 - table/control stability pass
+ * This block intentionally overrides older aggressive table/dropdown styling.
+ * Goal: keep LuCI native controls functional while polishing spacing, buttons
+ * and overflow on real OpenWrt 25.x pages.
+ */
+
+/* Real LuCI tables: restore native table layout to stop huge row gaps and
+ * vertically stacked cells on Startup, DHCP, Wireless, Processes and Routing. */
+.cleanx-content table.table,
+.cleanx-content table.cbi-section-table,
+.cleanx-content .cleanx-table-wrap > table {
+	display: table !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+	table-layout: auto !important;
+	margin: 0 !important;
+	overflow: hidden !important;
+}
+.cleanx-content table.table thead,
+.cleanx-content table.cbi-section-table thead { display: table-header-group !important; }
+.cleanx-content table.table tbody,
+.cleanx-content table.cbi-section-table tbody { display: table-row-group !important; }
+.cleanx-content table.table tr,
+.cleanx-content table.table tr.tr,
+.cleanx-content table.cbi-section-table tr,
+.cleanx-content table.cbi-section-table tr.tr,
+.cleanx-content table .tr,
+.cleanx-content table.cbi-section-table .tr {
+	display: table-row !important;
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+}
+.cleanx-content table.table th,
+.cleanx-content table.table td,
+.cleanx-content table.table .th,
+.cleanx-content table.table .td,
+.cleanx-content table.cbi-section-table th,
+.cleanx-content table.cbi-section-table td,
+.cleanx-content table.cbi-section-table .th,
+.cleanx-content table.cbi-section-table .td {
+	display: table-cell !important;
+	vertical-align: middle !important;
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	padding: 10px 14px !important;
+	line-height: 1.38 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: anywhere !important;
+}
+.cleanx-content table.table th,
+.cleanx-content table.cbi-section-table th,
+.cleanx-content table .table-titles .th,
+.cleanx-content table .cbi-section-table-titles .th,
+.cleanx-content table.cbi-section-table .cbi-section-table-titles th {
+	font-size: 11px !important;
+	font-weight: 900 !important;
+	letter-spacing: .055em !important;
+	text-transform: uppercase !important;
+	color: var(--cleanx-muted) !important;
+	background: rgba(var(--cleanx-bg-rgb), .28) !important;
+}
+.cleanx-content .cleanx-table-wrap {
+	width: 100% !important;
+	max-width: 100% !important;
+	overflow-x: auto !important;
+	overflow-y: visible !important;
+	border-radius: 20px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: rgba(var(--cleanx-bg-rgb), .14) !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+.cleanx-content .cleanx-table-wrap > table {
+	border: 0 !important;
+	box-shadow: none !important;
+	background: transparent !important;
+}
+
+/* Div-based LuCI tables: keep readable two-column/status layouts without
+ * forcing them into narrow broken columns. */
+.cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) {
+	display: table !important;
+	width: 100% !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+}
+.cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr {
+	display: table-row !important;
+	height: auto !important;
+	min-height: 0 !important;
+}
+.cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td,
+.cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) .tr > .td {
+	display: table-cell !important;
+	vertical-align: top !important;
+	padding: 8px 12px !important;
+	line-height: 1.48 !important;
+}
+
+/* Dense action cells: compact but usable. This fixes Startup, Processes,
+ * DHCP static leases, Wireless and Interfaces action columns. */
+.cleanx-content td.cbi-section-actions,
+.cleanx-content th.cbi-section-actions,
+.cleanx-content .td.cbi-section-actions,
+.cleanx-content .th.cbi-section-actions {
+	white-space: normal !important;
+	text-align: right !important;
+	vertical-align: middle !important;
+	width: 1% !important;
+	min-width: 150px !important;
+	max-width: 260px !important;
+	padding-left: 10px !important;
+	padding-right: 10px !important;
+}
+.cleanx-content td.cbi-section-actions > *,
+.cleanx-content .td.cbi-section-actions > * {
+	vertical-align: middle !important;
+}
+.cleanx-content td.cbi-section-actions .cbi-button,
+.cleanx-content td.cbi-section-actions .btn,
+.cleanx-content .td.cbi-section-actions .cbi-button,
+.cleanx-content .td.cbi-section-actions .btn,
+body[data-page*="startup"] .cleanx-content .btn,
+body[data-page*="processes"] .cleanx-content .btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	height: 28px !important;
+	min-height: 28px !important;
+	padding: 0 10px !important;
+	margin: 2px !important;
+	border-radius: 999px !important;
+	font-size: 11px !important;
+	font-weight: 850 !important;
+	line-height: 1 !important;
+	white-space: nowrap !important;
+	box-shadow: none !important;
+}
+body[data-page*="startup"] .cleanx-content td.cbi-section-actions,
+body[data-page*="startup"] .cleanx-content .td.cbi-section-actions {
+	min-width: 270px !important;
+	max-width: 320px !important;
+}
+body[data-page*="processes"] .cleanx-content td.cbi-section-actions,
+body[data-page*="processes"] .cleanx-content .td.cbi-section-actions {
+	min-width: 220px !important;
+	max-width: 260px !important;
+}
+
+/* DHCP/Network overview: keep final action column available without forcing
+ * the whole page to scroll to reach Reserve IP/Edit/Delete buttons. */
+body[data-page*="overview"] .cleanx-content table td.cbi-section-actions,
+body[data-page*="network"] .cleanx-content table td.cbi-section-actions,
+body[data-page*="dhcp"] .cleanx-content table td.cbi-section-actions,
+body[data-page*="wireless"] .cleanx-content table td.cbi-section-actions {
+	position: sticky !important;
+	right: 0 !important;
+	z-index: 2 !important;
+	background: color-mix(in srgb, var(--cleanx-bg) 84%, transparent) !important;
+	backdrop-filter: blur(16px) saturate(1.2) !important;
+}
+
+/* Save/Apply bar: modern compact controls, not a huge dropdown blob. */
+.cleanx-content .cbi-page-actions,
+.cleanx-content #applyrevert,
+.cleanx-content #cbi_apply_footer,
+.cleanx-content #cbi_apply_status,
+.cleanx-content .uci-change-actions {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: 8px !important;
+	flex-wrap: wrap !important;
+	padding: 12px 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-button,
+.cleanx-content .cbi-page-actions > button,
+.cleanx-content .cbi-page-actions > input,
+.cleanx-content #applyrevert .cbi-button,
+.cleanx-content #applyrevert button,
+.cleanx-content #applyrevert input,
+.cleanx-content .uci-change-actions .cbi-button,
+.cleanx-content .uci-change-actions button,
+.cleanx-content .uci-change-actions input {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: auto !important;
+	min-width: 64px !important;
+	height: 34px !important;
+	min-height: 34px !important;
+	padding: 0 14px !important;
+	margin: 0 !important;
+	border-radius: 14px !important;
+	font-size: 12px !important;
+	font-weight: 850 !important;
+	line-height: 1 !important;
+	white-space: nowrap !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply {
+	position: relative !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: auto !important;
+	min-width: 132px !important;
+	height: 36px !important;
+	min-height: 36px !important;
+	padding: 0 34px 0 16px !important;
+	border-radius: 15px !important;
+	font-size: 0 !important;
+	overflow: visible !important;
+	background: linear-gradient(135deg, var(--cleanx-accent), var(--cleanx-accent-2)) !important;
+	border-color: transparent !important;
+	color: #fff !important;
+	box-shadow: 0 12px 28px rgba(var(--cleanx-accent-rgb), .22) !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply::before,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply::before,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply::before {
+	content: "Save & Apply" !important;
+	font-size: 12px !important;
+	font-weight: 900 !important;
+	line-height: 1 !important;
+	color: #fff !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply::after,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply::after,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply::after {
+	content: "⌄" !important;
+	position: absolute !important;
+	right: 13px !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+	font-size: 12px !important;
+	color: rgba(255,255,255,.92) !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply > span,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply > span,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply > span,
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply > div,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply > div,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply > div {
+	display: none !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply > ul,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply > ul,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply > ul {
+	position: absolute !important;
+	top: calc(100% + 8px) !important;
+	right: 0 !important;
+	left: auto !important;
+	display: none !important;
+	min-width: 180px !important;
+	padding: 6px !important;
+	border-radius: 16px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: var(--cleanx-surface-strong) !important;
+	box-shadow: var(--cleanx-shadow) !important;
+	z-index: 30 !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply:hover > ul,
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply:focus > ul,
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply:focus-within > ul,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply:hover > ul,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply:focus > ul,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply:focus-within > ul,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply:hover > ul,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply:focus > ul,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply:focus-within > ul {
+	display: grid !important;
+	gap: 4px !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply > ul > li,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply > ul > li,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply > ul > li {
+	display: block !important;
+	padding: 9px 10px !important;
+	border-radius: 12px !important;
+	font-size: 12px !important;
+	font-weight: 850 !important;
+	line-height: 1.2 !important;
+	color: var(--cleanx-text) !important;
+	background: transparent !important;
+	white-space: nowrap !important;
+}
+.cleanx-content .cbi-page-actions > .cbi-dropdown.cbi-button-apply > ul > li:hover,
+.cleanx-content #applyrevert .cbi-dropdown.cbi-button-apply > ul > li:hover,
+.cleanx-content .uci-change-actions .cbi-dropdown.cbi-button-apply > ul > li:hover {
+	background: rgba(var(--cleanx-accent-rgb), .12) !important;
+}
+
+/* DNS/DHCP multi-value fields: keep compact, clickable and non-overlapping.
+ * Do not apply this to normal single dropdowns or action dropdowns. */
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value {
+	align-items: flex-start !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-value-field {
+	min-width: 0 !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) {
+	position: relative !important;
+	width: min(100%, 920px) !important;
+	min-height: 40px !important;
+	max-height: none !important;
+	padding: 8px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 16px !important;
+	background: rgba(var(--cleanx-bg-rgb), .18) !important;
+	overflow: visible !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) > ul {
+	position: static !important;
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+	gap: 7px !important;
+	width: 100% !important;
+	max-height: 260px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	overflow: auto !important;
+	overscroll-behavior: contain !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-network-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) > ul {
+	grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) > ul > li {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	min-height: 34px !important;
+	padding: 7px 10px !important;
+	border-radius: 12px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: var(--cleanx-surface-strong) !important;
+	line-height: 1.2 !important;
+	white-space: normal !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) input[type="checkbox"],
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) input[type="radio"] {
+	position: static !important;
+	display: inline-block !important;
+	width: 16px !important;
+	height: 16px !important;
+	margin: 0 !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	pointer-events: auto !important;
+}
+
+/* LED editor: grid checkboxes, correct click target, no misleading huge list. */
+body.cleanx-page-leds #modal_overlay .modal,
+body.cleanx-page-leds .cleanx-content .modal {
+	max-width: min(940px, calc(100vw - 34px)) !important;
+}
+body.cleanx-page-leds #modal_overlay .modal .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul,
+body.cleanx-page-leds .cleanx-content .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul {
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+	gap: 8px !important;
+	max-height: none !important;
+	overflow: visible !important;
+}
+body.cleanx-page-leds #modal_overlay .modal .cbi-dropdown:not(.cbi-button) > ul > li,
+body.cleanx-page-leds .cleanx-content .cbi-dropdown:not(.cbi-button) > ul > li {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	min-height: 34px !important;
+	padding: 8px 10px !important;
+	cursor: pointer !important;
+}
+body.cleanx-page-leds #modal_overlay input[type="checkbox"],
+body.cleanx-page-leds #modal_overlay input[type="radio"],
+body.cleanx-page-leds .cleanx-content input[type="checkbox"],
+body.cleanx-page-leds .cleanx-content input[type="radio"] {
+	position: static !important;
+	width: 16px !important;
+	height: 16px !important;
+	margin: 0 8px 0 0 !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	pointer-events: auto !important;
+}
+
+/* Startup: hide the unreliable Local Startup panel completely when CleanX marks
+ * it. Keep the service list compact and professional. */
+body.cleanx-page-startup .cleanx-startup-local-panel,
+body.cleanx-page-startup [data-cleanx-startup-local="1"] {
+	display: none !important;
+}
+body.cleanx-page-startup .cleanx-content .cleanx-table-wrap {
+	max-height: none !important;
+	overflow-x: auto !important;
+}
+body.cleanx-page-startup .cleanx-content table.table td,
+body.cleanx-page-startup .cleanx-content table.table th {
+	padding-top: 8px !important;
+	padding-bottom: 8px !important;
+}
+
+/* Wireless: compact two-column table values and stop excessive vertical gaps. */
+body[data-page*="wireless"] .cleanx-content table.table tr,
+body[data-page*="wireless"] .cleanx-content table.cbi-section-table tr {
+	height: auto !important;
+}
+body[data-page*="wireless"] .cleanx-content table.table td,
+body[data-page*="wireless"] .cleanx-content table.cbi-section-table td {
+	padding-top: 9px !important;
+	padding-bottom: 9px !important;
+	line-height: 1.36 !important;
+}
+body[data-page*="wireless"] .cleanx-content img {
+	max-width: 28px !important;
+	height: auto !important;
+}
+
+/* Realtime/Load/Channel Analysis: graphs must stay inside card bounds and use
+ * available width without clipping or breaking out. */
+body.cleanx-page-graphs .cleanx-content .cleanx-table-wrap,
+body[data-page*="realtime"] .cleanx-content .cleanx-table-wrap,
+body[data-page*="load"] .cleanx-content .cleanx-table-wrap,
+body[data-page*="channel_analysis"] .cleanx-content .cleanx-table-wrap,
+body[data-page*="channel"] .cleanx-content .cleanx-table-wrap {
+	overflow-x: auto !important;
+	overflow-y: hidden !important;
+	max-width: 100% !important;
+}
+body.cleanx-page-graphs .cleanx-content .cbi-map,
+body.cleanx-page-graphs .cleanx-content .cbi-section,
+body[data-page*="realtime"] .cleanx-content .cbi-map,
+body[data-page*="realtime"] .cleanx-content .cbi-section,
+body[data-page*="load"] .cleanx-content .cbi-map,
+body[data-page*="load"] .cleanx-content .cbi-section,
+body[data-page*="channel_analysis"] .cleanx-content .cbi-map,
+body[data-page*="channel_analysis"] .cleanx-content .cbi-section,
+body[data-page*="channel"] .cleanx-content .cbi-map,
+body[data-page*="channel"] .cleanx-content .cbi-section {
+	overflow: hidden !important;
+	max-width: 100% !important;
+}
+body.cleanx-page-graphs .cleanx-content canvas,
+body.cleanx-page-graphs .cleanx-content svg,
+body[data-page*="realtime"] .cleanx-content canvas,
+body[data-page*="realtime"] .cleanx-content svg,
+body[data-page*="load"] .cleanx-content canvas,
+body[data-page*="load"] .cleanx-content svg,
+body[data-page*="channel_analysis"] .cleanx-content canvas,
+body[data-page*="channel_analysis"] .cleanx-content svg,
+body[data-page*="channel"] .cleanx-content canvas,
+body[data-page*="channel"] .cleanx-content svg {
+	display: block !important;
+	max-width: 100% !important;
+	width: 100% !important;
+	height: auto !important;
+	min-height: 220px !important;
+	margin: 0 auto !important;
+	overflow: hidden !important;
+}
+
+/* Mobile stability. */
+@media (max-width: 760px) {
+	.cleanx-content { width: calc(100% - 20px) !important; }
+	.cleanx-content .cleanx-table-wrap { border-radius: 16px !important; }
+	.cleanx-content table.table th,
+	.cleanx-content table.table td,
+	.cleanx-content table.cbi-section-table th,
+	.cleanx-content table.cbi-section-table td {
+		padding: 8px 10px !important;
+		font-size: 12px !important;
+	}
+	.cleanx-content td.cbi-section-actions,
+	.cleanx-content .td.cbi-section-actions {
+		min-width: 180px !important;
+	}
+	body.cleanx-page-dnsdhcp .cleanx-content .cbi-value.cleanx-dense-choice-value .cbi-dropdown.cleanx-choice-grid:not(.cbi-button) > ul,
+	body.cleanx-page-leds #modal_overlay .modal .cbi-value[data-widget="CBI.MultiValue"] .cbi-dropdown:not(.cbi-button) > ul {
+		grid-template-columns: 1fr !important;
+		max-height: 320px !important;
+		overflow: auto !important;
 	}
 }

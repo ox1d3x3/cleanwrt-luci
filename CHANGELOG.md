@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0] - 2026-05-26
+
+### Fixed
+- Restored native LuCI table layout for DHCP, Startup, Wireless, Processes and Routing pages.
+- Compacted Startup and Processes action buttons without forcing huge row heights.
+- Hid the unreliable Local Startup panel when CleanX detects the Startup page.
+- Improved LED trigger-mode checkbox layout while keeping native LuCI input handling.
+- Improved Realtime Graphs, Load and Channel Analysis containers so graphs stay inside their cards.
+- Improved Save & Apply dropdown styling so it stays compact and modern.
+- Added sticky action cells for wide Network/DHCP/Overview tables where supported.
+
+### Changed
+- Workflow release assets now use architecture-independent `all-openwrt-*` naming.
+
+# Changelog
+
 
 
 ## v0.3.9 - Workflow recovery

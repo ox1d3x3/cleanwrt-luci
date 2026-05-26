@@ -441,50 +441,51 @@ return baseclass.extend({
 
 
 	bindCbiTabsFallback() {
-		/* Native LuCI owns CBI tabs. CleanX only repairs tabs after a click when
-		 * the native handler did not switch the panel. This avoids blocking System,
-		 * Startup and other tabbed pages. */
+		/* Native LuCI owns CBI tabs. CleanX only repairs a tab after click if the
+		 * native handler did not switch the panel within a short delay. */
+		const findPanelRoot = (menu) => {
+			let root = menu && menu.nextElementSibling;
+			if (root && (root.classList.contains('cbi-map-tabbed') || root.classList.contains('cbi-section-node-tabbed') || (root.matches && root.matches('[data-initialized][class*="tabbed"]'))))
+				return root;
+			for (let p = menu && menu.parentElement; p; p = p.parentElement) {
+				root = p.querySelector(':scope > .cbi-map-tabbed, :scope > .cbi-section-node-tabbed, :scope > [data-initialized][class*="tabbed"]');
+				if (root) return root;
+			}
+			return null;
+		};
+
 		document.addEventListener('click', (ev) => {
 			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
 			if (!a) return;
-
 			const li = a.closest('li[data-tab]');
 			const tab = li && li.getAttribute('data-tab');
 			const menu = a.closest('.cbi-tabmenu');
-			let panelRoot = menu ? menu.nextElementSibling : null;
-
-			if (!tab || !menu) return;
-			if (!panelRoot || !(
-				panelRoot.classList.contains('cbi-map-tabbed') ||
-				panelRoot.classList.contains('cbi-section-node-tabbed') ||
-				(panelRoot.matches && panelRoot.matches('[data-initialized][class*="tabbed"]'))
-			)) {
-				panelRoot = menu.parentElement && menu.parentElement.querySelector(':scope > .cbi-map-tabbed, :scope > .cbi-section-node-tabbed, :scope > [data-initialized][class*="tabbed"]');
-			}
-			if (!panelRoot) return;
+			const panelRoot = findPanelRoot(menu);
+			if (!tab || !menu || !panelRoot) return;
 
 			window.setTimeout(() => {
 				const safeTab = (window.CSS && CSS.escape) ? CSS.escape(tab) : tab.replace(/"/g, '\\"');
 				const targetPanel = panelRoot.querySelector(':scope > [data-tab="' + safeTab + '"]');
-				if (!targetPanel) return;
+				if (!targetPanel || targetPanel.classList.contains('cleanx-startup-local-panel')) return;
 
-				const nativeActive = targetPanel.dataset.tabActive === 'true' || targetPanel.hidden === false || targetPanel.style.display !== 'none';
-				if (nativeActive && li.classList.contains('cbi-tab')) return;
+				const targetVisible = !targetPanel.hidden && getComputedStyle(targetPanel).display !== 'none';
+				if (targetVisible && li.classList.contains('cbi-tab')) return;
 
 				menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
+					if (item.classList.contains('cleanx-hidden-local-startup-tab')) return;
 					const active = item === li;
 					item.classList.toggle('cbi-tab', active);
 					item.classList.toggle('cbi-tab-disabled', !active);
 					item.classList.toggle('active', active);
 				});
-
 				panelRoot.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
+					if (panel.classList.contains('cleanx-startup-local-panel')) return;
 					const active = panel.getAttribute('data-tab') === tab;
 					panel.dataset.tabActive = active ? 'true' : 'false';
 					panel.hidden = !active;
 					panel.style.display = active ? '' : 'none';
 				});
-			}, 80);
+			}, 140);
 		}, false);
 	},
 
@@ -626,8 +627,9 @@ return baseclass.extend({
 
 
 	stabiliseNativeLuciControls() {
-		/* Final safety layer: keep LuCI controls native and only add page flags or
-		 * harmless helper behaviour. This is intentionally conservative. */
+		/* Final safety layer: keep LuCI controls native. No custom click handlers
+		 * are attached to checkbox/dropdown rows because LuCI already owns those
+		 * events. CleanX only marks pages and hides known-broken duplicate panels. */
 		const markPage = () => {
 			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
 			document.body.classList.toggle('cleanx-page-dnsdhcp', /dhcp|dns/.test(page));
@@ -636,47 +638,55 @@ return baseclass.extend({
 			document.body.classList.toggle('cleanx-page-graphs', /realtime|load|channel_analysis|channel/.test(page));
 		};
 
-		const hideBrokenLocalStartup = () => {
+		const hideStartupLocalPanel = () => {
 			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
 			if (!/startup/.test(page)) return;
+
+			/* Hide Local Startup tab entry. The actual rc.local panel can appear as a
+			 * sibling section in OpenWrt 25.x, so detect it by data-tab and content. */
 			document.querySelectorAll('.cbi-tabmenu > li[data-tab]').forEach((li) => {
 				const label = String(li.textContent || '').trim().toLowerCase();
 				const tab = String(li.getAttribute('data-tab') || '').toLowerCase();
-				if (!/local/.test(label + ' ' + tab)) return;
+				if (!/local|\brc\b/.test(label + ' ' + tab)) return;
 				li.classList.add('cleanx-hidden-local-startup-tab');
 				li.style.display = 'none';
-				const menu = li.closest('.cbi-tabmenu');
-				const root = menu && (menu.nextElementSibling || menu.parentElement.querySelector(':scope > .cbi-section-node-tabbed, :scope > .cbi-map-tabbed'));
-				if (root) root.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
-					const panelTab = String(panel.getAttribute('data-tab') || '').toLowerCase();
-					if (/local/.test(panelTab)) {
-						panel.hidden = true;
-						panel.style.display = 'none';
-						panel.dataset.tabActive = 'false';
-					}
-				});
-				if (li.classList.contains('cbi-tab')) {
-					const first = menu.querySelector(':scope > li[data-tab]:not(.cleanx-hidden-local-startup-tab) > a');
-					first && first.click();
+			});
+
+			document.querySelectorAll('[data-tab]').forEach((panel) => {
+				const tab = String(panel.getAttribute('data-tab') || '').toLowerCase();
+				if (/local|\brc\b/.test(tab)) {
+					panel.classList.add('cleanx-startup-local-panel');
+					panel.dataset.cleanxStartupLocal = '1';
+					panel.style.display = 'none';
+					panel.hidden = true;
 				}
 			});
-		};
 
-		const repairCheckboxRows = () => {
-			/* Improve hit targets without rebuilding LuCI DOM. */
-			document.querySelectorAll('#modal_overlay .cbi-dropdown li, .cleanx-content .cbi-dropdown li').forEach((li) => {
-				if (li.dataset.cleanxCheckboxRow === '1') return;
-				if (!li.querySelector('input[type="checkbox"], input[type="radio"]')) return;
-				li.dataset.cleanxCheckboxRow = '1';
-				li.addEventListener('click', (ev) => {
-					if (ev.target.matches('input, label, a, button, select, textarea')) return;
-					const input = li.querySelector('input[type="checkbox"], input[type="radio"]');
-					if (input && !input.disabled) input.click();
-				}, false);
+			document.querySelectorAll('#maincontent .cbi-section, #maincontent .cbi-map, #maincontent textarea').forEach((node) => {
+				const text = String(node.textContent || node.value || '').toLowerCase();
+				if (!/\/etc\/rc\.local|put your custom commands here|exit 0/.test(text)) return;
+				const section = node.closest('.cbi-section, .cbi-map') || node;
+				section.classList.add('cleanx-startup-local-panel');
+				section.dataset.cleanxStartupLocal = '1';
+				section.style.display = 'none';
+				section.hidden = true;
+			});
+
+			/* Ensure first visible tab is active if the hidden local tab was active. */
+			document.querySelectorAll('.cbi-tabmenu').forEach((menu) => {
+				if (menu.querySelector(':scope > li.cbi-tab:not(.cleanx-hidden-local-startup-tab)')) return;
+				const first = menu.querySelector(':scope > li[data-tab]:not(.cleanx-hidden-local-startup-tab) > a');
+				first && first.click();
 			});
 		};
 
-		const run = () => { markPage(); hideBrokenLocalStartup(); repairCheckboxRows(); };
+		const markInputsOnly = () => {
+			document.querySelectorAll('#modal_overlay input[type="checkbox"], #modal_overlay input[type="radio"], .cleanx-content input[type="checkbox"], .cleanx-content input[type="radio"]').forEach((input) => {
+				input.classList.add('cleanx-native-choice-input');
+			});
+		};
+
+		const run = () => { markPage(); hideStartupLocalPanel(); markInputsOnly(); };
 		run();
 		window.addEventListener('load', run, { once: true });
 		setTimeout(run, 250);
