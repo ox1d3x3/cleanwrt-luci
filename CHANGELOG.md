@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.0] - 2026-05-26
+## [0.4.2] - 2026-05-26
 
 ### Fixed
 - Restored native LuCI table layout for DHCP, Startup, Wireless, Processes and Routing pages.

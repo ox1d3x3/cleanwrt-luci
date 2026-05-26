@@ -24,6 +24,7 @@ return baseclass.extend({
 		this.fixModalAndShellDetails();
 		this.polishDnsAndActionControls();
 		this.stabiliseNativeLuciControls();
+		this.splitApplyDropdown();
 	},
 
 	icon(name) {
@@ -112,7 +113,7 @@ return baseclass.extend({
 
 			/* Conservative table handling: do not wrap status/live widgets or native
 			 * LuCI structures that rely on their own JS and inline layout. */
-			main.querySelectorAll('table, div.table, .cbi-section-table').forEach((table) => {
+			main.querySelectorAll('table').forEach((table) => {
 				if (table.closest('.cleanx-dashboard, #modal_overlay, .ifacebox, .cleanx-port-grid')) return;
 
 				const hasLiveGraph = !!table.querySelector('canvas, .cbi-progressbar, .progress');
@@ -695,6 +696,111 @@ return baseclass.extend({
 			const observer = new MutationObserver(() => window.requestAnimationFrame(run));
 			observer.observe(document.body, { childList: true, subtree: true });
 		}
+	},
+
+
+	splitApplyDropdown() {
+		/* LuCI renders Save & Apply as a dropdown button with additional choices such
+		 * as "Apply unchecked". CleanX exposes this as a clean primary button plus a
+		 * separate More button, while keeping the original LuCI dropdown in the DOM so
+		 * the native event handlers still run. */
+		const normalise = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+		const clickNativeItem = (drop, item) => {
+			try {
+				if (item) {
+					const value = item.getAttribute('data-value');
+					const hidden = drop.querySelector('input[type="hidden"]');
+					if (hidden && value != null) {
+						hidden.value = value;
+						hidden.dispatchEvent(new Event('change', { bubbles: true }));
+					}
+					['mousedown', 'mouseup', 'click'].forEach((type) => {
+						item.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+					});
+					drop.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+				}
+				else {
+					drop.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+				}
+			}
+			catch (_) {
+				try { item ? item.click() : drop.click(); } catch (__) {}
+			}
+		};
+
+		const build = () => {
+			const main = document.getElementById('maincontent') || document.body;
+			if (!main) return;
+
+			main.querySelectorAll('.cbi-page-actions .cbi-dropdown.cbi-button-apply, #applyrevert .cbi-dropdown.cbi-button-apply, #cbi_apply_status .cbi-dropdown.cbi-button-apply, #cbi_apply_footer .cbi-dropdown.cbi-button-apply, .uci-change-actions .cbi-dropdown.cbi-button-apply').forEach((drop) => {
+				if (drop.dataset.cleanxApplySplit === '1' || drop.closest('.cleanx-apply-group')) return;
+				const items = Array.from(drop.querySelectorAll(':scope > ul > li')).filter((li) => normalise(li.textContent));
+				if (!items.length) return;
+
+				const selected = items.find((li) => li.hasAttribute('selected') || li.getAttribute('display') === '0') || items[0];
+				const group = document.createElement('span');
+				group.className = 'cleanx-apply-group';
+
+				const mainBtn = document.createElement('button');
+				mainBtn.type = 'button';
+				mainBtn.className = 'cleanx-apply-main';
+				mainBtn.textContent = 'Save & Apply';
+				mainBtn.title = normalise(selected.textContent) || 'Save & Apply';
+				mainBtn.addEventListener('click', (ev) => {
+					ev.preventDefault();
+					ev.stopPropagation();
+					clickNativeItem(drop, selected);
+				});
+
+				const moreBtn = document.createElement('button');
+				moreBtn.type = 'button';
+				moreBtn.className = 'cleanx-apply-more';
+				moreBtn.textContent = '⋯';
+				moreBtn.title = 'More apply options';
+
+				const menu = document.createElement('span');
+				menu.className = 'cleanx-apply-menu';
+				items.forEach((item) => {
+					const opt = document.createElement('button');
+					opt.type = 'button';
+					opt.textContent = normalise(item.textContent);
+					opt.title = opt.textContent;
+					opt.addEventListener('click', (ev) => {
+						ev.preventDefault();
+						ev.stopPropagation();
+						menu.classList.remove('open');
+						clickNativeItem(drop, item);
+					});
+					menu.appendChild(opt);
+				});
+
+				moreBtn.addEventListener('click', (ev) => {
+					ev.preventDefault();
+					ev.stopPropagation();
+					menu.classList.toggle('open');
+				});
+
+				drop.classList.add('cleanx-native-apply-source');
+				drop.dataset.cleanxApplySplit = '1';
+				group.appendChild(mainBtn);
+				group.appendChild(moreBtn);
+				group.appendChild(menu);
+				drop.insertAdjacentElement('beforebegin', group);
+			});
+		};
+
+		build();
+		window.addEventListener('load', build, { once: true });
+		setTimeout(build, 250);
+		setTimeout(build, 1000);
+		if (window.MutationObserver) {
+			const observer = new MutationObserver(() => window.requestAnimationFrame(build));
+			observer.observe(document.body, { childList: true, subtree: true });
+		}
+		document.addEventListener('click', (ev) => {
+			if (ev.target.closest('.cleanx-apply-group')) return;
+			document.querySelectorAll('.cleanx-apply-menu.open').forEach((menu) => menu.classList.remove('open'));
+		});
 	},
 
 	render(tree) {
