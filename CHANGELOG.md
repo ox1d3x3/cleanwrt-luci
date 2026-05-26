@@ -1,7 +1,7 @@
 # Changelog
 
 
-## v0.4.5
+## v0.4.6
 
 - Added a real LuCI table recovery pass for DHCP, DNS, Routing, Firewall, LED, Interfaces, Wireless, Software, Startup and Processes.
 - Stopped technical table cells from collapsing into vertical letters.
@@ -9,7 +9,7 @@
 - Improved graph containment for Load, Realtime Graphs and Channel Analysis.
 - Kept Save & Apply as a modern primary button plus separate More action.
 
-## [0.4.5] - 2026-05-26
+## [0.4.6] - 2026-05-26
 
 ### Fixed
 - Centred the top bar router/page title so it no longer appears slightly off-position.
