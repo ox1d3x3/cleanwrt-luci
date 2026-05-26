@@ -37,11 +37,23 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.4.7">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.4.9">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.4.7">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.4.9">
 	{% endif %}
-	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
+
+	<script>
+	(function () {
+		function hideCleanXLoader() {
+			var el = document.getElementById('cleanx-page-loader');
+			if (el) el.classList.add('cleanx-hidden');
+		}
+		window.addEventListener('error', hideCleanXLoader);
+		window.addEventListener('unhandledrejection', hideCleanXLoader);
+		window.addEventListener('load', hideCleanXLoader, { once: true });
+		setTimeout(hideCleanXLoader, 3000);
+	})();
+	</script>	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
 	{% if (node?.css): %}
 	<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
 	{% endif %}

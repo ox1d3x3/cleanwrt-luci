@@ -1,6 +1,14 @@
 # Changelog
 
-## v0.4.8
+## v0.4.9
+
+### Fixed
+- Added a loader failsafe so LuCI can no longer remain stuck behind the CleanX loading screen if an optional JavaScript enhancer fails.
+- Wrapped optional UI enhancers with safe error handling. Native LuCI content should still render even if one CleanX enhancement hits an unexpected page structure.
+- Updated cache-busting version strings for CleanX CSS assets.
+
+
+## v0.4.9
 
 - Fixed GitHub Actions auto-trigger behaviour after GitHub Desktop push.
 - Replaced stale UniWRT workflow references with CleanX workflow naming.
@@ -8,7 +16,7 @@
 - Kept package assets architecture-independent with `all-openwrt-*` release naming.
 
 
-## v0.4.8
+## v0.4.9
 
 - GitHub Desktop commit safety fix.
 - Removed long saved-browser QA page filenames from the tracked repo package.
@@ -18,7 +26,7 @@
 
 
 
-## v0.4.8
+## v0.4.9
 
 - Added a real LuCI table recovery pass for DHCP, DNS, Routing, Firewall, LED, Interfaces, Wireless, Software, Startup and Processes.
 - Stopped technical table cells from collapsing into vertical letters.

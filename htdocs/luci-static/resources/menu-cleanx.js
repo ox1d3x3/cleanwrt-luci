@@ -8,24 +8,40 @@ return baseclass.extend({
 	callSystemInfo: rpc.declare({ object: 'system', method: 'info' }),
 
 	__init__() {
-		ui.menu.load().then((tree) => this.render(tree));
-		this.bindShellControls();
-		this.enhanceLuciContent();
-		this.classifyLuciTables();
-		this.splitDiagnosticDropdownActions();
-		this.patchChangeIndicator();
-		this.startClock();
-		this.startProgress();
+		/* Start the loader failsafe first. Some LuCI pages expose unusual DOM
+		 * structures; if a later optional enhancer throws, the UI must not remain
+		 * hidden behind the loading overlay. */
 		this.removeLoader();
-		this.bindRipples();
-		this.bindButtonFeedback();
-		this.installToast();
-		this.bindCbiTabsFallback();
-		this.startStatusLiveRefresh();
-		this.fixModalAndShellDetails();
-		this.polishDnsAndActionControls();
-		this.stabiliseNativeLuciControls();
-		this.splitApplyDropdown();
+
+		const safe = (name, fn) => {
+			try { fn.call(this); }
+			catch (err) {
+				console.warn('[CleanX] Optional enhancer skipped:', name, err);
+				this.removeLoader();
+			}
+		};
+
+		ui.menu.load()
+			.then((tree) => this.render(tree))
+			.catch((err) => console.warn('[CleanX] Menu render skipped:', err))
+			.finally(() => this.removeLoader());
+
+		safe('shell controls', this.bindShellControls);
+		safe('luci content', this.enhanceLuciContent);
+		safe('table classifier', this.classifyLuciTables);
+		safe('diagnostics actions', this.splitDiagnosticDropdownActions);
+		safe('change indicator', this.patchChangeIndicator);
+		safe('clock', this.startClock);
+		safe('progress', this.startProgress);
+		safe('ripples', this.bindRipples);
+		safe('button feedback', this.bindButtonFeedback);
+		safe('toast', this.installToast);
+		safe('cbi tabs', this.bindCbiTabsFallback);
+		safe('status refresh', this.startStatusLiveRefresh);
+		safe('modal details', this.fixModalAndShellDetails);
+		safe('dns controls', this.polishDnsAndActionControls);
+		safe('native controls', this.stabiliseNativeLuciControls);
+		safe('apply dropdown', this.splitApplyDropdown);
 	},
 
 	icon(name) {
@@ -325,8 +341,14 @@ return baseclass.extend({
 
 	removeLoader() {
 		const hide = () => document.getElementById('cleanx-page-loader')?.classList.add('cleanx-hidden');
+		if (document.readyState === 'interactive' || document.readyState === 'complete') hide();
+		document.addEventListener('DOMContentLoaded', hide, { once: true });
 		window.addEventListener('load', hide, { once: true });
-		setTimeout(hide, 900);
+		window.addEventListener('error', hide, { once: true });
+		window.addEventListener('unhandledrejection', hide, { once: true });
+		setTimeout(hide, 250);
+		setTimeout(hide, 1200);
+		setTimeout(hide, 3000);
 	},
 
 	bindRipples() {
