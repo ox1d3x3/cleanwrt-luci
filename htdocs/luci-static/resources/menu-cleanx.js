@@ -637,6 +637,9 @@ return baseclass.extend({
 			document.body.classList.toggle('cleanx-page-leds', /led/.test(page));
 			document.body.classList.toggle('cleanx-page-startup', /startup|init/.test(page));
 			document.body.classList.toggle('cleanx-page-graphs', /realtime|load|channel_analysis|channel/.test(page));
+			document.body.classList.toggle('cleanx-page-processes', /processes/.test(page));
+			document.body.classList.toggle('cleanx-page-package', /package-manager|software|opkg/.test(page));
+			document.body.classList.toggle('cleanx-page-networktables', /network|interfaces|wireless|dhcp|dns|routes|routing|firewall/.test(page));
 		};
 
 		const hideStartupLocalPanel = () => {

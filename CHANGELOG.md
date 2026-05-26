@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.4.2] - 2026-05-26
+## [0.4.4] - 2026-05-26
+
+### Fixed
+- Centred the top bar router/page title so it no longer appears slightly off-position.
+- Added safer responsive truncation for long page titles.
+
+## [0.4.3] - 2026-05-26
 
 ### Fixed
 - Restored native LuCI table layout for DHCP, Startup, Wireless, Processes and Routing pages.
