@@ -7,3 +7,9 @@ build_dir/
 staging_dir/
 tmp/
 logs/
+
+# Saved browser QA pages can contain very long Windows-incompatible filenames.
+# Keep them outside the repo or zip them separately as test evidence.
+preview/qa-v*-user-pages/
+preview/*_files/
+*.download

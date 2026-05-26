@@ -11,6 +11,7 @@ return baseclass.extend({
 		ui.menu.load().then((tree) => this.render(tree));
 		this.bindShellControls();
 		this.enhanceLuciContent();
+		this.classifyLuciTables();
 		this.splitDiagnosticDropdownActions();
 		this.patchChangeIndicator();
 		this.startClock();

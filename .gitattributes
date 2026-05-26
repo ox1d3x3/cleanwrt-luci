@@ -1,0 +1,13 @@
+# Keep repository line endings stable across Windows/GitHub Desktop/Linux builders.
+* text=auto eol=lf
+
+# Binary/package/artifact files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.svg text eol=lf
+*.zip binary
+*.ipk binary
+*.apk binary
