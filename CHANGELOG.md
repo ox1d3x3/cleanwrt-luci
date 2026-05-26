@@ -1,5 +1,19 @@
 # Changelog
 
+
+
+## v0.3.8 - Workflow recovery
+
+### Fixed
+- Replaced the stale `Build UniWRT packages` workflow with a CleanX-specific pre-release workflow.
+- Fixed package build jobs still referencing `luci-theme-uniwrt` instead of `luci-theme-cleanx`.
+- Added a compatibility `scripts/build-sdk.sh` that uses CleanX names and current OpenWrt SDK targets.
+- Made the older manual build workflow dispatch-only to avoid duplicate or conflicting release jobs.
+
+### Changed
+- Pre-release assets are generated with clean package names and attached with build logs, summaries and checksums.
+- Release notes now clearly identify the package target and format.
+
 All notable user-facing CleanX changes are tracked here. GitHub Actions uses this file when generating automated pre-release notes.
 
 ## [0.3.7] - 2026-05-26
