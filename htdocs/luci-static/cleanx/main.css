@@ -1,4 +1,4 @@
-/* CleanX Theme v0.4.4 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.4.5 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -5766,7 +5766,7 @@ body[data-page*="channel"] .cleanx-content .table {
 
 
 /*
- * CleanX v0.4.4 - table/control stability pass
+ * CleanX v0.4.5 - table/control stability pass
  * This block intentionally overrides older aggressive table/dropdown styling.
  * Goal: keep LuCI native controls functional while polishing spacing, buttons
  * and overflow on real OpenWrt 25.x pages.
@@ -6265,7 +6265,7 @@ body[data-page*="channel"] .cleanx-content svg {
 
 
 /*
- * CleanX v0.4.4 - native LuCI recovery pass
+ * CleanX v0.4.5 - native LuCI recovery pass
  * Safety-first overrides for real OpenWrt pages. This block intentionally
  * reduces aggressive table/dropdown styling from older builds and keeps LuCI's
  * own JS-controlled controls clickable.
@@ -6729,7 +6729,7 @@ body[data-page*="channel_analysis"] .cleanx-content svg {
 
 
 /*
- * CleanX v0.4.4 - conservative native LuCI audit pass
+ * CleanX v0.4.5 - conservative native LuCI audit pass
  * This block is intentionally last. It corrects regressions from aggressive
  * table/dropdown styling while keeping LuCI's own JavaScript controls native.
  */
@@ -7059,7 +7059,7 @@ body[data-page*="channel"] .cleanx-content canvas {
 }
 
 /* --------------------------------------------------------------------------
- * CleanX v0.4.4 - data-table stability audit
+ * CleanX v0.4.5 - data-table stability audit
  *
  * Most remaining regressions were caused by LuCI technical tables being forced
  * to fit inside the viewport. That made MAC addresses, IPv6, package names and
@@ -7538,7 +7538,7 @@ body[data-page*="channel"] .cleanx-content canvas {
 }
 
 /* -------------------------------------------------------------------------
- * CleanX v0.4.4 - topbar title alignment polish
+ * CleanX v0.4.5 - topbar title alignment polish
  * Keeps the router name + page title visually centred between the menu and
  * right-side controls instead of drifting because of unequal side widths.
  * ------------------------------------------------------------------------- */
@@ -7602,4 +7602,365 @@ body[data-page*="channel"] .cleanx-content canvas {
 	.cleanx-page-title strong {
 		font-size: 16px !important;
 	}
+}
+
+/* --------------------------------------------------------------------------
+ * CleanX v0.4.5 - real table/layout recovery pass
+ * Goal: stop LuCI technical tables from collapsing into vertical text while
+ * keeping native LuCI controls clickable. This is intentionally conservative:
+ * use horizontal scrolling for dense data instead of squeezing columns.
+ * -------------------------------------------------------------------------- */
+
+/* Global table sanity: no vertical letter-by-letter wrapping in data tables. */
+.cleanx-content table,
+.cleanx-content table.table,
+.cleanx-content table.cbi-section-table {
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+	table-layout: auto !important;
+	width: max-content !important;
+	min-width: 100% !important;
+	max-width: none !important;
+}
+
+.cleanx-content .cleanx-table-wrap {
+	width: 100% !important;
+	max-width: 100% !important;
+	overflow-x: auto !important;
+	overflow-y: visible !important;
+	-webkit-overflow-scrolling: touch;
+	border-radius: 20px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	background: rgba(var(--cleanx-bg-rgb), .18) !important;
+}
+
+.cleanx-content table th,
+.cleanx-content table td,
+.cleanx-content table.table th,
+.cleanx-content table.table td,
+.cleanx-content table.cbi-section-table th,
+.cleanx-content table.cbi-section-table td {
+	width: auto !important;
+	max-width: none !important;
+	min-width: 72px !important;
+	padding: 11px 14px !important;
+	vertical-align: middle !important;
+	line-height: 1.38 !important;
+	white-space: nowrap !important;
+	word-break: keep-all !important;
+	overflow-wrap: normal !important;
+	text-align: left !important;
+}
+
+.cleanx-content table th,
+.cleanx-content table.table th,
+.cleanx-content table.cbi-section-table th {
+	font-size: 11px !important;
+	font-weight: 900 !important;
+	letter-spacing: .065em !important;
+	text-transform: uppercase !important;
+	color: var(--cleanx-muted) !important;
+}
+
+.cleanx-content table td p,
+.cleanx-content table td small,
+.cleanx-content table td .cbi-value-description,
+.cleanx-content table td .description {
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+
+.cleanx-content table td.cbi-section-actions,
+.cleanx-content table th.cbi-section-actions,
+.cleanx-content table td:last-child:has(.cbi-button),
+.cleanx-content table td:last-child:has(button),
+.cleanx-content table td:last-child:has(a.btn) {
+	min-width: 136px !important;
+	width: 1% !important;
+	white-space: nowrap !important;
+	text-align: right !important;
+}
+
+.cleanx-content table td.cbi-section-actions > *,
+.cleanx-content table td:last-child > .cbi-button,
+.cleanx-content table td:last-child > button,
+.cleanx-content table td:last-child > a.btn {
+	margin: 3px !important;
+}
+
+/* Dense package manager: keep name/version/size readable, let description wrap. */
+body.cleanx-page-package .cleanx-content table.table,
+body[data-page*="package-manager"] .cleanx-content table.table,
+body[data-page*="software"] .cleanx-content table.table,
+body[data-page*="opkg"] .cleanx-content table.table {
+	min-width: 1080px !important;
+}
+body.cleanx-page-package .cleanx-content table.table th:nth-child(1),
+body.cleanx-page-package .cleanx-content table.table td:nth-child(1),
+body[data-page*="package-manager"] .cleanx-content table.table th:nth-child(1),
+body[data-page*="package-manager"] .cleanx-content table.table td:nth-child(1) { min-width: 140px !important; }
+body.cleanx-page-package .cleanx-content table.table th:nth-child(2),
+body.cleanx-page-package .cleanx-content table.table td:nth-child(2),
+body[data-page*="package-manager"] .cleanx-content table.table th:nth-child(2),
+body[data-page*="package-manager"] .cleanx-content table.table td:nth-child(2) { min-width: 90px !important; }
+body.cleanx-page-package .cleanx-content table.table th:nth-child(3),
+body.cleanx-page-package .cleanx-content table.table td:nth-child(3),
+body[data-page*="package-manager"] .cleanx-content table.table th:nth-child(3),
+body[data-page*="package-manager"] .cleanx-content table.table td:nth-child(3) { min-width: 90px !important; }
+body.cleanx-page-package .cleanx-content table.table th:nth-child(4),
+body.cleanx-page-package .cleanx-content table.table td:nth-child(4),
+body[data-page*="package-manager"] .cleanx-content table.table th:nth-child(4),
+body[data-page*="package-manager"] .cleanx-content table.table td:nth-child(4) {
+	min-width: 560px !important;
+	white-space: normal !important;
+}
+
+/* Startup and Processes: compact rows, fixed useful columns, compact actions. */
+body.cleanx-page-startup .cleanx-content table.table,
+body[data-page*="startup"] .cleanx-content table.table { min-width: 760px !important; }
+body.cleanx-page-processes .cleanx-content table.table,
+body[data-page*="processes"] .cleanx-content table.table { min-width: 860px !important; }
+body.cleanx-page-startup .cleanx-content table.table th,
+body.cleanx-page-startup .cleanx-content table.table td,
+body[data-page*="startup"] .cleanx-content table.table th,
+body[data-page*="startup"] .cleanx-content table.table td,
+body.cleanx-page-processes .cleanx-content table.table th,
+body.cleanx-page-processes .cleanx-content table.table td,
+body[data-page*="processes"] .cleanx-content table.table th,
+body[data-page*="processes"] .cleanx-content table.table td {
+	padding-top: 10px !important;
+	padding-bottom: 10px !important;
+}
+body.cleanx-page-startup .cleanx-content table.table td:first-child,
+body[data-page*="startup"] .cleanx-content table.table td:first-child { min-width: 120px !important; }
+body.cleanx-page-startup .cleanx-content table.table td:nth-child(2),
+body[data-page*="startup"] .cleanx-content table.table td:nth-child(2) { min-width: 240px !important; }
+body.cleanx-page-processes .cleanx-content table.table th:nth-child(1),
+body.cleanx-page-processes .cleanx-content table.table td:nth-child(1),
+body[data-page*="processes"] .cleanx-content table.table th:nth-child(1),
+body[data-page*="processes"] .cleanx-content table.table td:nth-child(1) { min-width: 70px !important; }
+body.cleanx-page-processes .cleanx-content table.table th:nth-child(2),
+body.cleanx-page-processes .cleanx-content table.table td:nth-child(2),
+body[data-page*="processes"] .cleanx-content table.table th:nth-child(2),
+body[data-page*="processes"] .cleanx-content table.table td:nth-child(2) { min-width: 105px !important; }
+body.cleanx-page-processes .cleanx-content table.table th:nth-child(3),
+body.cleanx-page-processes .cleanx-content table.table td:nth-child(3),
+body[data-page*="processes"] .cleanx-content table.table th:nth-child(3),
+body[data-page*="processes"] .cleanx-content table.table td:nth-child(3) { min-width: 360px !important; }
+body.cleanx-page-processes .cleanx-content table.table th:nth-child(4),
+body.cleanx-page-processes .cleanx-content table.table td:nth-child(4),
+body.cleanx-page-processes .cleanx-content table.table th:nth-child(5),
+body.cleanx-page-processes .cleanx-content table.table td:nth-child(5),
+body[data-page*="processes"] .cleanx-content table.table th:nth-child(4),
+body[data-page*="processes"] .cleanx-content table.table td:nth-child(4),
+body[data-page*="processes"] .cleanx-content table.table th:nth-child(5),
+body[data-page*="processes"] .cleanx-content table.table td:nth-child(5) {
+	min-width: 105px !important;
+	text-align: center !important;
+}
+body.cleanx-page-processes .cleanx-content table.table td:last-child,
+body[data-page*="processes"] .cleanx-content table.table td:last-child { min-width: 230px !important; }
+
+/* DHCP/DNS/Routing/Firewall/LED: table data is technical, never squeeze it into vertical letters. */
+body[data-page*="dhcp"] .cleanx-content table,
+body[data-page*="dns"] .cleanx-content table,
+body[data-page*="routes"] .cleanx-content table,
+body[data-page*="routing"] .cleanx-content table,
+body[data-page*="firewall"] .cleanx-content table,
+body[data-page*="led"] .cleanx-content table { min-width: 940px !important; }
+body[data-page*="dhcp"] .cleanx-content table th,
+body[data-page*="dhcp"] .cleanx-content table td,
+body[data-page*="dns"] .cleanx-content table th,
+body[data-page*="dns"] .cleanx-content table td,
+body[data-page*="routes"] .cleanx-content table th,
+body[data-page*="routes"] .cleanx-content table td,
+body[data-page*="routing"] .cleanx-content table th,
+body[data-page*="routing"] .cleanx-content table td,
+body[data-page*="firewall"] .cleanx-content table th,
+body[data-page*="firewall"] .cleanx-content table td,
+body[data-page*="led"] .cleanx-content table th,
+body[data-page*="led"] .cleanx-content table td {
+	white-space: nowrap !important;
+	word-break: keep-all !important;
+	overflow-wrap: normal !important;
+}
+
+/* Network Interfaces / Devices / Wireless overview tables. */
+body[data-page="admin-network-network"] .cleanx-content table,
+body[data-page*="interfaces"] .cleanx-content table,
+body[data-page*="wireless"] .cleanx-content table { min-width: 980px !important; }
+body[data-page="admin-network-network"] .cleanx-content table td,
+body[data-page*="interfaces"] .cleanx-content table td,
+body[data-page*="wireless"] .cleanx-content table td {
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table td:first-child,
+body[data-page*="interfaces"] .cleanx-content table td:first-child,
+body[data-page*="wireless"] .cleanx-content table td:first-child { min-width: 360px !important; }
+body[data-page="admin-network-network"] .cleanx-content table td:nth-child(2),
+body[data-page*="interfaces"] .cleanx-content table td:nth-child(2),
+body[data-page*="wireless"] .cleanx-content table td:nth-child(2) { min-width: 320px !important; }
+
+/* Div based LuCI tables: recover native table behaviour for data pages. */
+body.cleanx-page-networktables .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid),
+body.cleanx-page-startup .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid),
+body.cleanx-page-processes .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid),
+body.cleanx-page-package .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid),
+body[data-page*="status"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) {
+	display: table !important;
+	table-layout: auto !important;
+	width: max-content !important;
+	min-width: 100% !important;
+	max-width: none !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+}
+body.cleanx-page-networktables .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr,
+body.cleanx-page-startup .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr,
+body.cleanx-page-processes .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr,
+body.cleanx-page-package .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr,
+body[data-page*="status"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr {
+	display: table-row !important;
+}
+body.cleanx-page-networktables .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td,
+body.cleanx-page-networktables .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .th,
+body.cleanx-page-startup .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td,
+body.cleanx-page-startup .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .th,
+body.cleanx-page-processes .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td,
+body.cleanx-page-processes .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .th,
+body.cleanx-page-package .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td,
+body.cleanx-page-package .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .th,
+body[data-page*="status"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td,
+body[data-page*="status"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .th {
+	display: table-cell !important;
+	min-width: 90px !important;
+	padding: 10px 14px !important;
+	vertical-align: middle !important;
+	white-space: nowrap !important;
+	word-break: keep-all !important;
+	overflow-wrap: normal !important;
+	line-height: 1.4 !important;
+}
+
+/* Overview network/wireless details: compact label/value rows instead of huge blank cards. */
+body[data-page="admin-status-overview"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td.left:first-child,
+body[data-page*="overview"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td.left:first-child {
+	min-width: 150px !important;
+	color: var(--cleanx-muted) !important;
+}
+body[data-page="admin-status-overview"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td.left:nth-child(2),
+body[data-page*="overview"] .cleanx-content div.table:not(.ifacebox):not(.cleanx-port-grid) > .tr > .td.left:nth-child(2) {
+	white-space: normal !important;
+	min-width: 360px !important;
+}
+
+/* DNS/DHCP dropdowns: native clickable, visually compact. */
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-dropdown:not(.cbi-button) {
+	position: relative !important;
+	display: block !important;
+	width: min(100%, 760px) !important;
+	min-height: 38px !important;
+	z-index: auto !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-dropdown:not(.cbi-button) > ul {
+	position: static !important;
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)) !important;
+	gap: 8px !important;
+	max-height: 260px !important;
+	overflow: auto !important;
+	padding: 10px !important;
+	margin-top: 8px !important;
+	border: 1px solid var(--cleanx-border) !important;
+	border-radius: 16px !important;
+	background: var(--cleanx-surface-soft) !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-dropdown:not(.cbi-button) > ul > li {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	min-height: 34px !important;
+	padding: 7px 9px !important;
+	border-radius: 12px !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+	cursor: pointer !important;
+}
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-dropdown:not(.cbi-button) input[type="checkbox"],
+body.cleanx-page-dnsdhcp .cleanx-content .cbi-dropdown:not(.cbi-button) input[type="radio"] {
+	position: static !important;
+	flex: 0 0 16px !important;
+	width: 16px !important;
+	height: 16px !important;
+	pointer-events: auto !important;
+}
+
+/* Graph pages: let upstream graph dimensions breathe inside a scrollable card. */
+body.cleanx-page-graphs .cleanx-content .cbi-map,
+body.cleanx-page-graphs .cleanx-content .cbi-section,
+body[data-page*="realtime"] .cleanx-content .cbi-map,
+body[data-page*="realtime"] .cleanx-content .cbi-section,
+body[data-page*="load"] .cleanx-content .cbi-map,
+body[data-page*="load"] .cleanx-content .cbi-section,
+body[data-page*="channel_analysis"] .cleanx-content .cbi-map,
+body[data-page*="channel_analysis"] .cleanx-content .cbi-section {
+	overflow-x: auto !important;
+	overflow-y: visible !important;
+}
+body.cleanx-page-graphs .cleanx-content svg,
+body.cleanx-page-graphs .cleanx-content canvas,
+body[data-page*="realtime"] .cleanx-content svg,
+body[data-page*="realtime"] .cleanx-content canvas,
+body[data-page*="load"] .cleanx-content svg,
+body[data-page*="load"] .cleanx-content canvas,
+body[data-page*="channel_analysis"] .cleanx-content svg,
+body[data-page*="channel_analysis"] .cleanx-content canvas {
+	display: block !important;
+	width: 100% !important;
+	max-width: none !important;
+	min-width: 900px !important;
+	height: auto !important;
+	min-height: 260px !important;
+	box-sizing: border-box !important;
+	background: #f8fafc !important;
+	border: 0 !important;
+	border-radius: 14px !important;
+}
+
+/* Save & Apply polish. */
+.cleanx-apply-group {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	vertical-align: middle !important;
+}
+.cleanx-apply-main,
+.cleanx-apply-more {
+	min-height: 38px !important;
+	border-radius: 14px !important;
+	font-weight: 900 !important;
+}
+.cleanx-apply-main { padding-inline: 18px !important; }
+.cleanx-apply-more { width: 42px !important; padding-inline: 0 !important; }
+.cleanx-native-apply-source { display: none !important; }
+
+@media (max-width: 900px) {
+	.cleanx-content table,
+	.cleanx-content table.table,
+	.cleanx-content table.cbi-section-table { min-width: 760px !important; }
+	body.cleanx-page-package .cleanx-content table.table,
+	body[data-page*="package-manager"] .cleanx-content table.table,
+	body[data-page*="software"] .cleanx-content table.table { min-width: 960px !important; }
+	body.cleanx-page-graphs .cleanx-content svg,
+	body.cleanx-page-graphs .cleanx-content canvas,
+	body[data-page*="realtime"] .cleanx-content svg,
+	body[data-page*="realtime"] .cleanx-content canvas,
+	body[data-page*="load"] .cleanx-content svg,
+	body[data-page*="load"] .cleanx-content canvas,
+	body[data-page*="channel_analysis"] .cleanx-content svg,
+	body[data-page*="channel_analysis"] .cleanx-content canvas { min-width: 760px !important; }
 }
