@@ -6,20 +6,16 @@ env:
   SUBTARGET: mt7622
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
       - master
-    paths:
-      - "Makefile"
-      - "VERSION"
-      - "CHANGELOG.md"
-      - "htdocs/**"
-      - "root/**"
-      - "ucode/**"
-      - "scripts/**"
-      - ".github/workflows/build-prerelease.yml"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Theme version override for release notes only"
+        required: false
+        default: ""
 
 concurrency:
   group: cleanx-prerelease-${{ github.ref }}
@@ -58,7 +54,7 @@ jobs:
 
     steps:
       - name: Checkout CleanX source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           path: theme
 
@@ -269,7 +265,7 @@ jobs:
 
     steps:
       - name: Checkout CleanX source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -285,7 +281,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [ -n "${{ github.event.inputs.version || '' }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="$(tr -d '[:space:]' < VERSION)"
+          fi
+
           VERSION="${VERSION#v}"
           TAG="v${VERSION}-pre.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
           TITLE="CleanX v${VERSION} pre-release #${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
@@ -352,7 +353,7 @@ jobs:
 
           ${PACKAGE_LIST}
 
-          Architecture note: CleanX is a LuCI theme package with no compiled binaries. The built files are marked `all` and are intended to be architecture-independent across OpenWrt targets; use the package format that matches your OpenWrt version.
+          Architecture note: CleanX is a LuCI theme package with no compiled binaries. The built files are marked \\`all\\` and are intended to be architecture-independent across OpenWrt targets; use the package format that matches your OpenWrt version.
 
           ## Build logs included
 
@@ -366,20 +367,21 @@ jobs:
 
           Use the OpenWrt package format that matches your router firmware:
 
-          - OpenWrt 24.10.x and older: use the file ending in `.ipk`.
-          - OpenWrt 25.12+ and release builds: use the release `.apk`.
-          - OpenWrt snapshot: use the snapshot `.apk` only on a matching snapshot build.
+          - OpenWrt 24.10.x and older: use the file ending in \\`.ipk\\`.
+          - OpenWrt 25.12+ and release builds: use the release \\`.apk\\`.
+          - OpenWrt snapshot: use the snapshot \\`.apk\\` only on a matching snapshot build.
 
           After installing, clear LuCI cache and hard refresh the browser:
 
-          ```sh
+          \\`\\`\\`sh
           rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
           /etc/init.d/uhttpd restart
-          ```
+          \\`\\`\\`
 
           If testing passes, create a stable release manually from GitHub using the tested package assets.
           EOF
 
+          sed -i 's/^          //' release-notes.md
           cp release-notes.md release-assets/RELEASE_NOTES.txt
 
       - name: Create GitHub pre-release

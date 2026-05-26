@@ -1,6 +1,14 @@
 # Changelog
 
-## v0.4.7
+## v0.4.8
+
+- Fixed GitHub Actions auto-trigger behaviour after GitHub Desktop push.
+- Replaced stale UniWRT workflow references with CleanX workflow naming.
+- Removed path filters from the pre-release workflow so every push to main/master starts a build.
+- Kept package assets architecture-independent with `all-openwrt-*` release naming.
+
+
+## v0.4.8
 
 - GitHub Desktop commit safety fix.
 - Removed long saved-browser QA page filenames from the tracked repo package.
@@ -10,7 +18,7 @@
 
 
 
-## v0.4.7
+## v0.4.8
 
 - Added a real LuCI table recovery pass for DHCP, DNS, Routing, Firewall, LED, Interfaces, Wireless, Software, Startup and Processes.
 - Stopped technical table cells from collapsing into vertical letters.
