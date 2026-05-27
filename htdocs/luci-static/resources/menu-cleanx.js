@@ -851,16 +851,19 @@ return baseclass.extend({
 				if (!headers.length && !/processes|startup|load|realtime|channel/.test(page)) return;
 
 				table.classList.add('cleanx-data-table', 'cleanx-technical-table');
+				/* Specific page/table detection must come before broad words like
+				 * name/action/device/rule. Otherwise LED, Interfaces and Devices tables
+				 * are misclassified as Firewall/Routing and columns collapse. */
 				if (/package name|version|size/.test(joined) || /package-manager|software|opkg/.test(page)) table.classList.add('cleanx-table-software');
 				else if (/pid|owner|command|cpu usage|memory usage/.test(joined) || /processes/.test(page)) table.classList.add('cleanx-table-processes');
 				else if (/start priority|initscript/.test(joined) || /startup|init/.test(page)) table.classList.add('cleanx-table-startup');
-				else if (/hostname|mac addresses|lease time|duid|iaid|remaining time|active dhcp/.test(joined) || /dhcp/.test(page)) table.classList.add('cleanx-table-dhcp');
-				else if (/device|target|gateway|source|metric|protocol|neighbour|neighbor|priority|rule/.test(joined) || /routes|routing/.test(page)) table.classList.add('cleanx-table-routing');
-				else if (/name|match|action|enable|zone|input|output|masquerading|forward/.test(joined) || /firewall|rules|zones/.test(page)) table.classList.add('cleanx-table-firewall');
-				else if (/led|trigger|interval|default state/.test(joined) || /leds/.test(page)) table.classList.add('cleanx-table-led');
+				else if (/led name|trigger|interval|default state/.test(joined) || /leds/.test(page)) table.classList.add('cleanx-table-led');
 				else if (/ssid|bssid|signal|noise|rx rate|tx rate|wireless|radio/.test(joined) || /wireless/.test(page)) table.classList.add('cleanx-table-wireless');
-				else if (/interface|device|mac address|type|mtu|rx|tx/.test(joined) || /interfaces|network/.test(page)) table.classList.add('cleanx-table-interfaces');
+				else if (/mac address|mtu|interface|type|rx|tx/.test(joined) || (/device/.test(joined) && /type|mtu|mac/.test(joined)) || /interfaces|network/.test(page)) table.classList.add('cleanx-table-interfaces');
+				else if (/hostname|mac addresses|lease time|duid|iaid|remaining time|active dhcp/.test(joined) || /dhcp/.test(page)) table.classList.add('cleanx-table-dhcp');
 				else if (/dns/.test(page)) table.classList.add('cleanx-table-dns');
+				else if (/zone|match|action|enable|input|output|masquerading|forward/.test(joined) || /firewall|rules|zones/.test(page)) table.classList.add('cleanx-table-firewall');
+				else if (/device|target|gateway|source|metric|protocol|neighbour|neighbor|priority|rule/.test(joined) || /routes|routing/.test(page)) table.classList.add('cleanx-table-routing');
 
 				const rows = Array.from(table.querySelectorAll('tr'));
 				if (!rows.length || !headers.length) return;
