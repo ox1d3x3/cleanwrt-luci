@@ -1,4 +1,4 @@
-/* CleanX Theme v0.5.1 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.5.2 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -8973,4 +8973,68 @@ body[data-page*="channel_analysis"] .cleanx-content table {
 		height: 340px !important;
 		min-height: 340px !important;
 	}
+}
+
+
+/* ========================================================================== */
+/* CleanX v0.5.2 - Realtime/Load graph regression guard                       */
+/* ========================================================================== */
+/* Do not touch Channel Analysis here. v0.5.1 improved Channel Analysis, but
+ * the broad graph-fill rules regressed LuCI Realtime Graphs/Load pages. These
+ * page-specific overrides restore the v0.4.9-safe graph behaviour only for
+ * admin-status-realtime* pages, including Load/Bandwidth/Wireless/Connections. */
+body[data-page*="realtime"] .cleanx-content .cbi-section,
+body[data-page*="load"] .cleanx-content .cbi-section {
+	padding: 1rem !important;
+	overflow-x: auto !important;
+	overflow-y: visible !important;
+}
+body[data-page*="realtime"] .cleanx-content div[style*="height:300px"],
+body[data-page*="load"] .cleanx-content div[style*="height:300px"] {
+	width: 100% !important;
+	max-width: 100% !important;
+	height: 300px !important;
+	min-height: 300px !important;
+	box-sizing: border-box !important;
+	overflow: hidden !important;
+	border: 1px solid rgba(148,163,184,.30) !important;
+	border-radius: 16px !important;
+	background: #f8fafc !important;
+	padding: 0 !important;
+	margin: .75rem 0 1rem !important;
+}
+body[data-page*="realtime"] .cleanx-content div[id*="graph"],
+body[data-page*="load"] .cleanx-content div[id*="graph"] {
+	max-width: 100% !important;
+	overflow-x: auto !important;
+	overflow-y: hidden !important;
+}
+body[data-page*="realtime"] .cleanx-content div[style*="height:300px"] svg,
+body[data-page*="load"] .cleanx-content div[style*="height:300px"] svg,
+body[data-page*="realtime"] .cleanx-content div[style*="height:300px"] canvas,
+body[data-page*="load"] .cleanx-content div[style*="height:300px"] canvas {
+	width: 100% !important;
+	height: 100% !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	max-width: none !important;
+	display: block !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-sizing: border-box !important;
+}
+body[data-page*="realtime"] .cleanx-content .right,
+body[data-page*="load"] .cleanx-content .right {
+	padding-top: 8px !important;
+	text-align: right !important;
+}
+/* Realtime detail tables/legends should not inherit the aggressive fixed table
+ * behaviour from the v0.5.1 graph fill block. */
+body[data-page*="realtime"] .cleanx-content table,
+body[data-page*="load"] .cleanx-content table {
+	width: 100% !important;
+	max-width: 100% !important;
+	min-width: 0 !important;
+	table-layout: auto !important;
 }
