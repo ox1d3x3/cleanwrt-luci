@@ -29,6 +29,7 @@ return baseclass.extend({
 		safe('shell controls', this.bindShellControls);
 		safe('luci content', this.enhanceLuciContent);
 		safe('table classifier', this.classifyLuciTables);
+		safe('interfaces device tooltip cleanup', this.cleanupInterfaceDeviceTooltips);
 		safe('diagnostics actions', this.splitDiagnosticDropdownActions);
 		safe('change indicator', this.patchChangeIndicator);
 		safe('clock', this.startClock);
@@ -936,6 +937,34 @@ return baseclass.extend({
 			observer.observe(document.getElementById('maincontent') || document.body, { childList: true, subtree: true });
 		}
 	},
+
+	cleanupInterfaceDeviceTooltips() {
+		/* Focused v0.5.8 recovery: Network > Interfaces/Devices only.
+		 * LuCI stores detailed device data in .cbi-tooltip spans beside the small
+		 * interface icons. In CleanX tables these tooltip payloads look like broken
+		 * grey boxes over the table. Remove only those payload spans while keeping
+		 * the visible icon/name and all real buttons/handlers untouched. */
+		const run = () => {
+			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
+			if (!/admin-network-network|\/network\/network|interfaces/.test(page)) return;
+			const root = document.getElementById('maincontent') || document;
+			root.querySelectorAll('table.cleanx-table-devices .cbi-tooltip, table.cleanx-table-interface-summary .cbi-tooltip').forEach((node) => node.remove());
+		};
+		run();
+		window.addEventListener('load', run, { once: true });
+		setTimeout(run, 250);
+		setTimeout(run, 1000);
+		if (window.MutationObserver) {
+			let queued = false;
+			const observer = new MutationObserver(() => {
+				if (queued) return;
+				queued = true;
+				window.requestAnimationFrame(() => { queued = false; run(); });
+			});
+			observer.observe(document.getElementById('maincontent') || document.body, { childList: true, subtree: true });
+		}
+	},
+
 
 	bindCbiTabsStable() {
 		/* OpenWrt 25.x tab panels are sometimes rendered with data-tab-active only.

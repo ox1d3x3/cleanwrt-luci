@@ -1,13 +1,19 @@
 # Changelog
 
-## v0.5.7
+## v0.5.8
+
+- Focused fix for Network > Firewall > Traffic Rules so the table fills the available card width instead of leaving a large empty area.
+- Focused fix for Network > Interfaces > Devices so the table uses clear column dividers and hides LuCI device tooltip payloads that were overlapping the rows.
+- No changes to DNS, DHCP, Startup, Wireless, graphs, loader, or other pages.
+
+## v0.5.8
 
 - Cleaned old development theme names from LuCI design list on install/upgrade: UniWRT and X1Wrt.
 - Ensured CleanX is registered as the only current CleanX theme entry.
 - Removed the duplicated header/description bar from Firewall > General Settings > Zones while keeping the per-cell labels and current zone data visible.
 - Scoped the fix only to Firewall Zones and theme registration cleanup.
 
-## v0.5.7
+## v0.5.8
 
 - Focused recovery for Network → Interfaces and Network → Devices only.
 - Hid overlapping LuCI tooltip payload boxes in Interfaces/Devices tables.
