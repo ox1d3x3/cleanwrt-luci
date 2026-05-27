@@ -1,4 +1,4 @@
-/* CleanX Theme v0.5.5 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.5.6 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -9466,7 +9466,7 @@ body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-inter
 
 
 /* ========================================================================== */
-/* CleanX v0.5.5 - focused recovery for uploaded issue pages only             */
+/* CleanX v0.5.6 - focused recovery for uploaded issue pages only             */
 /* ========================================================================== */
 /* Scope: Network > Interfaces/Devices and Firewall > Traffic Rules only.
  * Purpose: roll back the good Interfaces summary layout, correctly classify
@@ -9737,6 +9737,228 @@ body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-actio
 	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing,
 	body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall,
 	body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table {
+		min-width: 820px !important;
+	}
+}
+
+/* ========================================================================== */
+/* CleanX v0.5.6 - focused Interfaces / Devices recovery only                 */
+/* --------------------------------------------------------------------------
+ * Scope: Network > Interfaces page, specifically the Interfaces and Devices
+ * tabs. Do not alter graphs, DNS/DHCP, Startup, Firewall, Wireless or other
+ * pages. The user issue was the device hover tooltip boxes and the extra
+ * per-cell labels added inside the Devices table. This returns the Devices tab
+ * to a clean native table, with proper row/column alignment and no overlay
+ * tooltip boxes covering content.
+ * ========================================================================== */
+
+/* Hide LuCI hover tooltip payloads on the Interfaces/Devices tables. They are
+ * useful in Bootstrap but visually overlap CleanX's card/table layout. Keep the
+ * visible icon + device name, hide only the hover information box. */
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cbi-tooltip,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interfaces .cbi-tooltip,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cbi-tooltip,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cbi-tooltip {
+	display: none !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cbi-tooltip-container,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interfaces .cbi-tooltip-container,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cbi-tooltip-container,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cbi-tooltip-container {
+	position: static !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	vertical-align: middle !important;
+}
+
+/* Interfaces tab: keep the card-like native overview layout, but stop tooltip
+ * overlays and keep each row compact. */
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary {
+	width: 100% !important;
+	min-width: 820px !important;
+	border-collapse: separate !important;
+	border-spacing: 0 .65rem !important;
+	table-layout: fixed !important;
+	background: transparent !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td {
+	padding: .72rem .85rem !important;
+	border-top: 1px solid rgba(148, 163, 184, .16) !important;
+	border-bottom: 1px solid rgba(148, 163, 184, .16) !important;
+	background: rgba(15, 23, 42, .28) !important;
+	vertical-align: middle !important;
+	line-height: 1.42 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td {
+	background: rgba(255, 255, 255, .72) !important;
+	border-color: rgba(100, 116, 139, .20) !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td:first-child {
+	width: 38% !important;
+	min-width: 320px !important;
+	border-left: 1px solid rgba(148, 163, 184, .16) !important;
+	border-radius: 16px 0 0 16px !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td:nth-child(2) {
+	width: auto !important;
+	min-width: 360px !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td.cbi-section-actions,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td.cleanx-col-actions {
+	width: 170px !important;
+	min-width: 170px !important;
+	max-width: 185px !important;
+	border-right: 1px solid rgba(148, 163, 184, .16) !important;
+	border-radius: 0 16px 16px 0 !important;
+	text-align: right !important;
+	white-space: normal !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td[data-cleanx-title]::before {
+	content: none !important;
+	display: none !important;
+}
+
+/* Devices tab: no fake per-cell labels/chips. Use the actual header row and
+ * align columns like a proper data table. This is intentionally similar to the
+ * Firewall Zones recovery: isolated row boundaries, but no extra label boxes
+ * inside each cell. */
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices.cbi-section-table {
+	width: 100% !important;
+	min-width: 900px !important;
+	max-width: none !important;
+	table-layout: fixed !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+	background: transparent !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td {
+	position: static !important;
+	border-top: 1px solid rgba(148, 163, 184, .18) !important;
+	border-bottom: 0 !important;
+	border-left: 0 !important;
+	border-right: 0 !important;
+	box-shadow: none !important;
+	vertical-align: middle !important;
+	line-height: 1.38 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th {
+	padding: .72rem .85rem !important;
+	background: rgba(2, 6, 23, .32) !important;
+	color: var(--cleanx-text) !important;
+	font-size: .72rem !important;
+	font-weight: 900 !important;
+	letter-spacing: .055em !important;
+	text-transform: uppercase !important;
+	white-space: nowrap !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td {
+	padding: .9rem .85rem !important;
+	background: rgba(15, 23, 42, .24) !important;
+}
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th {
+	background: rgba(248, 250, 252, .95) !important;
+	color: #334155 !important;
+}
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td {
+	background: rgba(255, 255, 255, .74) !important;
+	border-color: rgba(100, 116, 139, .18) !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr:first-child th:first-child { border-radius: 16px 0 0 0 !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr:first-child th:last-child { border-radius: 0 16px 0 0 !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr:last-child td:first-child { border-radius: 0 0 0 16px !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr:last-child td:last-child { border-radius: 0 0 16px 0 !important; }
+
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td[data-cleanx-title]::before {
+	content: none !important;
+	display: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-device,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th:nth-child(1),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(1) {
+	width: 34% !important;
+	min-width: 270px !important;
+	max-width: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-type,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th:nth-child(2),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(2) {
+	width: 25% !important;
+	min-width: 170px !important;
+	max-width: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-mac-address,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th:nth-child(3),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(3) {
+	width: 20% !important;
+	min-width: 185px !important;
+	max-width: none !important;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+	font-size: .86rem !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-mtu,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th:nth-child(4),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(4) {
+	width: 8% !important;
+	min-width: 80px !important;
+	max-width: none !important;
+	text-align: center !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-actions,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th:nth-child(5),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(5),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td.cbi-section-actions {
+	width: 13% !important;
+	min-width: 145px !important;
+	max-width: 170px !important;
+	text-align: right !important;
+	white-space: normal !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .ifacebadge {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: .45rem !important;
+	margin: 0 !important;
+	white-space: nowrap !important;
+	max-width: 100% !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .ifacebadge img,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .ifacebadge img {
+	width: 18px !important;
+	height: 18px !important;
+	object-fit: contain !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td.cbi-section-actions > div {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: .45rem !important;
+	flex-wrap: wrap !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td.cbi-section-actions .btn,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td.cbi-section-actions .cbi-button {
+	min-height: 29px !important;
+	height: 29px !important;
+	padding: 0 .65rem !important;
+	font-size: .72rem !important;
+	margin: 0 !important;
+}
+
+@media (max-width: 900px) {
+	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary,
+	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices {
 		min-width: 820px !important;
 	}
 }

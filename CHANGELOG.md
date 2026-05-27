@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.6
+
+- Focused recovery for Network → Interfaces and Network → Devices only.
+- Hid overlapping LuCI tooltip payload boxes in Interfaces/Devices tables.
+- Restored the Interfaces summary layout without fake internal labels.
+- Reworked the Devices table to use real headers and clean row alignment instead of per-cell label chips.
+- Did not touch DNS, DHCP, Firewall, Startup, Wireless, Software, Graphs or Realtime pages.
+
 ## v0.5.5
 
 - Focused fix only for uploaded issue pages: Network Interfaces/Devices and Firewall Traffic Rules.
