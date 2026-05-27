@@ -856,9 +856,11 @@ return baseclass.extend({
 				const rows = Array.from(table.querySelectorAll('tr'));
 				const sample = text(table).toLowerCase();
 				const isNetworkInterfacesPage = /admin-network-network|\/network\/network|interfaces/.test(page);
+				const isNetworkDevicesTable = isNetworkInterfacesPage && /\bdevice\b/.test(joined) && /\btype\b/.test(joined) && /mac address/.test(joined) && /\bmtu\b/.test(joined);
 
-				/* OpenWrt interface overview tables often have no TH row. They still need
-				 * structured cell borders, but they must not be misread as generic forms. */
+				/* OpenWrt interface overview tables often have no TH row. Keep the
+				 * native card-like layout. Do not add data labels here because that was
+				 * what made the previously-good Interfaces box look misaligned. */
 				if (!headers.length && isNetworkInterfacesPage && rows.some((row) => row.children.length === 3) && /protocol:|device:|connected:|mac:/.test(sample)) {
 					clearTypeClasses(table);
 					table.classList.add('cleanx-data-table', 'cleanx-technical-table', 'cleanx-table-interface-summary');
@@ -866,7 +868,7 @@ return baseclass.extend({
 						Array.from(row.children).forEach((cell, index) => {
 							const header = index === 0 ? 'Interface' : (index === 1 ? 'Status' : 'Actions');
 							cell.classList.add('cleanx-col-' + slug(header));
-							cell.setAttribute('data-cleanx-title', header);
+							cell.removeAttribute('data-cleanx-title');
 							if (index === 2 || cell.classList.contains('cbi-section-actions')) cell.classList.add('cleanx-col-actions');
 						});
 					});
@@ -880,7 +882,8 @@ return baseclass.extend({
 				/* Keep detection narrow. A broad /network/ page match previously caused
 				 * Firewall Zones to be treated as Interfaces because both live under the
 				 * Network menu. Header text wins first, page path is only a fallback. */
-				if (/package name|version|size/.test(joined) || /package-manager|software|opkg/.test(page)) table.classList.add('cleanx-table-software');
+				if (isNetworkDevicesTable) table.classList.add('cleanx-table-devices');
+				else if (/package name|version|size/.test(joined) || /package-manager|software|opkg/.test(page)) table.classList.add('cleanx-table-software');
 				else if (/pid|owner|command|cpu usage|memory usage/.test(joined) || /processes/.test(page)) table.classList.add('cleanx-table-processes');
 				else if (/start priority|initscript/.test(joined) || /startup|init/.test(page)) table.classList.add('cleanx-table-startup');
 				else if (/led name|trigger|interval|default state/.test(joined) || /leds/.test(page)) table.classList.add('cleanx-table-led');

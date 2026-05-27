@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.5
+
+- Focused fix only for uploaded issue pages: Network Interfaces/Devices and Firewall Traffic Rules.
+- Rolled back isolated labels on the Interfaces summary table so the previously-good Interfaces box is not changed.
+- Corrected the table classifier so the Network Devices table is treated as Devices, not Routing.
+- Added isolated borders and header-aligned cell sizing for the Devices table.
+- Reworked Traffic Rules column sizing and badge contrast so Match/Action/Enable/Actions stay aligned and readable.
+- Did not touch Realtime Graphs, Channel Analysis, DNS, DHCP, Startup, LED, Wireless or other page families in this release.
+
 ## v0.5.4
 
 ### Fixed

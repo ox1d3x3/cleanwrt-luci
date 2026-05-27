@@ -1,4 +1,4 @@
-/* CleanX Theme v0.5.4 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.5.5 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -9461,5 +9461,282 @@ body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-inter
 	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interfaces,
 	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary {
 		min-width: 860px !important;
+	}
+}
+
+
+/* ========================================================================== */
+/* CleanX v0.5.5 - focused recovery for uploaded issue pages only             */
+/* ========================================================================== */
+/* Scope: Network > Interfaces/Devices and Firewall > Traffic Rules only.
+ * Purpose: roll back the good Interfaces summary layout, correctly classify
+ * the Devices table, and keep Traffic Rules headers/values aligned with
+ * isolated cell borders. No graph/DNS/DHCP/Startup/LED rules are touched here. */
+
+/* Network Interfaces summary: do not use the isolated cell-label treatment.
+ * This restores the previously good overview-like table while keeping actions
+ * compact and the native LuCI content untouched. */
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary {
+	width: 100% !important;
+	min-width: 760px !important;
+	max-width: none !important;
+	border-collapse: separate !important;
+	border-spacing: 0 .55rem !important;
+	table-layout: auto !important;
+	background: transparent !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td {
+	position: static !important;
+	padding: .55rem .65rem !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	vertical-align: middle !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary td[data-cleanx-title]::before {
+	content: none !important;
+	display: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cleanx-col-interface {
+	width: 38% !important;
+	min-width: 300px !important;
+	max-width: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cleanx-col-status {
+	width: auto !important;
+	min-width: 330px !important;
+	max-width: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cleanx-col-actions,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cbi-section-actions {
+	width: 160px !important;
+	min-width: 160px !important;
+	max-width: 175px !important;
+	text-align: right !important;
+	white-space: normal !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cbi-section-actions .cbi-button,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary .cleanx-col-actions .cbi-button {
+	min-height: 28px !important;
+	height: 28px !important;
+	padding: 0 .58rem !important;
+	font-size: .72rem !important;
+	margin: .12rem .1rem !important;
+}
+
+/* Network Devices table: this is the only Network table that receives isolated
+ * cells on this page. Include cleanx-table-routing as a compatibility fallback
+ * for users who still have cached v0.5.4 markup before the JS reclassifies it. */
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing {
+	width: max-content !important;
+	min-width: 880px !important;
+	max-width: none !important;
+	border-collapse: separate !important;
+	border-spacing: 0 .55rem !important;
+	table-layout: auto !important;
+	background: transparent !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing th {
+	padding: .62rem .78rem !important;
+	border: 1px solid rgba(148, 163, 184, .22) !important;
+	background: rgba(248, 250, 252, .96) !important;
+	color: #0f172a !important;
+	font-size: .74rem !important;
+	font-weight: 850 !important;
+	text-align: left !important;
+	white-space: nowrap !important;
+}
+html[data-cleanx-theme="dark"] body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices th,
+html[data-cleanx-theme="dark"] body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing th {
+	background: rgba(17, 24, 39, .96) !important;
+	color: #e5e7eb !important;
+	border-color: rgba(148, 163, 184, .18) !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing td {
+	position: relative !important;
+	padding: .72rem .78rem !important;
+	border: 1px solid rgba(148, 163, 184, .22) !important;
+	background: rgba(255, 255, 255, .82) !important;
+	box-shadow: 0 10px 22px rgba(15, 23, 42, .035) !important;
+	vertical-align: top !important;
+	line-height: 1.45 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+html[data-cleanx-theme="dark"] body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td,
+html[data-cleanx-theme="dark"] body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing td {
+	background: rgba(15, 23, 42, .72) !important;
+	border-color: rgba(148, 163, 184, .17) !important;
+	box-shadow: none !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td[data-cleanx-title]::before,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing td[data-cleanx-title]::before {
+	content: attr(data-cleanx-title);
+	display: inline-flex !important;
+	align-items: center !important;
+	max-width: 100% !important;
+	margin: 0 0 .42rem !important;
+	padding: .17rem .48rem !important;
+	border-radius: 999px !important;
+	background: rgba(37, 99, 235, .10) !important;
+	color: #1d4ed8 !important;
+	font-size: .66rem !important;
+	font-weight: 850 !important;
+	letter-spacing: .02em !important;
+	text-transform: uppercase !important;
+	white-space: nowrap !important;
+}
+html[data-cleanx-theme="dark"] body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td[data-cleanx-title]::before,
+html[data-cleanx-theme="dark"] body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing td[data-cleanx-title]::before {
+	background: rgba(96, 165, 250, .16) !important;
+	color: #93c5fd !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-device,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cleanx-col-device { min-width: 300px !important; max-width: 420px !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-type,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cleanx-col-type { min-width: 160px !important; max-width: 220px !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-mac-address,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cleanx-col-mac-address {
+	min-width: 190px !important;
+	max-width: 210px !important;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+	font-size: .82rem !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-mtu,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cleanx-col-mtu { min-width: 86px !important; max-width: 100px !important; text-align: center !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cleanx-col-actions,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cleanx-col-actions { min-width: 165px !important; max-width: 185px !important; text-align: left !important; white-space: normal !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cbi-tooltip,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .cbi-tooltip { display: none !important; }
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .ifacebadge,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing .ifacebadge {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: .35rem !important;
+	white-space: nowrap !important;
+}
+
+/* Firewall Traffic Rules: align description headers and data cells using fixed
+ * column intent, isolated borders and safer badge colours. This targets only
+ * the Traffic Rules page, not firewall zones/general pages. */
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table {
+	width: max-content !important;
+	min-width: 1120px !important;
+	max-width: none !important;
+	border-collapse: separate !important;
+	border-spacing: 0 .55rem !important;
+	table-layout: fixed !important;
+	background: transparent !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall th,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table th {
+	padding: .62rem .78rem !important;
+	border: 1px solid rgba(148, 163, 184, .24) !important;
+	background: rgba(248, 250, 252, .96) !important;
+	color: #0f172a !important;
+	font-size: .74rem !important;
+	font-weight: 850 !important;
+	text-align: left !important;
+	white-space: nowrap !important;
+}
+html[data-cleanx-theme="dark"] body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall th,
+html[data-cleanx-theme="dark"] body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table th {
+	background: rgba(17, 24, 39, .96) !important;
+	color: #e5e7eb !important;
+	border-color: rgba(148, 163, 184, .18) !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td {
+	padding: .72rem .78rem !important;
+	border: 1px solid rgba(148, 163, 184, .22) !important;
+	background: rgba(255, 255, 255, .82) !important;
+	box-shadow: 0 10px 22px rgba(15, 23, 42, .035) !important;
+	vertical-align: top !important;
+	line-height: 1.45 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: break-word !important;
+}
+html[data-cleanx-theme="dark"] body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td,
+html[data-cleanx-theme="dark"] body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td {
+	background: rgba(15, 23, 42, .72) !important;
+	border-color: rgba(148, 163, 184, .17) !important;
+	box-shadow: none !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td[data-cleanx-title]::before,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td[data-cleanx-title]::before {
+	content: none !important;
+	display: none !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-name { width: 170px !important; min-width: 170px !important; max-width: 170px !important; }
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-match { width: 520px !important; min-width: 520px !important; max-width: 520px !important; }
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-action { width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-enable { width: 92px !important; min-width: 92px !important; max-width: 92px !important; text-align: center !important; }
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-actions { width: 180px !important; min-width: 180px !important; max-width: 180px !important; text-align: left !important; }
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-match small {
+	display: grid !important;
+	gap: .34rem !important;
+	line-height: 1.36 !important;
+	color: var(--cleanx-text) !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-match small > span {
+	display: flex !important;
+	align-items: center !important;
+	gap: .28rem !important;
+	flex-wrap: wrap !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content .zonebadge,
+body[data-page="admin-network-firewall-rules"] .cleanx-content .ifacebadge {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: .28rem !important;
+	max-width: 100% !important;
+	min-height: 22px !important;
+	padding: .15rem .42rem !important;
+	border-radius: 9px !important;
+	border: 1px solid rgba(15, 23, 42, .10) !important;
+	color: #0f172a !important;
+	font-weight: 750 !important;
+	line-height: 1.15 !important;
+	white-space: nowrap !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content .zonebadge em,
+body[data-page="admin-network-firewall-rules"] .cleanx-content .ifacebadge em,
+body[data-page="admin-network-firewall-rules"] .cleanx-content .zonebadge strong,
+body[data-page="admin-network-firewall-rules"] .cleanx-content .ifacebadge strong { color: inherit !important; }
+body[data-page="admin-network-firewall-rules"] .cleanx-content .zonebadge[style*="238, 238, 238"],
+body[data-page="admin-network-firewall-rules"] .cleanx-content .ifacebadge[style*="238, 238, 238"] {
+	background: #dbeafe !important;
+	color: #1e3a8a !important;
+	border-color: rgba(37, 99, 235, .22) !important;
+}
+html[data-cleanx-theme="dark"] body[data-page="admin-network-firewall-rules"] .cleanx-content .zonebadge,
+html[data-cleanx-theme="dark"] body[data-page="admin-network-firewall-rules"] .cleanx-content .ifacebadge {
+	border-color: rgba(255, 255, 255, .14) !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-actions .cbi-button,
+body[data-page="admin-network-firewall-rules"] .cleanx-content .cleanx-col-actions .btn {
+	min-height: 28px !important;
+	height: 28px !important;
+	padding: 0 .54rem !important;
+	font-size: .72rem !important;
+	margin: .12rem .14rem !important;
+}
+
+@media (max-width: 760px) {
+	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-interface-summary,
+	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices,
+	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-routing,
+	body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall,
+	body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table {
+		min-width: 820px !important;
 	}
 }
