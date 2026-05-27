@@ -1,4 +1,4 @@
-/* CleanX Theme v0.5.8 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.5.9 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -10302,4 +10302,241 @@ body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devic
 	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices {
 		max-width: none !important;
 	}
+}
+
+
+/* ========================================================================== */
+/* CleanX v0.5.9 - per-cell label alignment for two remaining pages            */
+/* --------------------------------------------------------------------------
+ * Scope is intentionally narrow:
+ *  - Network > Firewall > Traffic Rules
+ *  - Network > Interfaces > Devices
+ * It does not touch DNS, DHCP, Startup, LED, Wireless, Software, graphs or
+ * firewall zones. The aim is to stop header/data drift by placing the column
+ * description inside each cell, then the value directly underneath.            */
+
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices {
+	width: 100% !important;
+	max-width: 100% !important;
+	table-layout: fixed !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+}
+
+/* Hide only the old single top header row on these two tables. Every data cell
+ * gets its own small label below, so the visual description always travels with
+ * its data and cannot drift out of alignment. */
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall > thead,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table > thead,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices > thead,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall > tbody > tr:first-child:has(th),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table > tbody > tr:first-child:has(th),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices > tbody > tr:first-child:has(th) {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall tr,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table tr,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr {
+	background: transparent !important;
+}
+
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td {
+	position: relative !important;
+	padding: 2.15rem .9rem .9rem !important;
+	vertical-align: top !important;
+	border: 1px solid rgba(148, 163, 184, .22) !important;
+	border-left-width: 0 !important;
+	border-top-width: 0 !important;
+	background: rgba(15, 23, 42, .26) !important;
+	line-height: 1.45 !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	overflow-wrap: anywhere !important;
+	box-shadow: none !important;
+}
+
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall tr > td:first-child,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table tr > td:first-child,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr > td:first-child {
+	border-left-width: 1px !important;
+}
+
+/* First visible data row gets a top border because the visual TH is hidden. */
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall tr:first-child > td,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table tr:first-child > td,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr:first-child > td,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall tr:nth-child(2) > td,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table tr:nth-child(2) > td,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices tr:nth-child(2) > td {
+	border-top-width: 1px !important;
+}
+
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td,
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td,
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td {
+	background: rgba(255, 255, 255, .82) !important;
+	border-color: rgba(100, 116, 139, .24) !important;
+}
+
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td[data-cleanx-title]::before,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td[data-cleanx-title]::before,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td[data-cleanx-title]::before {
+	content: attr(data-cleanx-title);
+	position: absolute;
+	top: .55rem;
+	left: .72rem;
+	right: .72rem;
+	display: block;
+	padding-bottom: .42rem;
+	border-bottom: 1px dashed rgba(148, 163, 184, .24);
+	font-size: .67rem;
+	font-weight: 900;
+	line-height: 1.05;
+	letter-spacing: .075em;
+	text-transform: uppercase;
+	color: #93c5fd;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	pointer-events: none;
+}
+
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td[data-cleanx-title]::before,
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td[data-cleanx-title]::before,
+html:not([data-cleanx-theme="dark"]) body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td[data-cleanx-title]::before {
+	color: #0369a1;
+	border-bottom-color: rgba(14, 165, 233, .22);
+}
+
+/* Traffic Rules column balance with per-cell labels. */
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td:nth-child(1),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td:nth-child(1) {
+	width: 16% !important;
+	min-width: 160px !important;
+	font-weight: 850 !important;
+	letter-spacing: .035em !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td:nth-child(2),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td:nth-child(2) {
+	width: 46% !important;
+	min-width: 420px !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td:nth-child(3),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td:nth-child(3) {
+	width: 13% !important;
+	min-width: 130px !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td:nth-child(4),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td:nth-child(4) {
+	width: 8% !important;
+	min-width: 82px !important;
+	text-align: center !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td:nth-child(5),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td:nth-child(5),
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td.cleanx-col-actions,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td.cleanx-col-actions {
+	width: 17% !important;
+	min-width: 170px !important;
+	text-align: left !important;
+}
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall td.cleanx-col-actions > div,
+body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table td.cleanx-col-actions > div {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	gap: .4rem !important;
+	flex-wrap: wrap !important;
+}
+
+/* Devices column balance with per-cell labels. */
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(1) {
+	width: 31% !important;
+	min-width: 250px !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(2) {
+	width: 24% !important;
+	min-width: 180px !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(3) {
+	width: 20% !important;
+	min-width: 180px !important;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+	font-size: .84rem !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(4) {
+	width: 9% !important;
+	min-width: 80px !important;
+	text-align: center !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td:nth-child(5),
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td.cbi-section-actions {
+	width: 16% !important;
+	min-width: 150px !important;
+	text-align: right !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices td.cbi-section-actions > div {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	gap: .45rem !important;
+	flex-wrap: wrap !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cbi-tooltip,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .ifacebadge.large.cbi-tooltip {
+	display: none !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+	width: 0 !important;
+	height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	overflow: hidden !important;
+}
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .cbi-tooltip-container,
+body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices .ifacebadge {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: .42rem !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+	white-space: nowrap !important;
+}
+
+@media (max-width: 900px) {
+	body[data-page="admin-network-firewall-rules"] .cleanx-content table.cleanx-table-firewall,
+	body[data-page="admin-network-firewall-rules"] .cleanx-content table.cbi-section-table,
+	body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devices {
+		min-width: 880px !important;
+		max-width: none !important;
+	}
+}
+
+/* JS-added fallback so browsers do not need :has() support to hide the old
+ * header row on the two v0.5.9 per-cell-label tables. */
+body[data-page="admin-network-firewall-rules"] .cleanx-content tr.cleanx-inline-cell-label-header,
+body[data-page="admin-network-network"] .cleanx-content tr.cleanx-inline-cell-label-header {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.9
+
+- Focused per-cell alignment fix for Network > Firewall > Traffic Rules.
+- Focused per-cell alignment fix for Network > Interfaces > Devices.
+- The affected tables now show the field label inside each data cell so the description and value stay visually connected.
+- Kept all other pages untouched in this release.
+
 ## v0.5.8
 
 - Focused fix for Network > Firewall > Traffic Rules so the table fills the available card width instead of leaving a large empty area.

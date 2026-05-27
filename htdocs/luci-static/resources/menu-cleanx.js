@@ -843,6 +843,9 @@ return baseclass.extend({
 		const text = (node) => String(node && node.textContent || '').replace(/\s+/g, ' ').trim();
 		const headersOf = (table) => Array.from(table.querySelectorAll('tr:first-child th, thead th'))
 			.map((th) => text(th)).filter(Boolean);
+		const headerRowOf = (table) => table.querySelector('thead tr, tr:first-child');
+		const visibleRowsOf = (table) => Array.from(table.querySelectorAll('tr'))
+			.filter((row) => row !== headerRowOf(table) || !row.querySelector('th'));
 		const clearTypeClasses = (table) => {
 			Array.from(table.classList).forEach((cls) => {
 				if (/^cleanx-table-/.test(cls) && cls !== 'cleanx-table-wrap') table.classList.remove(cls);
@@ -857,7 +860,10 @@ return baseclass.extend({
 				const rows = Array.from(table.querySelectorAll('tr'));
 				const sample = text(table).toLowerCase();
 				const isNetworkInterfacesPage = /admin-network-network|\/network\/network|interfaces/.test(page);
-				const isNetworkDevicesTable = isNetworkInterfacesPage && /\bdevice\b/.test(joined) && /\btype\b/.test(joined) && /mac address/.test(joined) && /\bmtu\b/.test(joined);
+				const isNetworkDevicesTable = isNetworkInterfacesPage && (
+					(/\bdevice\b/.test(joined) && /\btype\b/.test(joined) && /mac address/.test(joined) && /\bmtu\b/.test(joined)) ||
+					(/configure|unconfigure/.test(sample) && /mac address|mtu|bridge device|network device/.test(sample) && /\btype\b/.test(joined))
+				);
 
 				/* OpenWrt interface overview tables often have no TH row. Keep the
 				 * native card-like layout. Do not add data labels here because that was
@@ -921,6 +927,30 @@ return baseclass.extend({
 						if (!last.getAttribute('data-cleanx-title')) last.setAttribute('data-cleanx-title', 'Actions');
 					}
 				});
+
+				/* v0.5.9: for the two remaining alignment-problem tables, each cell
+				 * carries its own small label. This avoids relying on a single header
+				 * line that visually drifts away from the row values. */
+				const isFirewallRulesPage = /admin-network-firewall-rules|firewall-rules/.test(page);
+				const useCellLabels = table.classList.contains('cleanx-table-devices') ||
+					(isFirewallRulesPage && table.classList.contains('cleanx-table-firewall')) ||
+					(isFirewallRulesPage && table.classList.contains('cbi-section-table'));
+				if (useCellLabels) {
+					table.classList.add('cleanx-cell-label-table');
+					const headerRow = headerRowOf(table);
+					if (headerRow && headerRow.querySelector('th')) headerRow.classList.add('cleanx-inline-cell-label-header');
+					const maxCells = Math.max(headers.length, ...Array.from(table.querySelectorAll('tr')).map((row) => row.children.length));
+					const titles = headers.slice(0, maxCells);
+					while (titles.length < maxCells) titles.push(titles.length === maxCells - 1 ? 'Actions' : '');
+					Array.from(table.querySelectorAll('tr')).forEach((row) => {
+						if (row === headerRow && row.querySelector('th')) return;
+						Array.from(row.children).forEach((cell, index) => {
+							let title = titles[index] || '';
+							if (!title && (cell.classList.contains('cbi-section-actions') || cell.querySelector('button, .cbi-button, a.btn'))) title = 'Actions';
+							if (title) cell.setAttribute('data-cleanx-title', title);
+						});
+					});
+				}
 			});
 		};
 		classify();
@@ -939,7 +969,7 @@ return baseclass.extend({
 	},
 
 	cleanupInterfaceDeviceTooltips() {
-		/* Focused v0.5.8 recovery: Network > Interfaces/Devices only.
+		/* Focused v0.5.9 recovery: Network > Interfaces/Devices only.
 		 * LuCI stores detailed device data in .cbi-tooltip spans beside the small
 		 * interface icons. In CleanX tables these tooltip payloads look like broken
 		 * grey boxes over the table. Remove only those payload spans while keeping
