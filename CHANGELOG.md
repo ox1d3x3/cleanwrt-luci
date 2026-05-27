@@ -1,6 +1,13 @@
 # Changelog
 
-## v0.5.6
+## v0.5.7
+
+- Cleaned old development theme names from LuCI design list on install/upgrade: UniWRT and X1Wrt.
+- Ensured CleanX is registered as the only current CleanX theme entry.
+- Removed the duplicated header/description bar from Firewall > General Settings > Zones while keeping the per-cell labels and current zone data visible.
+- Scoped the fix only to Firewall Zones and theme registration cleanup.
+
+## v0.5.7
 
 - Focused recovery for Network → Interfaces and Network → Devices only.
 - Hid overlapping LuCI tooltip payload boxes in Interfaces/Devices tables.

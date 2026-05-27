@@ -882,7 +882,12 @@ return baseclass.extend({
 				/* Keep detection narrow. A broad /network/ page match previously caused
 				 * Firewall Zones to be treated as Interfaces because both live under the
 				 * Network menu. Header text wins first, page path is only a fallback. */
-				if (isNetworkDevicesTable) table.classList.add('cleanx-table-devices');
+				if (/firewall-zones/.test(page) && (/zone|input|output|masquerading|forward/.test(joined) || /zone-forwards/.test(sample))) {
+					table.classList.add('cleanx-table-firewall', 'cleanx-table-firewall-zones');
+					const headRow = table.querySelector('thead tr, tr:first-child');
+					if (headRow && headRow.querySelector('th')) headRow.classList.add('cleanx-zone-header-row');
+				}
+				else if (isNetworkDevicesTable) table.classList.add('cleanx-table-devices');
 				else if (/package name|version|size/.test(joined) || /package-manager|software|opkg/.test(page)) table.classList.add('cleanx-table-software');
 				else if (/pid|owner|command|cpu usage|memory usage/.test(joined) || /processes/.test(page)) table.classList.add('cleanx-table-processes');
 				else if (/start priority|initscript/.test(joined) || /startup|init/.test(page)) table.classList.add('cleanx-table-startup');

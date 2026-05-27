@@ -1,13 +1,19 @@
 #!/bin/sh
 
-# Register and select CleanX theme on fresh install.
-# During package upgrade, keep the user's current theme selection untouched.
+# Register CleanX and remove old development theme names from the LuCI design list.
+# During package upgrade, keep the user's current theme selection unless it still
+# points to an old CleanX development path.
 
 uci -q batch <<-'UCI'
+	delete luci.themes.UniWRT
+	delete luci.themes.uniwrt
+	delete luci.themes.X1Wrt
+	delete luci.themes.x1wrt
 	set luci.themes.CleanX='/luci-static/cleanx'
 UCI
 
-if [ "$PKG_UPGRADE" != "1" ]; then
+current_media="$(uci -q get luci.main.mediaurlbase)"
+if [ "$PKG_UPGRADE" != "1" ] || [ "$current_media" = "/luci-static/uniwrt" ] || [ "$current_media" = "/luci-static/x1wrt" ]; then
 	uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
 fi
 
