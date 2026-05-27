@@ -842,35 +842,63 @@ return baseclass.extend({
 		const text = (node) => String(node && node.textContent || '').replace(/\s+/g, ' ').trim();
 		const headersOf = (table) => Array.from(table.querySelectorAll('tr:first-child th, thead th'))
 			.map((th) => text(th)).filter(Boolean);
+		const clearTypeClasses = (table) => {
+			Array.from(table.classList).forEach((cls) => {
+				if (/^cleanx-table-/.test(cls) && cls !== 'cleanx-table-wrap') table.classList.remove(cls);
+			});
+		};
 		const classify = () => {
 			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
 			document.querySelectorAll('#maincontent table').forEach((table) => {
 				if (table.closest('#modal_overlay, .cleanx-dashboard, .ifacebox, .cleanx-port-grid')) return;
 				const headers = headersOf(table);
 				const joined = headers.join(' | ').toLowerCase();
+				const rows = Array.from(table.querySelectorAll('tr'));
+				const sample = text(table).toLowerCase();
+				const isNetworkInterfacesPage = /admin-network-network|\/network\/network|interfaces/.test(page);
+
+				/* OpenWrt interface overview tables often have no TH row. They still need
+				 * structured cell borders, but they must not be misread as generic forms. */
+				if (!headers.length && isNetworkInterfacesPage && rows.some((row) => row.children.length === 3) && /protocol:|device:|connected:|mac:/.test(sample)) {
+					clearTypeClasses(table);
+					table.classList.add('cleanx-data-table', 'cleanx-technical-table', 'cleanx-table-interface-summary');
+					rows.forEach((row) => {
+						Array.from(row.children).forEach((cell, index) => {
+							const header = index === 0 ? 'Interface' : (index === 1 ? 'Status' : 'Actions');
+							cell.classList.add('cleanx-col-' + slug(header));
+							cell.setAttribute('data-cleanx-title', header);
+							if (index === 2 || cell.classList.contains('cbi-section-actions')) cell.classList.add('cleanx-col-actions');
+						});
+					});
+					return;
+				}
+
 				if (!headers.length && !/processes|startup|load|realtime|channel/.test(page)) return;
 
+				clearTypeClasses(table);
 				table.classList.add('cleanx-data-table', 'cleanx-technical-table');
-				/* Specific page/table detection must come before broad words like
-				 * name/action/device/rule. Otherwise LED, Interfaces and Devices tables
-				 * are misclassified as Firewall/Routing and columns collapse. */
+				/* Keep detection narrow. A broad /network/ page match previously caused
+				 * Firewall Zones to be treated as Interfaces because both live under the
+				 * Network menu. Header text wins first, page path is only a fallback. */
 				if (/package name|version|size/.test(joined) || /package-manager|software|opkg/.test(page)) table.classList.add('cleanx-table-software');
 				else if (/pid|owner|command|cpu usage|memory usage/.test(joined) || /processes/.test(page)) table.classList.add('cleanx-table-processes');
 				else if (/start priority|initscript/.test(joined) || /startup|init/.test(page)) table.classList.add('cleanx-table-startup');
 				else if (/led name|trigger|interval|default state/.test(joined) || /leds/.test(page)) table.classList.add('cleanx-table-led');
-				else if (/ssid|bssid|signal|noise|rx rate|tx rate|wireless|radio/.test(joined) || /wireless/.test(page)) table.classList.add('cleanx-table-wireless');
-				else if (/mac address|mtu|interface|type|rx|tx/.test(joined) || (/device/.test(joined) && /type|mtu|mac/.test(joined)) || /interfaces|network/.test(page)) table.classList.add('cleanx-table-interfaces');
+				else if (/zone|match|action|enable|input|output|masquerading|forward/.test(joined) || /firewall|rules|zones/.test(page)) table.classList.add('cleanx-table-firewall');
 				else if (/hostname|mac addresses|lease time|duid|iaid|remaining time|active dhcp/.test(joined) || /dhcp/.test(page)) table.classList.add('cleanx-table-dhcp');
 				else if (/dns/.test(page)) table.classList.add('cleanx-table-dns');
-				else if (/zone|match|action|enable|input|output|masquerading|forward/.test(joined) || /firewall|rules|zones/.test(page)) table.classList.add('cleanx-table-firewall');
+				else if (/ssid|bssid|signal|noise|rx rate|tx rate|wireless|radio/.test(joined) || /wireless/.test(page)) table.classList.add('cleanx-table-wireless');
 				else if (/device|target|gateway|source|metric|protocol|neighbour|neighbor|priority|rule/.test(joined) || /routes|routing/.test(page)) table.classList.add('cleanx-table-routing');
+				else if (/mac address|mtu|interface|type|rx|tx/.test(joined) || (/device/.test(joined) && /type|mtu|mac/.test(joined)) || isNetworkInterfacesPage) table.classList.add('cleanx-table-interfaces');
 
-				const rows = Array.from(table.querySelectorAll('tr'));
 				if (!rows.length || !headers.length) return;
 				rows.forEach((row) => {
 					Array.from(row.children).forEach((cell, index) => {
-						const header = headers[index] || (cell.classList && cell.classList.contains('cbi-section-actions') ? 'actions' : '');
-						if (header) cell.classList.add('cleanx-col-' + slug(header));
+						const header = headers[index] || (cell.classList && cell.classList.contains('cbi-section-actions') ? 'Actions' : '');
+						if (header) {
+							cell.classList.add('cleanx-col-' + slug(header));
+							cell.setAttribute('data-cleanx-title', header);
+						}
 						if (cell.classList && cell.classList.contains('cbi-section-actions')) cell.classList.add('cleanx-col-actions');
 					});
 				});
@@ -879,8 +907,10 @@ return baseclass.extend({
 				Array.from(table.querySelectorAll('tr')).forEach((row) => {
 					const cells = Array.from(row.children);
 					const last = cells[cells.length - 1];
-					if (last && last.querySelector('button, .cbi-button, a.btn, input[type="button"], input[type="submit"]'))
+					if (last && last.querySelector('button, .cbi-button, a.btn, input[type="button"], input[type="submit"]')) {
 						last.classList.add('cleanx-col-actions');
+						if (!last.getAttribute('data-cleanx-title')) last.setAttribute('data-cleanx-title', 'Actions');
+					}
 				});
 			});
 		};
@@ -889,7 +919,12 @@ return baseclass.extend({
 		setTimeout(classify, 250);
 		setTimeout(classify, 1000);
 		if (window.MutationObserver) {
-			const observer = new MutationObserver(() => window.requestAnimationFrame(classify));
+			let scheduled = false;
+			const observer = new MutationObserver(() => {
+				if (scheduled) return;
+				scheduled = true;
+				window.requestAnimationFrame(() => { scheduled = false; classify(); });
+			});
 			observer.observe(document.getElementById('maincontent') || document.body, { childList: true, subtree: true });
 		}
 	},

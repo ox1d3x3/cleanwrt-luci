@@ -1,6 +1,14 @@
 # Changelog
 
-## v0.5.3
+## v0.5.4
+
+### Fixed
+- Corrected CleanX table classification so Firewall Zones is not treated as a Network Interfaces table.
+- Added isolated cell borders and per-cell labels for Firewall Zones and Network Interfaces/Devices alignment.
+- Added safe handling for OpenWrt's headerless interface summary table without changing other pages.
+
+
+## v0.5.4
 
 ### Fixed
 - Focused recovery for the uploaded saved issue pages: Firewall Zones, Traffic Rules, Interfaces/Devices and LED Configuration.
@@ -10,7 +18,7 @@
 - Added Interfaces/Devices column sizing for Device, Type, MAC Address and MTU fields.
 - Kept graph and realtime-page behaviour unchanged from v0.5.2.
 
-## v0.5.3
+## v0.5.4
 
 - Fixed a v0.5.1 regression where Status → Realtime Graphs / Load could render incorrectly.
 - Restored the v0.4.9-safe graph behaviour for `admin-status-realtime*` pages only.
@@ -19,7 +27,7 @@
 
 
 
-## v0.5.3
+## v0.5.4
 
 - Added saved-page alignment recovery for DHCP, DNS, Diagnostics, System, Load and Traffic Rules pages.
 - Added runtime technical table classification for LuCI data-heavy tables.
@@ -29,7 +37,7 @@
 - Improved graph containment for Load, Realtime Graphs and Channel Analysis.
 - Added stronger fallback tab switching for CBI tab pages on OpenWrt 25.x.
 
-## v0.5.3
+## v0.5.4
 
 ### Fixed
 - Added a loader failsafe so LuCI can no longer remain stuck behind the CleanX loading screen if an optional JavaScript enhancer fails.
@@ -37,7 +45,7 @@
 - Updated cache-busting version strings for CleanX CSS assets.
 
 
-## v0.5.3
+## v0.5.4
 
 - Fixed GitHub Actions auto-trigger behaviour after GitHub Desktop push.
 - Replaced stale UniWRT workflow references with CleanX workflow naming.
@@ -45,7 +53,7 @@
 - Kept package assets architecture-independent with `all-openwrt-*` release naming.
 
 
-## v0.5.3
+## v0.5.4
 
 - GitHub Desktop commit safety fix.
 - Removed long saved-browser QA page filenames from the tracked repo package.
@@ -55,7 +63,7 @@
 
 
 
-## v0.5.3
+## v0.5.4
 
 - Added a real LuCI table recovery pass for DHCP, DNS, Routing, Firewall, LED, Interfaces, Wireless, Software, Startup and Processes.
 - Stopped technical table cells from collapsing into vertical letters.
