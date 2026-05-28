@@ -134,14 +134,30 @@ jobs:
             exit 1
           fi
 
+          # Persist for later shell steps. Values written to $GITHUB_ENV
+          # are runtime shell variables, so later steps must cd "$SDK_DIR"
+          # inside their run block instead of using a YAML-level directory expression.
           echo "SDK_DIR=${SDK_DIR}" >> "$GITHUB_ENV"
           echo "Using SDK directory: ${SDK_DIR}"
 
       - name: Prepare feeds
-        working-directory: ${{ env.SDK_DIR }}
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ -z "${SDK_DIR:-}" ] || [ ! -d "${SDK_DIR}" ]; then
+            echo "ERROR: SDK_DIR is not set or does not exist: ${SDK_DIR:-<empty>}"
+            exit 1
+          fi
+
+          if [ ! -x "${SDK_DIR}/scripts/feeds" ]; then
+            echo "ERROR: OpenWrt SDK scripts/feeds not found at: ${SDK_DIR}/scripts/feeds"
+            echo "SDK_DIR contents:"
+            find "${SDK_DIR}" -maxdepth 2 -type f -o -type d | sort | sed -n '1,120p'
+            exit 1
+          fi
+
+          cd "${SDK_DIR}"
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
@@ -181,10 +197,16 @@ jobs:
           find "${PKG_DST}" -maxdepth 2 -type d | sort | sed -n '1,80p'
 
       - name: Build package
-        working-directory: ${{ env.SDK_DIR }}
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ -z "${SDK_DIR:-}" ] || [ ! -d "${SDK_DIR}" ]; then
+            echo "ERROR: SDK_DIR is not set or does not exist: ${SDK_DIR:-<empty>}"
+            exit 1
+          fi
+
+          cd "${SDK_DIR}"
           make defconfig
           mkdir -p "${GITHUB_WORKSPACE}/build-logs"
           make "package/${PKG_NAME}/clean" V=s || true
