@@ -23,8 +23,18 @@ PKG_DIR="$OWRT_DIR/package/custom/$PKG_NAME"
 
 mkdir -p "$OWRT_DIR/package/custom"
 rm -rf "$PKG_DIR"
-cp -a "$SRC_DIR" "$PKG_DIR"
-rm -rf "$PKG_DIR/.git" "$PKG_DIR/.github"
+rsync -a --delete \
+	--exclude '.git' \
+	--exclude '.github' \
+	--exclude '.sdk-*' \
+	--exclude 'openwrt-sdk-*' \
+	--exclude 'dist' \
+	--exclude 'package-artifacts' \
+	--exclude 'build-logs' \
+	--exclude '*.zip' \
+	--exclude '*.tar.xz' \
+	--exclude '*.tar.zst' \
+	"$SRC_DIR/" "$PKG_DIR/"
 
 cd "$OWRT_DIR"
 

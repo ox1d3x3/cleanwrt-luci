@@ -1,5 +1,8 @@
 name: Build CleanX universal packages
 
+env:
+  PKG_NAME: luci-theme-cleanx
+
 on:
   push:
     branches:
@@ -24,21 +27,18 @@ jobs:
       matrix:
         include:
           - label: OpenWrt 24.10.6 universal IPK
-            openwrt_version: "24.10.6"
             sdk_version: "24.10.6"
             target: "x86"
             subtarget: "64"
             format: "ipk"
             release_suffix: "all-openwrt-24.10.6-universal"
           - label: OpenWrt 25.12.4 universal APK
-            openwrt_version: "25.12.4"
             sdk_version: "25.12.4"
             target: "x86"
             subtarget: "64"
             format: "apk"
             release_suffix: "all-openwrt-25.12.4-universal"
           - label: OpenWrt snapshot universal APK
-            openwrt_version: "snapshot"
             sdk_version: "snapshot"
             target: "x86"
             subtarget: "64"
@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout CleanX source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Read package version
         id: version
@@ -88,13 +88,19 @@ jobs:
             zstd \
             libelf-dev
 
-      - name: Download OpenWrt SDK
+      - name: Download OpenWrt SDK outside repository
         shell: bash
         run: |
           set -euo pipefail
+
           TARGET="${{ matrix.target }}"
           SUBTARGET="${{ matrix.subtarget }}"
           VERSION="${{ matrix.sdk_version }}"
+          SDK_WORKDIR="${RUNNER_TEMP}/openwrt-sdk-${{ matrix.release_suffix }}"
+
+          rm -rf "${SDK_WORKDIR}"
+          mkdir -p "${SDK_WORKDIR}"
+          cd "${SDK_WORKDIR}"
 
           if [ "${VERSION}" = "snapshot" ]; then
             SDK_BASE_URL="https://downloads.openwrt.org/snapshots/targets/${TARGET}/${SUBTARGET}/"
@@ -103,10 +109,12 @@ jobs:
           fi
 
           echo "SDK URL: ${SDK_BASE_URL}"
-          SDK_FILE="$(curl -fsSL "${SDK_BASE_URL}" | grep -oE 'openwrt-sdk-[^"<>]+Linux-x86_64\.tar\.(xz|zst)' | head -n 1)"
+          curl -fsSL "${SDK_BASE_URL}" -o sdk-index.html
+          SDK_FILE="$(grep -oE 'openwrt-sdk-[^"<> ]+Linux-x86_64\.tar\.(xz|zst)' sdk-index.html | sort -u | head -n 1 || true)"
 
           if [ -z "${SDK_FILE}" ]; then
             echo "ERROR: Could not detect SDK file from ${SDK_BASE_URL}"
+            sed -n '1,120p' sdk-index.html || true
             exit 1
           fi
 
@@ -119,9 +127,10 @@ jobs:
             *) echo "ERROR: Unsupported SDK archive: ${SDK_FILE}"; exit 1 ;;
           esac
 
-          SDK_DIR="$(find . -maxdepth 1 -type d -name 'openwrt-sdk-*' | head -n 1)"
-          if [ -z "${SDK_DIR}" ]; then
+          SDK_DIR="$(find "${SDK_WORKDIR}" -maxdepth 1 -type d -name 'openwrt-sdk-*' | head -n 1)"
+          if [ -z "${SDK_DIR}" ] || [ ! -d "${SDK_DIR}" ]; then
             echo "ERROR: SDK directory not found"
+            find "${SDK_WORKDIR}" -maxdepth 2 -type d -print
             exit 1
           fi
 
@@ -136,24 +145,40 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-      - name: Copy CleanX package into SDK
+      - name: Stage CleanX package source
         shell: bash
         run: |
           set -euo pipefail
-          PKG="luci-theme-cleanx"
-          mkdir -p "${SDK_DIR}/package/custom/${PKG}"
+
+          PKG_SRC="${RUNNER_TEMP}/${PKG_NAME}-source"
+          PKG_DST="${SDK_DIR}/package/custom/${PKG_NAME}"
+
+          rm -rf "${PKG_SRC}" "${PKG_DST}"
+          mkdir -p "${PKG_SRC}" "$(dirname "${PKG_DST}")"
+
+          # Keep the OpenWrt SDK and generated outputs out of the package source.
+          # The previous workflow extracted the SDK under GITHUB_WORKSPACE, then
+          # rsynced ./ into SDK/package/custom/${PKG_NAME}, causing recursive SDK copies.
           rsync -a --delete \
             --exclude '.git' \
             --exclude '.github' \
             --exclude '.sdk-*' \
+            --exclude 'openwrt-sdk-*' \
             --exclude 'dist' \
             --exclude 'package-artifacts' \
             --exclude 'build-logs' \
             --exclude '*.zip' \
-            ./ "${SDK_DIR}/package/custom/${PKG}/"
+            --exclude '*.tar.xz' \
+            --exclude '*.tar.zst' \
+            "${GITHUB_WORKSPACE}/" "${PKG_SRC}/"
 
-          grep -q '^PKGARCH:=all' "${SDK_DIR}/package/custom/${PKG}/Makefile"
-          grep -q '^LUCI_PKGARCH:=all' "${SDK_DIR}/package/custom/${PKG}/Makefile"
+          cp -a "${PKG_SRC}" "${PKG_DST}"
+
+          grep -q '^PKGARCH:=all' "${PKG_DST}/Makefile"
+          grep -q '^LUCI_PKGARCH:=all' "${PKG_DST}/Makefile"
+
+          echo "Package source staged at: ${PKG_DST}"
+          find "${PKG_DST}" -maxdepth 2 -type d | sort | sed -n '1,80p'
 
       - name: Build package
         working-directory: ${{ env.SDK_DIR }}
@@ -162,29 +187,30 @@ jobs:
           set -euo pipefail
           make defconfig
           mkdir -p "${GITHUB_WORKSPACE}/build-logs"
-          make package/luci-theme-cleanx/clean V=s || true
-          make package/luci-theme-cleanx/compile V=s -j"$(nproc)" 2>&1 | tee "${GITHUB_WORKSPACE}/build-logs/build-${{ matrix.release_suffix }}.log"
+          make "package/${PKG_NAME}/clean" V=s || true
+          make "package/${PKG_NAME}/compile" V=s -j"$(nproc)" 2>&1 | tee "${GITHUB_WORKSPACE}/build-logs/build-${{ matrix.release_suffix }}.log"
 
       - name: Collect and rename universal package
         shell: bash
         run: |
           set -euo pipefail
+
           mkdir -p package-artifacts
           VERSION="${{ steps.version.outputs.version }}"
           FORMAT="${{ matrix.format }}"
           SUFFIX="${{ matrix.release_suffix }}"
 
           if [ "${FORMAT}" = "ipk" ]; then
-            SRC="$(find "${SDK_DIR}/bin" -type f -name 'luci-theme-cleanx*.ipk' | head -n 1)"
-            OUT="package-artifacts/luci-theme-cleanx_${VERSION}-r1_${SUFFIX}.ipk"
+            SRC="$(find "${SDK_DIR}/bin" -type f -name "${PKG_NAME}*.ipk" | sort | head -n 1 || true)"
+            OUT="package-artifacts/${PKG_NAME}_${VERSION}-r1_${SUFFIX}.ipk"
           else
-            SRC="$(find "${SDK_DIR}/bin" -type f -name 'luci-theme-cleanx*.apk' | head -n 1)"
-            OUT="package-artifacts/luci-theme-cleanx_${VERSION}-r1_${SUFFIX}.apk"
+            SRC="$(find "${SDK_DIR}/bin" -type f -name "${PKG_NAME}*.apk" | sort | head -n 1 || true)"
+            OUT="package-artifacts/${PKG_NAME}_${VERSION}-r1_${SUFFIX}.apk"
           fi
 
-          if [ -z "${SRC}" ]; then
+          if [ -z "${SRC}" ] || [ ! -f "${SRC}" ]; then
             echo "ERROR: Built ${FORMAT} package not found"
-            find "${SDK_DIR}/bin" -type f | sort | tail -n 50
+            find "${SDK_DIR}/bin" -type f | sort | tail -n 80
             exit 1
           fi
 
@@ -200,18 +226,18 @@ jobs:
           cat > "build-logs/summary-${{ matrix.release_suffix }}.md" <<EOF2
           # CleanX ${{ steps.version.outputs.version }} - ${{ matrix.label }}
 
-          - Package: luci-theme-cleanx
+          - Package: ${PKG_NAME}
           - Package architecture: all
           - Builder SDK target: ${{ matrix.target }}/${{ matrix.subtarget }}
-          - OpenWrt generation: ${{ matrix.openwrt_version }}
+          - OpenWrt SDK generation: ${{ matrix.sdk_version }}
           - Output format: .${{ matrix.format }}
-          - Universal target: ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching package manager generation
+          - Universal target: ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching OpenWrt package-manager generation
 
           The SDK target is only used as the build environment. CleanX contains no compiled binaries.
           EOF2
 
       - name: Upload package artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cleanx-${{ matrix.release_suffix }}
           path: |
@@ -226,7 +252,7 @@ jobs:
 
     steps:
       - name: Checkout CleanX source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Read package version
         id: version
@@ -239,7 +265,7 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Download package artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: release-assets
           merge-multiple: true
@@ -248,8 +274,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           cd release-assets
-          sha256sum luci-theme-cleanx_* > SHA256SUMS.txt
+          sha256sum ${PKG_NAME}_* > SHA256SUMS.txt
           cd ..
 
           cat > RELEASE_NOTES.txt <<EOF2
@@ -259,13 +286,13 @@ jobs:
 
           ## Universal package support
 
-          CleanX is architecture-independent. The package architecture is \`all\`, so the package is intended for ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching OpenWrt package manager generation.
+          CleanX is architecture-independent. The package architecture is \`all\`, so the package is intended for ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching OpenWrt package-manager generation.
 
           ## Assets
 
-          - \`luci-theme-cleanx_${{ steps.version.outputs.version }}-r1_all-openwrt-24.10.6-universal.ipk\` for OpenWrt 24.10.x / opkg generation
-          - \`luci-theme-cleanx_${{ steps.version.outputs.version }}-r1_all-openwrt-25.12.4-universal.apk\` for OpenWrt 25.12+ / apk generation
-          - \`luci-theme-cleanx_${{ steps.version.outputs.version }}-r1_all-openwrt-snapshot-universal.apk\` for OpenWrt snapshots / apk generation
+          - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-24.10.6-universal.ipk\` for OpenWrt 24.10.x / opkg generation
+          - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-25.12.4-universal.apk\` for OpenWrt 25.12+ / apk generation
+          - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-snapshot-universal.apk\` for OpenWrt snapshots / apk generation
 
           ## Notes
 
@@ -275,7 +302,7 @@ jobs:
           EOF2
 
           echo "Release assets:"
-          find release-assets -type f -maxdepth 2 -print | sort
+          find release-assets -maxdepth 2 -type f -print | sort
 
       - name: Create GitHub pre-release
         env:

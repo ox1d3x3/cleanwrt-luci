@@ -48,10 +48,13 @@ rsync -a --delete \
   --exclude '.git' \
   --exclude '.github' \
   --exclude '.sdk-*' \
+  --exclude 'openwrt-sdk-*' \
   --exclude 'dist' \
   --exclude 'package-artifacts' \
   --exclude 'build-logs' \
   --exclude '*.zip' \
+  --exclude '*.tar.xz' \
+  --exclude '*.tar.zst' \
   "$ROOT_DIR/" "sdk/package/custom/$PACKAGE_NAME/"
 
 cd sdk
