@@ -928,7 +928,7 @@ return baseclass.extend({
 					}
 				});
 
-				/* v0.5.9: for the two remaining alignment-problem tables, each cell
+				/* v0.6.0: for the two remaining alignment-problem tables, each cell
 				 * carries its own small label. This avoids relying on a single header
 				 * line that visually drifts away from the row values. */
 				const isFirewallRulesPage = /admin-network-firewall-rules|firewall-rules/.test(page);
@@ -969,7 +969,7 @@ return baseclass.extend({
 	},
 
 	cleanupInterfaceDeviceTooltips() {
-		/* Focused v0.5.9 recovery: Network > Interfaces/Devices only.
+		/* Focused v0.6.0 recovery: Network > Interfaces/Devices only.
 		 * LuCI stores detailed device data in .cbi-tooltip spans beside the small
 		 * interface icons. In CleanX tables these tooltip payloads look like broken
 		 * grey boxes over the table. Remove only those payload spans while keeping

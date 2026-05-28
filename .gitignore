@@ -1,15 +1,16 @@
-.DS_Store
-*.ipk
-*.apk
-*.tar.gz
-bin/
-build_dir/
-staging_dir/
-tmp/
-logs/
+# Local build output
+/dist/
+/package-artifacts/
+/build-logs/
+/.sdk-*/
 
-# Saved browser QA pages can contain very long Windows-incompatible filenames.
-# Keep them outside the repo or zip them separately as test evidence.
+# Exported/saved router pages used for local debugging only
 preview/qa-v*-user-pages/
 preview/*_files/
 *.download
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -5,8 +5,8 @@ set -euo pipefail
 
 PACKAGE_NAME="${PACKAGE_NAME:-luci-theme-cleanx}"
 OPENWRT_VERSION="${OPENWRT_VERSION:-25.12.4}"
-TARGET="${TARGET:-mediatek}"
-SUBTARGET="${SUBTARGET:-mt7622}"
+TARGET="${TARGET:-x86}"
+SUBTARGET="${SUBTARGET:-64}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="${WORK_DIR:-$ROOT_DIR/.sdk-$OPENWRT_VERSION-$TARGET-$SUBTARGET}"
 DIST_DIR="$ROOT_DIR/dist"
@@ -60,7 +60,7 @@ printf '==> Updating feeds\n'
 ./scripts/feeds install -a
 make defconfig
 
-printf '==> Building %s for OpenWrt %s\n' "$PACKAGE_NAME" "$OPENWRT_VERSION"
+printf '==> Building %s for OpenWrt %s (PKGARCH=all universal package)\n' "$PACKAGE_NAME" "$OPENWRT_VERSION"
 make "package/$PACKAGE_NAME/clean" V=s || true
 make "package/$PACKAGE_NAME/compile" V=s 2>&1 | tee "$DIST_DIR/build-${OPENWRT_VERSION}.log"
 

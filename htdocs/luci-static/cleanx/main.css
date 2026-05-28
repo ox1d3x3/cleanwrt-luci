@@ -1,4 +1,4 @@
-/* CleanX Theme v0.5.9 - SPDX-License-Identifier: Apache-2.0 */
+/* CleanX Theme v0.6.0 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -10306,7 +10306,7 @@ body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devic
 
 
 /* ========================================================================== */
-/* CleanX v0.5.9 - per-cell label alignment for two remaining pages            */
+/* CleanX v0.6.0 - per-cell label alignment for two remaining pages            */
 /* --------------------------------------------------------------------------
  * Scope is intentionally narrow:
  *  - Network > Firewall > Traffic Rules
@@ -10527,7 +10527,7 @@ body[data-page="admin-network-network"] .cleanx-content table.cleanx-table-devic
 }
 
 /* JS-added fallback so browsers do not need :has() support to hide the old
- * header row on the two v0.5.9 per-cell-label tables. */
+ * header row on the two v0.6.0 per-cell-label tables. */
 body[data-page="admin-network-firewall-rules"] .cleanx-content tr.cleanx-inline-cell-label-header,
 body[data-page="admin-network-network"] .cleanx-content tr.cleanx-inline-cell-label-header {
 	position: absolute !important;

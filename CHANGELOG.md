@@ -1,6 +1,16 @@
 # Changelog
 
-## v0.5.9
+## v0.6.0
+
+### Changed
+- Updated GitHub Actions to publish architecture-independent universal packages.
+- Release assets are now named as `all-openwrt-*-universal` to make it clear that CleanX is not tied to one router model.
+- Switched the default SDK build target to x86/64 as a neutral builder target while preserving `PKGARCH:=all` and `LUCI_PKGARCH:=all`.
+
+### Notes
+- CleanX contains no compiled binaries. The generated IPK/APK package architecture is `all`, so it is intended for ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching package manager generation.
+
+## v0.6.0
 
 - Focused per-cell alignment fix for Network > Firewall > Traffic Rules.
 - Focused per-cell alignment fix for Network > Interfaces > Devices.

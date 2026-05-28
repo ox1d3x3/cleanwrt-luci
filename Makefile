@@ -10,7 +10,7 @@ LUCI_TITLE:=CleanX Theme - modern LuCI theme with live dashboard widgets
 LUCI_DEPENDS:=+luci-base
 
 PKG_NAME:=luci-theme-cleanx
-PKG_VERSION:=0.5.9
+PKG_VERSION:=0.6.0
 PKG_RELEASE:=1
 PKGARCH:=all
 LUCI_PKGARCH:=all
