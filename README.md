@@ -53,9 +53,6 @@ CleanX is designed to make LuCI feel cleaner, easier to read and more comfortabl
 
 <p align="center">
   <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/ox1d3x3/cleanwrt-luci?include_prereleases&sort=semver&style=for-the-badge&label=latest%20release">
-  </a>
-  <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
     <img alt="Total release downloads" src="https://img.shields.io/github/downloads/ox1d3x3/cleanwrt-luci/total?style=for-the-badge&label=total%20downloads&logo=github">
   </a>
   <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
