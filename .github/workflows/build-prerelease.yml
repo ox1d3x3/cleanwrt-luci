@@ -303,17 +303,42 @@ jobs:
       - name: Download package artifacts
         uses: actions/download-artifact@v7
         with:
-          path: release-assets
-          merge-multiple: true
+          path: downloaded-artifacts
 
-      - name: Prepare release notes and checksums
+      - name: Prepare release assets, notes and checksums
         shell: bash
         run: |
           set -euo pipefail
 
-          cd release-assets
-          sha256sum ${PKG_NAME}_* > SHA256SUMS.txt
-          cd ..
+          echo "Downloaded artifact tree:"
+          find downloaded-artifacts -maxdepth 4 -type f -print | sort || true
+
+          rm -rf dist
+          mkdir -p dist
+
+          # Artifacts may be restored either directly, inside package-artifacts/,
+          # or inside per-artifact folders depending on download-artifact behaviour.
+          # Always collect the real packages into a known flat dist/ folder.
+          while IFS= read -r pkg; do
+            cp -v "${pkg}" dist/
+          done < <(find downloaded-artifacts -type f \( -name "${PKG_NAME}_*.ipk" -o -name "${PKG_NAME}_*.apk" \) | sort)
+
+          shopt -s nullglob
+          packages=(dist/${PKG_NAME}_*.ipk dist/${PKG_NAME}_*.apk)
+          if [ "${#packages[@]}" -eq 0 ]; then
+            echo "ERROR: No ${PKG_NAME} package files were found after downloading artifacts."
+            echo "Full downloaded artifact tree:"
+            find downloaded-artifacts -maxdepth 6 -print | sort
+            exit 1
+          fi
+
+          echo "Package files prepared for release:"
+          printf ' - %s\n' "${packages[@]}"
+
+          (
+            cd dist
+            sha256sum "${PKG_NAME}"_*.ipk "${PKG_NAME}"_*.apk 2>/dev/null | sort -k2 > SHA256SUMS.txt
+          )
 
           cat > RELEASE_NOTES.txt <<EOF2
           # CleanX ${{ steps.version.outputs.version }} pre-release
@@ -330,6 +355,10 @@ jobs:
           - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-25.12.4-universal.apk\` for OpenWrt 25.12+ / apk generation
           - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-snapshot-universal.apk\` for OpenWrt snapshots / apk generation
 
+          ## Checksums
+
+          SHA256 checksums are included in \`SHA256SUMS.txt\`.
+
           ## Notes
 
           The SDK target used in CI is only a builder environment. CleanX contains no compiled binaries and keeps \`PKGARCH:=all\` plus \`LUCI_PKGARCH:=all\`.
@@ -337,8 +366,8 @@ jobs:
           Test this pre-release on your router before promoting it to a stable release.
           EOF2
 
-          echo "Release assets:"
-          find release-assets -maxdepth 2 -type f -print | sort
+          echo "Final release assets:"
+          find dist -maxdepth 1 -type f -print | sort
 
       - name: Create GitHub pre-release
         env:
@@ -351,4 +380,4 @@ jobs:
             --title "CleanX ${{ steps.version.outputs.version }} pre-release" \
             --notes-file RELEASE_NOTES.txt \
             --prerelease \
-            release-assets/*
+            dist/*
