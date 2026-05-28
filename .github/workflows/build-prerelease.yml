@@ -127,17 +127,30 @@ jobs:
             *) echo "ERROR: Unsupported SDK archive: ${SDK_FILE}"; exit 1 ;;
           esac
 
-          SDK_DIR="$(find "${SDK_WORKDIR}" -maxdepth 1 -type d -name 'openwrt-sdk-*' | head -n 1)"
+          # Detect the real SDK root after extraction. Do not use SDK_WORKDIR itself:
+          # its name also starts with openwrt-sdk-* and can be accidentally matched.
+          SDK_DIR=""
+          for d in "${SDK_WORKDIR}"/openwrt-sdk-*; do
+            if [ -d "${d}" ] && [ -f "${d}/scripts/feeds" ]; then
+              SDK_DIR="${d}"
+              break
+            fi
+          done
+
           if [ -z "${SDK_DIR}" ] || [ ! -d "${SDK_DIR}" ]; then
-            echo "ERROR: SDK directory not found"
-            find "${SDK_WORKDIR}" -maxdepth 2 -type d -print
+            echo "ERROR: SDK directory not found under ${SDK_WORKDIR}"
+            find "${SDK_WORKDIR}" -maxdepth 2 -type d -print | sort
             exit 1
           fi
+
+          chmod +x "${SDK_DIR}/scripts/feeds"
 
           # Persist for later shell steps. Values written to $GITHUB_ENV
           # are runtime shell variables, so later steps must cd "$SDK_DIR"
           # inside their run block instead of using a YAML-level directory expression.
+          echo "SDK_WORKDIR=${SDK_WORKDIR}" >> "$GITHUB_ENV"
           echo "SDK_DIR=${SDK_DIR}" >> "$GITHUB_ENV"
+          echo "Using SDK workdir: ${SDK_WORKDIR}"
           echo "Using SDK directory: ${SDK_DIR}"
 
       - name: Prepare feeds
@@ -150,12 +163,13 @@ jobs:
             exit 1
           fi
 
-          if [ ! -x "${SDK_DIR}/scripts/feeds" ]; then
+          if [ ! -f "${SDK_DIR}/scripts/feeds" ]; then
             echo "ERROR: OpenWrt SDK scripts/feeds not found at: ${SDK_DIR}/scripts/feeds"
-            echo "SDK_DIR contents:"
-            find "${SDK_DIR}" -maxdepth 2 -type f -o -type d | sort | sed -n '1,120p'
+            echo "SDK workdir contents:"
+            find "${SDK_WORKDIR:-${SDK_DIR}}" -maxdepth 2 \( -type f -o -type d \) | sort | sed -n '1,160p'
             exit 1
           fi
+          chmod +x "${SDK_DIR}/scripts/feeds"
 
           cd "${SDK_DIR}"
           ./scripts/feeds update -a
