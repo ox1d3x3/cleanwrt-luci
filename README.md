@@ -5,7 +5,7 @@
 <h1 align="center">CleanX LuCI Theme</h1>
 
 <p align="center">
-  A clean, modern, UniFi-inspired LuCI theme for OpenWrt with polished dark/light mode, responsive navigation and a useful router overview dashboard.
+  A clean, modern, LuCI theme for OpenWrt with polished dark/light mode, responsive navigation and a useful router overview dashboard.
 </p>
 
 <p align="center">
