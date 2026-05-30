@@ -51,15 +51,6 @@ CleanX is designed to make LuCI feel cleaner, easier to read and more comfortabl
 
 ## Latest release
 
-<p align="center">
-  <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
-    <img alt="Total release downloads" src="https://img.shields.io/github/downloads/ox1d3x3/cleanwrt-luci/total?style=for-the-badge&label=total%20downloads&logo=github">
-  </a>
-  <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
-    <img alt="Download latest release" src="https://img.shields.io/badge/download-latest%20release-2ea44f?style=for-the-badge&logo=github">
-  </a>
-</p>
-
 Download the newest `.ipk` or `.apk` package from the [GitHub Releases](https://github.com/ox1d3x3/cleanwrt-luci/releases) page. The release badge and download counter update automatically from GitHub release metadata, so this section does not need to be edited after every build.
 
 Use the package format that matches your router firmware:
