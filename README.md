@@ -98,29 +98,6 @@ The package is architecture-independent and is intended for modern OpenWrt/LuCI 
 
 > Router firmware builds can differ between vendors and snapshots. Keep SSH access available when testing a new LuCI theme so you can recover quickly if the web UI cache or theme selection breaks.
 
-## Repository structure
-
-```text
-luci-theme-cleanx/
-├── Makefile
-├── README.md
-├── htdocs/luci-static/cleanx/
-│   ├── main.css
-│   ├── login.css
-│   └── images/logo.svg
-├── htdocs/luci-static/resources/
-│   ├── menu-cleanx.js
-│   └── cleanx-dashboard.js
-├── root/etc/uci-defaults/30_luci-theme-cleanx
-├── root/usr/share/rpcd/acl.d/luci-theme-cleanx.json
-├── ucode/template/themes/cleanx/
-│   ├── header.ut
-│   ├── footer.ut
-│   └── sysauth.ut
-├── preview/
-├── scripts/
-└── .github/workflows/build-openwrt-packages.yml
-```
 
 ## Install from a release package
 
@@ -179,21 +156,6 @@ preview/qa-v042/index.html
 preview/qa-v031/index.html
 ```
 
-The QA mocks use fake OpenWrt/LuCI data so theme layout changes can be checked without flashing a router. They are useful for testing the overview dashboard, Network pages, Wireless pages, Firewall output, Package Manager modals and compact mobile top bar behaviour.
-
-## Dashboard behaviour
-
-The overview dashboard reads LuCI RPC data from the router.
-
-Current behaviour:
-
-- WAN speed is calculated from RX/TX byte counter changes.
-- Traffic totals are taken from interface counters since boot or interface reset.
-- RAM usage comes from `system.info`.
-- CPU usage uses `/proc/stat` when available and falls back to a load-based estimate if file RPC is unavailable.
-- System uptime updates on the overview dashboard.
-
-For persistent monthly or yearly traffic totals, add `vnstat` or `nlbwmon` in a future release.
 
 ## Recovery if LuCI breaks
 
@@ -231,36 +193,6 @@ When changing the theme, test both desktop and mobile layouts. LuCI pages can va
 - Startup, processes and scheduled tasks
 - Software and Package Manager modals
 
-Keep user-facing text clean and avoid adding internal prompt or test wording to production files.
-
-## Changelog
-
-### v0.5.9
-
-- Polished top bar alignment so the router name and page title stay visually centred between the menu button and right-side controls.
-- Added responsive truncation for long page names on small screens.
-- Improved native LuCI dropdown and action compatibility on DNS, Diagnostics, Startup, LED Configuration, System, Load and Processes pages.
-- Kept dropdown controls compact by default while allowing long DNS/DHCP lists to open in a more readable layout when focused.
-- Cleaned CleanX naming in the LuCI Design list.
-- Cleaned duplicate Firewall Zones header output.
-
-### v0.4.3
-
-- Added CPU and RAM cards to the overview dashboard.
-- Added a dashboard summary line for system uptime, total traffic and RAM total.
-- Restyled Overview Hide/Show controls as modern pills.
-- Improved Overview Network and Wireless output readability.
-- Improved Package Manager install/details modal dependency layout.
-- Added compact top bar controls and a visible SVG mobile menu icon.
-- Updated footer project links.
-- Added QA mock pages for layout testing.
-
-## Roadmap
-
-- Continue refining LuCI table layouts on dense pages such as Firewall and Network Devices.
-- Add more screenshots and mobile previews.
-- Add more automated packaging checks for OPKG and APK targets.
-- Improve dashboard support for optional traffic history tools such as `vnstat` or `nlbwmon`.
 
 ## Author
 
