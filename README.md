@@ -2,7 +2,7 @@
   <img src="htdocs/luci-static/cleanx/images/logo.svg" alt="CleanX logo" width="76">
 </p>
 
-<h1 align="center"> ## If UniWRT is useful to you, a ⭐ helps others find it.</h1>
+<h1 align="center">If UniWRT is useful to you, a ⭐ helps others find it.</h1>
 
 <h1 align="center">CleanX LuCI Theme</h1>
 
