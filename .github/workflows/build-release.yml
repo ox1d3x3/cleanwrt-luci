@@ -1,4 +1,9 @@
-name: Build CleanX universal packages
+name: Build and release CleanX
+
+# Every push to main builds universal .ipk/.apk packages.
+#   - If VERSION has no GitHub release yet -> stable release vX.Y.Z (marked latest)
+#   - Otherwise                            -> pre-release vX.Y.Z-pre.<run>.<attempt>
+# Bump the version with scripts/bump-version.sh to cut a new stable release.
 
 env:
   PKG_NAME: luci-theme-cleanx
@@ -8,19 +13,64 @@ on:
     branches:
       - main
       - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'preview/**'
+      - 'LICENSE'
+  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: cleanx-universal-${{ github.ref }}
+  group: cleanx-release-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  check:
+    name: Sanity checks
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout CleanX source
+        uses: actions/checkout@v5
+
+      - name: Version strings match VERSION
+        run: bash scripts/bump-version.sh --check
+
+      - name: Shell scripts parse
+        run: |
+          set -euo pipefail
+          for f in scripts/*.sh root/etc/uci-defaults/*; do
+            case "$f" in *.sh) bash -n "$f" ;; *) sh -n "$f" ;; esac
+            echo "ok: $f"
+          done
+
+      - name: LuCI JavaScript modules parse
+        run: |
+          set -euo pipefail
+          for f in htdocs/luci-static/resources/*.js; do
+            node -e "
+              const src = require('fs').readFileSync(process.argv[1], 'utf8')
+                .replace(/^'(use strict|require [^']+)';\s*/gm, '');
+              new Function('baseclass', 'rpc', 'poll', 'ui', 'E', 'L', '_', src);
+            " "$f"
+            echo "ok: $f"
+          done
+
+      - name: ACL and JSON files parse
+        run: |
+          set -euo pipefail
+          for f in root/usr/share/rpcd/acl.d/*.json; do
+            python3 -m json.tool "$f" > /dev/null
+            echo "ok: $f"
+          done
+
   build:
     name: Build ${{ matrix.label }}
     runs-on: ubuntu-24.04
+    needs: check
 
     strategy:
       fail-fast: false
@@ -197,12 +247,17 @@ jobs:
             --exclude 'dist' \
             --exclude 'package-artifacts' \
             --exclude 'build-logs' \
+            --exclude 'docs' \
+            --exclude 'preview' \
             --exclude '*.zip' \
             --exclude '*.tar.xz' \
             --exclude '*.tar.zst' \
             "${GITHUB_WORKSPACE}/" "${PKG_SRC}/"
 
           cp -a "${PKG_SRC}" "${PKG_DST}"
+
+          # Ship minified CSS; the repository keeps the readable source.
+          bash "${GITHUB_WORKSPACE}/scripts/minify-css.sh" "${PKG_DST}"
 
           grep -q '^PKGARCH:=all' "${PKG_DST}/Makefile"
           grep -q '^LUCI_PKGARCH:=all' "${PKG_DST}/Makefile"
@@ -281,103 +336,122 @@ jobs:
             build-logs/*
           if-no-files-found: error
 
-  prerelease:
-    name: Publish GitHub pre-release
+  release:
+    name: Publish GitHub release
     runs-on: ubuntu-24.04
     needs: build
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout CleanX source
         uses: actions/checkout@v5
 
-      - name: Read package version
+      - name: Decide release type
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
           VERSION="$(tr -d '[:space:]' < VERSION)"
-          TAG="v${VERSION}-pre.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+          if gh release view "v${VERSION}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
+            TAG="v${VERSION}-pre.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+            KIND="prerelease"
+          else
+            TAG="v${VERSION}"
+            KIND="stable"
+          fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}"         >> "$GITHUB_OUTPUT"
+          echo "kind=${KIND}"       >> "$GITHUB_OUTPUT"
+          echo "Publishing ${KIND} release ${TAG}"
 
       - name: Download package artifacts
         uses: actions/download-artifact@v7
         with:
           path: downloaded-artifacts
 
-      - name: Prepare release assets, notes and checksums
+      - name: Collect packages and checksums
         shell: bash
         run: |
           set -euo pipefail
-
-          echo "Downloaded artifact tree:"
-          find downloaded-artifacts -maxdepth 4 -type f -print | sort || true
-
-          rm -rf dist
-          mkdir -p dist
-
-          # Artifacts may be restored either directly, inside package-artifacts/,
-          # or inside per-artifact folders depending on download-artifact behaviour.
-          # Always collect the real packages into a known flat dist/ folder.
-          while IFS= read -r pkg; do
-            cp -v "${pkg}" dist/
-          done < <(find downloaded-artifacts -type f \( -name "${PKG_NAME}_*.ipk" -o -name "${PKG_NAME}_*.apk" \) | sort)
+          rm -rf dist && mkdir -p dist
+          find downloaded-artifacts -type f \( -name "${PKG_NAME}_*.ipk" -o -name "${PKG_NAME}_*.apk" \) -exec cp -v {} dist/ \;
 
           shopt -s nullglob
-          packages=(dist/${PKG_NAME}_*.ipk dist/${PKG_NAME}_*.apk)
+          packages=(dist/*.ipk dist/*.apk)
           if [ "${#packages[@]}" -eq 0 ]; then
-            echo "ERROR: No ${PKG_NAME} package files were found after downloading artifacts."
-            echo "Full downloaded artifact tree:"
+            echo "ERROR: no packages found in build artifacts"
             find downloaded-artifacts -maxdepth 6 -print | sort
             exit 1
           fi
+          (cd dist && sha256sum *.ipk *.apk | sort -k2 > SHA256SUMS.txt)
+          cat dist/SHA256SUMS.txt
 
-          echo "Package files prepared for release:"
-          printf ' - %s\n' "${packages[@]}"
+      - name: Write release notes
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          KIND: ${{ steps.version.outputs.kind }}
+        run: |
+          set -euo pipefail
+          {
+            if [ "${KIND}" = "prerelease" ]; then
+              echo "> Automated pre-release build from \`${GITHUB_SHA::7}\`. Test on your router before relying on it."
+              echo
+            fi
 
-          (
-            cd dist
-            sha256sum "${PKG_NAME}"_*.ipk "${PKG_NAME}"_*.apk 2>/dev/null | sort -k2 > SHA256SUMS.txt
-          )
+            # Changes: the CHANGELOG section for this version, without its heading.
+            awk -v v="${VERSION}" '
+              $0 ~ "^## \\[" v "\\]" { on = 1; next }
+              on && /^## \[/          { exit }
+              on && /^\[[0-9.]+\]: /  { exit }
+              on                       { print }
+            ' CHANGELOG.md
 
-          cat > RELEASE_NOTES.txt <<EOF2
-          # CleanX ${{ steps.version.outputs.version }} pre-release
+            cat <<EOF
 
-          This is an automated CleanX pre-release build.
+          ## Which package do I need?
 
-          ## Universal package support
+          | Router firmware | Package manager | Download |
+          | --- | --- | --- |
+          | OpenWrt 24.10 and older | \`opkg\` | \`${PKG_NAME}_${VERSION}-r1_all-openwrt-24.10.6-universal.ipk\` |
+          | OpenWrt 25.12 and newer | \`apk\` | \`${PKG_NAME}_${VERSION}-r1_all-openwrt-25.12.4-universal.apk\` |
+          | OpenWrt snapshot | \`apk\` | \`${PKG_NAME}_${VERSION}-r1_all-openwrt-snapshot-universal.apk\` |
 
-          CleanX is architecture-independent. The package architecture is \`all\`, so the package is intended for ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching OpenWrt package-manager generation.
+          Packages are architecture-independent (\`all\`) and work on any CPU target.
+          Quick install on the router:
 
-          ## Assets
+          \`\`\`sh
+          wget -O- https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/scripts/install.sh | sh
+          \`\`\`
 
-          - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-24.10.6-universal.ipk\` for OpenWrt 24.10.x / opkg generation
-          - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-25.12.4-universal.apk\` for OpenWrt 25.12+ / apk generation
-          - \`${PKG_NAME}_${{ steps.version.outputs.version }}-r1_all-openwrt-snapshot-universal.apk\` for OpenWrt snapshots / apk generation
+          SHA256 checksums are in \`SHA256SUMS.txt\`.
+          EOF
+          } | sed 's/^          //' > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
 
-          ## Checksums
-
-          SHA256 checksums are included in \`SHA256SUMS.txt\`.
-
-          ## Notes
-
-          The SDK target used in CI is only a builder environment. CleanX contains no compiled binaries and keeps \`PKGARCH:=all\` plus \`LUCI_PKGARCH:=all\`.
-
-          Test this pre-release on your router before promoting it to a stable release.
-          EOF2
-
-          echo "Final release assets:"
-          find dist -maxdepth 1 -type f -print | sort
-
-      - name: Create GitHub pre-release
+      - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          KIND: ${{ steps.version.outputs.kind }}
+          VERSION: ${{ steps.version.outputs.version }}
         shell: bash
         run: |
           set -euo pipefail
-          TAG="${{ steps.version.outputs.tag }}"
-          gh release create "$TAG" \
-            --title "CleanX ${{ steps.version.outputs.version }} pre-release" \
-            --notes-file RELEASE_NOTES.txt \
-            --prerelease \
-            dist/*
+          if [ "${KIND}" = "stable" ]; then
+            gh release create "${TAG}" dist/* \
+              --target "${GITHUB_SHA}" \
+              --title "CleanX ${VERSION}" \
+              --notes-file RELEASE_NOTES.md \
+              --latest
+          else
+            gh release create "${TAG}" dist/* \
+              --target "${GITHUB_SHA}" \
+              --title "CleanX ${VERSION} pre-release ${GITHUB_RUN_NUMBER}" \
+              --notes-file RELEASE_NOTES.md \
+              --prerelease
+          fi

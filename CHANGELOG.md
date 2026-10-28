@@ -1,206 +1,153 @@
 # Changelog
 
-## v0.6.0
+All notable changes to CleanX are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+[Semantic Versioning](https://semver.org/).
+
+## [0.6.1] - 2026-10-28
+
+### Fixed
+- **Fresh installs now actually select CleanX.** The package still shipped the
+  retired UniWRT and X1Wrt development themes, and their `uci-defaults`
+  scripts ran after CleanX's, re-registering both themes and switching the
+  active theme to X1Wrt. They are removed, and upgrades from builds that
+  point at either old path are moved to CleanX.
+- The `cleanx` UCI config is now created on install. Previously
+  `/etc/config/cleanx` never existed, so the theme mode, dashboard and
+  animation settings could not be saved.
+- `scripts/install.sh` and `scripts/uninstall.sh` targeted the old
+  `uniwrt-luci` repository and package. They now install the latest CleanX
+  release (picking `.ipk`, `.apk` or snapshot `.apk` automatically) and
+  remove CleanX cleanly.
+- `localStorage` access is guarded, so private-browsing modes or blocked site
+  data no longer break theme switching.
+
+### Performance
+- All DOM enhancers now share one `MutationObserver` instead of seven, run at
+  most once per animation frame, and pause the observer while CleanX edits
+  the page so its own changes no longer trigger another round. On pages LuCI
+  refreshes constantly (Processes, Realtime Graphs, Overview) this roughly
+  halves the DOM querying with identical output.
+- Overview dashboard and memory widgets skip their RPC polls while the browser
+  tab is hidden.
+- Scroll progress bar updates are throttled to one per frame; the clock wakes
+  once per minute instead of every 30 seconds.
+- Removed a permanent `will-change` from every navigation icon, which kept
+  dozens of GPU layers alive for no visual benefit.
+- The blurred background blobs are now static by default. Their drift is
+  opt-in with `uci set cleanx.theme.animations=full`.
+- Removed 488 stylesheet declarations that could never take effect (each was
+  re-declared later with the same selector, value and priority).
+- Release packages ship minified CSS (`main.css` 423 KB → 337 KB). The
+  repository keeps the readable source.
 
 ### Changed
-- Updated GitHub Actions to publish architecture-independent universal packages.
-- Release assets are now named as `all-openwrt-*-universal` to make it clear that CleanX is not tied to one router model.
-- Switched the default SDK build target to x86/64 as a neutral builder target while preserving `PKGARCH:=all` and `LUCI_PKGARCH:=all`.
+- Pushing a new `VERSION` to `main` now publishes a **stable** release
+  automatically; other pushes publish pre-releases as before.
+- Added `scripts/bump-version.sh` to update every hard-coded version string
+  in one step, with a `--check` mode used by CI.
+- Removed stale QA snapshot folders from `preview/`. The preview gallery and
+  `preview/compat/` mocks now load the real theme stylesheet instead of an
+  outdated copy.
+- README rewritten.
 
-### Notes
-- CleanX contains no compiled binaries. The generated IPK/APK package architecture is `all`, so it is intended for ARM, ARM64, MIPS, x86, x86_64 and other OpenWrt targets using the matching package manager generation.
+## [0.6.0] - 2026-05-28
 
-## v0.6.0
-
-- Focused per-cell alignment fix for Network > Firewall > Traffic Rules.
-- Focused per-cell alignment fix for Network > Interfaces > Devices.
-- The affected tables now show the field label inside each data cell so the description and value stay visually connected.
-- Kept all other pages untouched in this release.
-
-## v0.5.8
-
-- Focused fix for Network > Firewall > Traffic Rules so the table fills the available card width instead of leaving a large empty area.
-- Focused fix for Network > Interfaces > Devices so the table uses clear column dividers and hides LuCI device tooltip payloads that were overlapping the rows.
-- No changes to DNS, DHCP, Startup, Wireless, graphs, loader, or other pages.
-
-## v0.5.8
-
-- Cleaned old development theme names from LuCI design list on install/upgrade: UniWRT and X1Wrt.
-- Ensured CleanX is registered as the only current CleanX theme entry.
-- Removed the duplicated header/description bar from Firewall > General Settings > Zones while keeping the per-cell labels and current zone data visible.
-- Scoped the fix only to Firewall Zones and theme registration cleanup.
-
-## v0.5.8
-
-- Focused recovery for Network → Interfaces and Network → Devices only.
-- Hid overlapping LuCI tooltip payload boxes in Interfaces/Devices tables.
-- Restored the Interfaces summary layout without fake internal labels.
-- Reworked the Devices table to use real headers and clean row alignment instead of per-cell label chips.
-- Did not touch DNS, DHCP, Firewall, Startup, Wireless, Software, Graphs or Realtime pages.
-
-## v0.5.5
-
-- Focused fix only for uploaded issue pages: Network Interfaces/Devices and Firewall Traffic Rules.
-- Rolled back isolated labels on the Interfaces summary table so the previously-good Interfaces box is not changed.
-- Corrected the table classifier so the Network Devices table is treated as Devices, not Routing.
-- Added isolated borders and header-aligned cell sizing for the Devices table.
-- Reworked Traffic Rules column sizing and badge contrast so Match/Action/Enable/Actions stay aligned and readable.
-- Did not touch Realtime Graphs, Channel Analysis, DNS, DHCP, Startup, LED, Wireless or other page families in this release.
-
-## v0.5.4
+### Changed
+- GitHub Actions publish architecture-independent universal packages named
+  `all-openwrt-*-universal`. CleanX contains no compiled binaries, so one
+  package works on ARM, ARM64, MIPS, x86 and x86_64 for the matching
+  package-manager generation.
+- x86/64 is used as a neutral SDK build target while keeping `PKGARCH:=all`.
 
 ### Fixed
-- Corrected CleanX table classification so Firewall Zones is not treated as a Network Interfaces table.
-- Added isolated cell borders and per-cell labels for Firewall Zones and Network Interfaces/Devices alignment.
-- Added safe handling for OpenWrt's headerless interface summary table without changing other pages.
+- Per-cell alignment for **Network → Firewall → Traffic Rules** and
+  **Network → Interfaces → Devices**: each data cell shows its field label so
+  descriptions and values stay visually connected.
 
-
-## v0.5.4
-
-### Fixed
-- Focused recovery for the uploaded saved issue pages: Firewall Zones, Traffic Rules, Interfaces/Devices and LED Configuration.
-- Reordered table classification so LED and Interfaces/Devices tables are no longer misclassified as Firewall/Routing.
-- Added isolated cell borders and safer column sizing for firewall zone/rule rows.
-- Added LED-specific table sizing while keeping native LuCI checkbox/dropdown behaviour untouched.
-- Added Interfaces/Devices column sizing for Device, Type, MAC Address and MTU fields.
-- Kept graph and realtime-page behaviour unchanged from v0.5.2.
-
-## v0.5.4
-
-- Fixed a v0.5.1 regression where Status → Realtime Graphs / Load could render incorrectly.
-- Restored the v0.4.9-safe graph behaviour for `admin-status-realtime*` pages only.
-- Left Channel Analysis untouched because the previous fix improved it.
-- No table/form/control changes were made in this release.
-
-
-
-## v0.5.4
-
-- Added saved-page alignment recovery for DHCP, DNS, Diagnostics, System, Load and Traffic Rules pages.
-- Added runtime technical table classification for LuCI data-heavy tables.
-- Fixed table cells collapsing into vertical text by using readable natural table widths with controlled horizontal scrolling.
-- Fixed CBI value label/field alignment across DNS/DHCP/System style forms.
-- Improved DNS/DHCP multi-select dropdowns so long option lists open as compact scrollable grids.
-- Improved graph containment for Load, Realtime Graphs and Channel Analysis.
-- Added stronger fallback tab switching for CBI tab pages on OpenWrt 25.x.
-
-## v0.5.4
+## [0.5.8] - 2026-05-27
 
 ### Fixed
-- Added a loader failsafe so LuCI can no longer remain stuck behind the CleanX loading screen if an optional JavaScript enhancer fails.
-- Wrapped optional UI enhancers with safe error handling. Native LuCI content should still render even if one CleanX enhancement hits an unexpected page structure.
-- Updated cache-busting version strings for CleanX CSS assets.
+- Traffic Rules table fills the full card width.
+- Devices table uses clear column dividers and hides LuCI tooltip payloads that
+  overlapped the rows.
+- Interfaces summary layout restored without artificial internal labels.
+- Removed the duplicated header bar from Firewall → General Settings → Zones.
 
+### Changed
+- Old development theme names (UniWRT, X1Wrt) are removed from the LuCI design
+  list on install and upgrade.
 
-## v0.5.4
+## [0.5.5] - 2026-05-27
 
-- Fixed GitHub Actions auto-trigger behaviour after GitHub Desktop push.
-- Replaced stale UniWRT workflow references with CleanX workflow naming.
-- Removed path filters from the pre-release workflow so every push to main/master starts a build.
-- Kept package assets architecture-independent with `all-openwrt-*` release naming.
+### Fixed
+- Network Devices table is no longer misclassified as a routing table.
+- Header-aligned cell sizing and borders for the Devices table.
+- Traffic Rules column sizing and badge contrast, keeping Match / Action /
+  Enable / Actions aligned.
 
+## [0.5.4] - 2026-05-27
 
-## v0.5.4
+### Fixed
+- Firewall Zones, LED and Interfaces/Devices tables are classified correctly.
+- Isolated cell borders and safer column sizing for firewall zone and rule rows.
+- LED-specific table sizing that keeps native checkbox and dropdown behaviour.
+- Realtime Graphs → Load renders correctly again (regression from 0.5.1).
+- Alignment recovery for DHCP, DNS, Diagnostics, System, Load and Traffic Rules.
+- Table cells no longer collapse into vertical text.
+- CBI label/field alignment on DNS, DHCP and System style forms.
+- Loader failsafe: LuCI can no longer stay hidden behind the CleanX loading
+  screen if an optional enhancer fails; enhancers are individually guarded.
 
-- GitHub Desktop commit safety fix.
-- Removed long saved-browser QA page filenames from the tracked repo package.
-- Added `.gitattributes` to keep LF line endings and reduce CRLF warnings.
-- Updated `.gitignore` to keep future saved HTML resource folders out of Git.
-- No LuCI runtime styling regression intended from this build.
-
-
-
-## v0.5.4
-
-- Added a real LuCI table recovery pass for DHCP, DNS, Routing, Firewall, LED, Interfaces, Wireless, Software, Startup and Processes.
-- Stopped technical table cells from collapsing into vertical letters.
-- Restored div.table based LuCI data tables to native table behaviour on data-heavy pages.
-- Improved graph containment for Load, Realtime Graphs and Channel Analysis.
-- Kept Save & Apply as a modern primary button plus separate More action.
+### Changed
+- DNS/DHCP multi-select dropdowns open as compact scrollable grids.
+- Save & Apply is a primary button plus a separate "More" action.
+- Workflow triggers on every push to `main`; LF line endings enforced via
+  `.gitattributes`.
 
 ## [0.4.7] - 2026-05-26
 
 ### Fixed
-- Centred the top bar router/page title so it no longer appears slightly off-position.
-- Added safer responsive truncation for long page titles.
+- Top bar router/page title is centred correctly, with responsive truncation
+  for long titles.
 
 ## [0.4.3] - 2026-05-26
 
 ### Fixed
-- Restored native LuCI table layout for DHCP, Startup, Wireless, Processes and Routing pages.
-- Compacted Startup and Processes action buttons without forcing huge row heights.
-- Hid the unreliable Local Startup panel when CleanX detects the Startup page.
-- Improved LED trigger-mode checkbox layout while keeping native LuCI input handling.
-- Improved Realtime Graphs, Load and Channel Analysis containers so graphs stay inside their cards.
-- Improved Save & Apply dropdown styling so it stays compact and modern.
-- Added sticky action cells for wide Network/DHCP/Overview tables where supported.
-
-### Changed
-- Workflow release assets now use architecture-independent `all-openwrt-*` naming.
-
-# Changelog
-
-
-
-## v0.3.9 - Workflow recovery
-
-### Fixed
-- Replaced the stale `Build UniWRT packages` workflow with a CleanX-specific pre-release workflow.
-- Fixed package build jobs still referencing `luci-theme-uniwrt` instead of `luci-theme-cleanx`.
-- Added a compatibility `scripts/build-sdk.sh` that uses CleanX names and current OpenWrt SDK targets.
-- Made the older manual build workflow dispatch-only to avoid duplicate or conflicting release jobs.
-
-### Changed
-- Pre-release assets are generated with clean package names and attached with build logs, summaries and checksums.
-- Release notes now clearly identify the package target and format.
-
-All notable user-facing CleanX changes are tracked here. GitHub Actions uses this file when generating automated pre-release notes.
+- Native table layout restored for DHCP, Startup, Wireless, Processes and
+  Routing.
+- Compact Startup and Processes action buttons.
+- Local Startup panel hidden on the Startup page.
+- Realtime Graphs, Load and Channel Analysis graphs stay inside their cards.
+- Sticky action cells for wide Network/DHCP/Overview tables where supported.
 
 ## [0.3.9] - 2026-05-26
 
 ### Fixed
-- Fixed automated pre-release package asset names so `.apk` and `.ipk` extensions appear only once.
-- Release package names now use target suffixes such as `openwrt-25.12.4-mt7622.apk` instead of `openwrt-25.12.4-mt7622-apk.apk`.
-- Release notes now explain the correct package format clearly for OpenWrt 24.10 and OpenWrt 25.12/snapshot builds.
+- Native LuCI tab behaviour on System and Startup pages.
+- DNS/DHCP multi-select fields render inline, scrollable and clickable.
+- LED edit modal checkbox alignment.
+- Diagnostics IPv4/IPv6 actions shown as separate buttons.
+- Release asset names no longer repeat the package extension.
 
 ### Changed
-- Kept GitHub Actions artifact group names descriptive, but separated them from release asset file names.
+- CleanX-specific pre-release workflow replaces the old UniWRT workflow.
 
 ## [0.3.2] - 2026-05-26
 
 ### Added
-- Automated GitHub **pre-release** publishing after successful OpenWrt SDK builds.
-- Release assets now include `.ipk`, `.apk`, build logs, build summaries, release notes and SHA256 checksums.
-- Pre-release notes now include changes, fixes, features, package list, logs and recent commits.
-
-### Changed
-- Build workflow now uses `contents: write` only so GitHub Actions can create pre-releases with the default `GITHUB_TOKEN`.
-- Stable releases are intentionally manual, so tested builds can be promoted only after router validation.
-
-### Fixed
-- Build logs are uploaded even if a matrix build fails, making broken SDK/package builds easier to diagnose.
+- Automated GitHub pre-releases after successful OpenWrt SDK builds, with
+  `.ipk`/`.apk` packages and SHA256 checksums.
 
 ## [0.3.1] - 2026-05-26
 
 ### Added
 - Live CPU and RAM cards on the Overview page.
-- System uptime, total traffic and RAM total summary line.
+- Uptime, total traffic and RAM total summary line.
 
 ### Fixed
-- Overview Network and Wireless sections now space labels and values cleanly.
-- Show/Hide buttons are styled as modern compact controls.
-- Footer now links to the CleanX project repository.
+- Overview Network and Wireless sections space labels and values cleanly.
+- Modern compact Show/Hide buttons.
 
-## v0.3.9 - Stable-candidate LuCI control recovery
-
-### Fixed
-- Recovered native LuCI tab behaviour for System and Startup pages.
-- Hid the broken Local Startup tab on the Startup page to avoid a dead UI path.
-- Added final conservative overrides for DNS/DHCP multi-select fields so long options render inline, scrollable and clickable without floating over later fields.
-- Improved LED edit modal checkbox alignment and click targets.
-- Compacted Startup and Processes action buttons and reduced excessive row height.
-- Added full-width Realtime Graphs, Load and Channel Analysis graph container rules to prevent clipped half-graphs.
-- Kept Diagnostics IPv4/IPv6 actions split into separate visible buttons while leaving LuCI handlers intact.
-
-### QA
-- Added focused mock pages under `preview/qa-v039/` for DNS/DHCP, LED modal, Startup, Diagnostics and graph pages.
+[0.6.1]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/Ox1d3x3/cleanwrt-luci/releases/tag/v0.6.0

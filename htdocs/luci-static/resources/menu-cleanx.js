@@ -11,6 +11,7 @@ return baseclass.extend({
 		/* Start the loader failsafe first. Some LuCI pages expose unusual DOM
 		 * structures; if a later optional enhancer throws, the UI must not remain
 		 * hidden behind the loading overlay. */
+		this.passes = [];
 		this.removeLoader();
 
 		const safe = (name, fn) => {
@@ -26,11 +27,8 @@ return baseclass.extend({
 			.catch((err) => console.warn('[CleanX] Menu render skipped:', err))
 			.finally(() => this.removeLoader());
 
+		/* One-off bindings (event listeners, timers). */
 		safe('shell controls', this.bindShellControls);
-		safe('luci content', this.enhanceLuciContent);
-		safe('table classifier', this.classifyLuciTables);
-		safe('interfaces device tooltip cleanup', this.cleanupInterfaceDeviceTooltips);
-		safe('diagnostics actions', this.splitDiagnosticDropdownActions);
 		safe('change indicator', this.patchChangeIndicator);
 		safe('clock', this.startClock);
 		safe('progress', this.startProgress);
@@ -40,10 +38,85 @@ return baseclass.extend({
 		safe('cbi tabs', this.bindCbiTabsFallback);
 		safe('stable cbi tabs', this.bindCbiTabsStable);
 		safe('status refresh', this.startStatusLiveRefresh);
+
+		/* DOM enhancement passes. Each one registers itself with addPass() and
+		 * they all share a single MutationObserver (see startPassScheduler). The
+		 * registration order is the execution order and matters: the table
+		 * classifier relies on the wrappers added by enhanceLuciContent, and the
+		 * tooltip cleanup relies on the classifier's table classes. */
+		safe('luci content', this.enhanceLuciContent);
+		safe('table classifier', this.classifyLuciTables);
+		safe('interfaces device tooltip cleanup', this.cleanupInterfaceDeviceTooltips);
+		safe('diagnostics actions', this.splitDiagnosticDropdownActions);
 		safe('modal details', this.fixModalAndShellDetails);
 		safe('dns controls', this.polishDnsAndActionControls);
 		safe('native controls', this.stabiliseNativeLuciControls);
 		safe('apply dropdown', this.splitApplyDropdown);
+
+		safe('pass scheduler', this.startPassScheduler);
+	},
+
+	/* ------------------------------------------------------------------ *
+	 * Shared DOM pass scheduler
+	 *
+	 * Previously every enhancer created its own MutationObserver on the
+	 * document body plus four startup timers, and the enhancers re-triggered
+	 * each other through their own DOM writes. On pages that refresh often
+	 * (Overview, Processes, Realtime Graphs) that meant many full-page scans
+	 * per second. Now all passes run together, at most once per animation
+	 * frame, and the observer is paused while CleanX edits the DOM so its own
+	 * changes never schedule another run.
+	 * ------------------------------------------------------------------ */
+
+	addPass(name, fn) {
+		this.passes.push({ name, fn });
+	},
+
+	runPasses() {
+		for (const pass of this.passes) {
+			try { pass.fn(); }
+			catch (err) { console.warn('[CleanX] Enhancer pass failed:', pass.name, err); }
+		}
+	},
+
+	startPassScheduler() {
+		const target = document.body;
+		const options = { childList: true, subtree: true };
+		let observer = null;
+		let queued = false;
+
+		const run = () => {
+			queued = false;
+			if (observer) observer.disconnect();
+			try { this.runPasses(); }
+			finally { if (observer) observer.observe(target, options); }
+		};
+
+		const schedule = () => {
+			if (queued) return;
+			queued = true;
+			window.requestAnimationFrame(run);
+		};
+
+		/* Passes that trigger native LuCI behaviour (e.g. clicking a tab) can
+		 * request one follow-up run for DOM changes made while paused. */
+		this.requestPass = schedule;
+
+		if (window.MutationObserver) observer = new MutationObserver(schedule);
+		run();
+		window.addEventListener('load', schedule, { once: true });
+		setTimeout(schedule, 250);
+		setTimeout(schedule, 1000);
+	},
+
+	storageGet(key) {
+		try { return window.localStorage.getItem(key); }
+		catch (_) { return null; }
+	},
+
+	storageSet(key, value) {
+		try { window.localStorage.setItem(key, value); }
+		catch (_) {}
 	},
 
 	icon(name) {
@@ -85,19 +158,21 @@ return baseclass.extend({
 		const mobileDrawer = document.getElementById('cleanx-mobile-drawer');
 		const mobileClose = document.getElementById('cleanx-mobile-close');
 
+		const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
 		const applyTheme = (choice) => {
-			const mode = choice || localStorage.getItem(themeKey) || html.dataset.cleanxMode || 'auto';
-			const dark = mode === 'dark' || (mode !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+			const mode = choice || this.storageGet(themeKey) || html.dataset.cleanxMode || 'auto';
+			const dark = mode === 'dark' || (mode !== 'light' && !!darkQuery && darkQuery.matches);
 			html.dataset.cleanxTheme = dark ? 'dark' : 'light';
 			html.dataset.cleanxThemeChoice = mode;
-			localStorage.setItem(themeKey, mode);
+			this.storageSet(themeKey, mode);
 		};
 
-		applyTheme(localStorage.getItem(themeKey) || html.dataset.cleanxMode || 'auto');
+		applyTheme(this.storageGet(themeKey) || html.dataset.cleanxMode || 'auto');
 
-		if (window.matchMedia) {
-			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-				if ((localStorage.getItem(themeKey) || 'auto') === 'auto') applyTheme('auto');
+		if (darkQuery && darkQuery.addEventListener) {
+			darkQuery.addEventListener('change', () => {
+				if ((this.storageGet(themeKey) || 'auto') === 'auto') applyTheme('auto');
 			});
 		}
 
@@ -187,23 +262,7 @@ return baseclass.extend({
 			});
 		};
 
-		enhance();
-		window.addEventListener('load', enhance, { once: true });
-		setTimeout(enhance, 250);
-		setTimeout(enhance, 900);
-
-		if (window.MutationObserver && main) {
-			let scheduled = false;
-			const observer = new MutationObserver(() => {
-				if (scheduled) return;
-				scheduled = true;
-				window.requestAnimationFrame(() => {
-					scheduled = false;
-					enhance();
-				});
-			});
-			observer.observe(main, { childList: true, subtree: true });
-		}
+		this.addPass('luci content', enhance);
 	},
 
 
@@ -212,7 +271,7 @@ return baseclass.extend({
 		if (!/status|overview/.test(page)) return;
 
 		const markGrid = (grid) => {
-			if (!grid) return;
+			if (!grid || grid.classList.contains('cleanx-port-grid')) return;
 			grid.classList.add('cleanx-port-grid');
 			try {
 				grid.style.setProperty('display', 'grid', 'important');
@@ -228,17 +287,22 @@ return baseclass.extend({
 		});
 
 		main.querySelectorAll('.ifacebox').forEach((box) => {
-			box.classList.add('cleanx-port-card');
-			markGrid(box.parentElement);
+			/* Inline sizing only needs writing once per box; LuCI replaces the
+			 * nodes when it refreshes, so new boxes are picked up again. */
+			if (!box.classList.contains('cleanx-port-card')) {
+				box.classList.add('cleanx-port-card');
+				markGrid(box.parentElement);
 
-			try {
-				box.style.setProperty('width', '100%', 'important');
-				box.style.setProperty('min-width', '0', 'important');
-				box.style.setProperty('max-width', 'none', 'important');
-				box.style.setProperty('margin', '0', 'important');
-			} catch (_) {}
+				try {
+					box.style.setProperty('width', '100%', 'important');
+					box.style.setProperty('min-width', '0', 'important');
+					box.style.setProperty('max-width', 'none', 'important');
+					box.style.setProperty('margin', '0', 'important');
+				} catch (_) {}
+			}
 
 			box.querySelectorAll('.cbi-tooltip-container > .cbi-tooltip').forEach((tip) => {
+				if (tip.getAttribute('aria-hidden') === 'true') return;
 				tip.setAttribute('aria-hidden', 'true');
 				try {
 					tip.style.setProperty('display', 'none', 'important');
@@ -286,6 +350,7 @@ return baseclass.extend({
 		};
 
 		const update = async () => {
+			if (document.hidden) return;
 			try {
 				const system = await this.callSystemInfo();
 				const mem = system?.memory || {};
@@ -324,26 +389,39 @@ return baseclass.extend({
 		const tick = () => {
 			const now = new Date();
 			el.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			/* Wake up right after the next minute boundary instead of polling. */
+			setTimeout(tick, 60500 - (now.getSeconds() * 1000 + now.getMilliseconds()));
 		};
-		tick(); setInterval(tick, 30000);
+		tick();
 	},
 
 	startProgress() {
 		const bar = document.getElementById('cleanx-scroll-progress');
 		if (!bar) return;
+		let queued = false;
 		const update = () => {
+			queued = false;
 			const top = document.documentElement.scrollTop || document.body.scrollTop;
 			const height = document.documentElement.scrollHeight - window.innerHeight;
 			bar.style.width = (height > 0 ? Math.min(100, Math.max(0, top / height * 100)) : 0) + '%';
 		};
-		window.addEventListener('scroll', update, { passive: true });
-		window.addEventListener('resize', update);
+		/* Reading scrollHeight forces layout, so do it at most once per frame. */
+		const schedule = () => {
+			if (queued) return;
+			queued = true;
+			window.requestAnimationFrame(update);
+		};
+		window.addEventListener('scroll', schedule, { passive: true });
+		window.addEventListener('resize', schedule, { passive: true });
 		update();
 	},
 
 	removeLoader() {
 		const hide = () => document.getElementById('cleanx-page-loader')?.classList.add('cleanx-hidden');
 		if (document.readyState === 'interactive' || document.readyState === 'complete') hide();
+		/* The failsafe listeners only need registering once per page. */
+		if (this.loaderFailsafeBound) return;
+		this.loaderFailsafeBound = true;
 		document.addEventListener('DOMContentLoaded', hide, { once: true });
 		window.addEventListener('load', hide, { once: true });
 		window.addEventListener('error', hide, { once: true });
@@ -455,14 +533,7 @@ return baseclass.extend({
 			});
 		};
 
-		split();
-		window.addEventListener('load', split, { once: true });
-		setTimeout(split, 250);
-		setTimeout(split, 1000);
-		if (window.MutationObserver) {
-			const observer = new MutationObserver(() => window.requestAnimationFrame(split));
-			observer.observe(document.body, { childList: true, subtree: true });
-		}
+		this.addPass('diagnostics actions', split);
 	},
 
 
@@ -592,14 +663,7 @@ return baseclass.extend({
 			});
 		};
 
-		mark();
-		window.addEventListener('load', mark, { once: true });
-		setTimeout(mark, 250);
-		setTimeout(mark, 900);
-		if (window.MutationObserver) {
-			const observer = new MutationObserver(() => window.requestAnimationFrame(mark));
-			observer.observe(document.body, { childList: true, subtree: true });
-		}
+		this.addPass('modal details', mark);
 	},
 
 
@@ -641,14 +705,7 @@ return baseclass.extend({
 			main.querySelectorAll('.cbi-progressbar, .progress').forEach((bar) => bar.classList.add('cleanx-readable-progress'));
 		};
 
-		mark();
-		window.addEventListener('load', mark, { once: true });
-		setTimeout(mark, 250);
-		setTimeout(mark, 900);
-		if (window.MutationObserver) {
-			const observer = new MutationObserver(() => window.requestAnimationFrame(mark));
-			observer.observe(document.body, { childList: true, subtree: true });
-		}
+		this.addPass('dns controls', mark);
 	},
 
 
@@ -705,7 +762,10 @@ return baseclass.extend({
 			document.querySelectorAll('.cbi-tabmenu').forEach((menu) => {
 				if (menu.querySelector(':scope > li.cbi-tab:not(.cleanx-hidden-local-startup-tab)')) return;
 				const first = menu.querySelector(':scope > li[data-tab]:not(.cleanx-hidden-local-startup-tab) > a');
-				first && first.click();
+				if (!first) return;
+				first.click();
+				/* The click runs native LuCI code while the observer is paused. */
+				if (this.requestPass) this.requestPass();
 			});
 		};
 
@@ -715,15 +775,9 @@ return baseclass.extend({
 			});
 		};
 
-		const run = () => { markPage(); hideStartupLocalPanel(); markInputsOnly(); };
-		run();
-		window.addEventListener('load', run, { once: true });
-		setTimeout(run, 250);
-		setTimeout(run, 1000);
-		if (window.MutationObserver) {
-			const observer = new MutationObserver(() => window.requestAnimationFrame(run));
-			observer.observe(document.body, { childList: true, subtree: true });
-		}
+		/* The page path never changes after load, so classify the page once. */
+		markPage();
+		this.addPass('native controls', () => { hideStartupLocalPanel(); markInputsOnly(); });
 	},
 
 
@@ -817,14 +871,7 @@ return baseclass.extend({
 			});
 		};
 
-		build();
-		window.addEventListener('load', build, { once: true });
-		setTimeout(build, 250);
-		setTimeout(build, 1000);
-		if (window.MutationObserver) {
-			const observer = new MutationObserver(() => window.requestAnimationFrame(build));
-			observer.observe(document.body, { childList: true, subtree: true });
-		}
+		this.addPass('apply dropdown', build);
 		document.addEventListener('click', (ev) => {
 			if (ev.target.closest('.cleanx-apply-group')) return;
 			document.querySelectorAll('.cleanx-apply-menu.open').forEach((menu) => menu.classList.remove('open'));
@@ -953,19 +1000,7 @@ return baseclass.extend({
 				}
 			});
 		};
-		classify();
-		window.addEventListener('load', classify, { once: true });
-		setTimeout(classify, 250);
-		setTimeout(classify, 1000);
-		if (window.MutationObserver) {
-			let scheduled = false;
-			const observer = new MutationObserver(() => {
-				if (scheduled) return;
-				scheduled = true;
-				window.requestAnimationFrame(() => { scheduled = false; classify(); });
-			});
-			observer.observe(document.getElementById('maincontent') || document.body, { childList: true, subtree: true });
-		}
+		this.addPass('table classifier', classify);
 	},
 
 	cleanupInterfaceDeviceTooltips() {
@@ -980,19 +1015,7 @@ return baseclass.extend({
 			const root = document.getElementById('maincontent') || document;
 			root.querySelectorAll('table.cleanx-table-devices .cbi-tooltip, table.cleanx-table-interface-summary .cbi-tooltip').forEach((node) => node.remove());
 		};
-		run();
-		window.addEventListener('load', run, { once: true });
-		setTimeout(run, 250);
-		setTimeout(run, 1000);
-		if (window.MutationObserver) {
-			let queued = false;
-			const observer = new MutationObserver(() => {
-				if (queued) return;
-				queued = true;
-				window.requestAnimationFrame(() => { queued = false; run(); });
-			});
-			observer.observe(document.getElementById('maincontent') || document.body, { childList: true, subtree: true });
-		}
+		this.addPass('interfaces device tooltip cleanup', run);
 	},
 
 

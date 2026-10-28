@@ -30,16 +30,18 @@
 	<script>
 	(function () {
 		var key = 'cleanx.theme';
-		var saved = localStorage.getItem(key) || '{{ entityencode(theme_mode, true) }}' || 'auto';
+		var saved = null;
+		try { saved = localStorage.getItem(key); } catch (e) {}
+		saved = saved || '{{ entityencode(theme_mode, true) }}' || 'auto';
 		var dark = saved === 'dark' || (saved !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 		document.documentElement.dataset.cleanxTheme = dark ? 'dark' : 'light';
 		document.documentElement.dataset.cleanxThemeChoice = saved;
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.0">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.1">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.0">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.1">
 	{% endif %}
 
 	<script>
@@ -53,7 +55,8 @@
 		window.addEventListener('load', hideCleanXLoader, { once: true });
 		setTimeout(hideCleanXLoader, 3000);
 	})();
-	</script>	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
+	</script>
+	<link rel="icon" href="{{ media }}/images/logo.svg" sizes="any" type="image/svg+xml">
 	{% if (node?.css): %}
 	<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
 	{% endif %}

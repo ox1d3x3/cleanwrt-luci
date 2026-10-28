@@ -1,11 +1,17 @@
 #!/bin/sh
-
-# Register CleanX and remove old development theme names from the LuCI design list.
-# During package upgrade, keep the user's current theme selection unless it still
-# points to an old CleanX development path.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Register CleanX in LuCI and remove theme entries left behind by the old
+# development builds (UniWRT / X1Wrt).
+#
+# Fresh install: CleanX becomes the active theme.
+# Upgrade:       the user's current theme choice is kept, unless it still
+#                points at one of the retired development theme paths.
 
 uci -q batch <<-'UCI'
 	delete luci.themes.UniWRT
+	delete luci.themes.UniWRTDark
+	delete luci.themes.UniWRTLight
 	delete luci.themes.uniwrt
 	delete luci.themes.X1Wrt
 	delete luci.themes.x1wrt
@@ -13,11 +19,21 @@ uci -q batch <<-'UCI'
 UCI
 
 current_media="$(uci -q get luci.main.mediaurlbase)"
-if [ "$PKG_UPGRADE" != "1" ] || [ "$current_media" = "/luci-static/uniwrt" ] || [ "$current_media" = "/luci-static/x1wrt" ]; then
-	uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
-fi
+case "$current_media" in
+	/luci-static/uniwrt|/luci-static/x1wrt)
+		uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
+		;;
+	*)
+		[ "$PKG_UPGRADE" = "1" ] || uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
+		;;
+esac
 
-# Theme config used by the frontend JS. Safe defaults only.
+uci -q commit luci
+
+# Frontend settings read by the theme header. uci cannot create a section in
+# a config file that does not exist yet, so make sure the file is present.
+[ -f /etc/config/cleanx ] || touch /etc/config/cleanx
+
 uci -q get cleanx.theme >/dev/null 2>&1 || {
 	uci -q batch <<-'UCI'
 		set cleanx.theme='theme'
@@ -26,9 +42,9 @@ uci -q get cleanx.theme >/dev/null 2>&1 || {
 		set cleanx.theme.wan_interface='auto'
 		set cleanx.theme.animations='balanced'
 	UCI
+	uci -q commit cleanx
 }
 
-uci -q commit luci
-uci -q commit cleanx
+rm -rf /tmp/luci-indexcache /tmp/luci-modulecache 2>/dev/null
 
 exit 0

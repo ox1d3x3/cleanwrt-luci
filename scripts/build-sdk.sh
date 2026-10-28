@@ -52,10 +52,15 @@ rsync -a --delete \
   --exclude 'dist' \
   --exclude 'package-artifacts' \
   --exclude 'build-logs' \
+	--exclude 'docs' \
+	--exclude 'preview' \
   --exclude '*.zip' \
   --exclude '*.tar.xz' \
   --exclude '*.tar.zst' \
   "$ROOT_DIR/" "sdk/package/custom/$PACKAGE_NAME/"
+
+# Ship minified CSS (the repository keeps the readable source).
+bash "$ROOT_DIR"/scripts/minify-css.sh "sdk/package/custom/$PACKAGE_NAME"
 
 cd sdk
 printf '==> Updating feeds\n'

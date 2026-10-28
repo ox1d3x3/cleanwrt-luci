@@ -31,10 +31,15 @@ rsync -a --delete \
 	--exclude 'dist' \
 	--exclude 'package-artifacts' \
 	--exclude 'build-logs' \
+	--exclude 'docs' \
+	--exclude 'preview' \
 	--exclude '*.zip' \
 	--exclude '*.tar.xz' \
 	--exclude '*.tar.zst' \
 	"$SRC_DIR/" "$PKG_DIR/"
+
+# Ship minified CSS (the repository keeps the readable source).
+bash "$SRC_DIR"/scripts/minify-css.sh "$PKG_DIR"
 
 cd "$OWRT_DIR"
 

@@ -78,6 +78,10 @@ return baseclass.extend({
 	},
 
 	async update() {
+		/* Nothing is visible in a background tab; skip the RPC round-trips. The
+		 * rate maths uses wall-clock deltas, so the first sample after the tab
+		 * becomes visible again is still correct. */
+		if (document.hidden) return;
 		try {
 			const [ system, device, cpuPct ] = await Promise.all([
 				this.callSystemInfo(),
@@ -94,7 +98,8 @@ return baseclass.extend({
 	},
 
 	async detectWanDevice() {
-		const saved = localStorage.getItem('cleanx.wanDevice');
+		let saved = null;
+		try { saved = window.localStorage.getItem('cleanx.wanDevice'); } catch (_) {}
 		if (saved && saved !== 'auto') return saved;
 		try {
 			const wan = await this.callInterfaceStatus('wan');

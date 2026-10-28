@@ -1,198 +1,210 @@
 <p align="center">
-  <img src="htdocs/luci-static/cleanx/images/logo.svg" alt="CleanX logo" width="76">
+  <img src="htdocs/luci-static/cleanx/images/logo.svg" alt="CleanX logo" width="80">
 </p>
 
-<h1 align="center">If CleanX is useful to you, a ⭐ helps others find it.</h1>
-
-<h1 align="center">CleanX LuCI Theme</h1>
+<h1 align="center">CleanX</h1>
 
 <p align="center">
-  A clean, modern, LuCI theme for OpenWrt with polished dark/light mode, responsive navigation and a useful router overview dashboard.
+  A clean, modern theme for the OpenWrt LuCI web interface —<br>
+  dark and light modes, a responsive layout and a live router dashboard.
 </p>
 
 <p align="center">
-  <a href="https://github.com/ox1d3x3/cleanwrt-luci/actions/workflows/build-openwrt-packages.yml">
-    <img alt="Build OpenWrt packages" src="https://github.com/ox1d3x3/cleanwrt-luci/actions/workflows/build-openwrt-packages.yml/badge.svg">
-  </a>
-  <img alt="OpenWrt" src="https://img.shields.io/badge/OpenWrt-23.05%20%7C%2024.10%20%7C%2025.x-00A3E0?logo=openwrt">
-  <img alt="Packages" src="https://img.shields.io/badge/packages-.ipk%20%7C%20.apk-success">
-  <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/ox1d3x3/cleanwrt-luci?include_prereleases&sort=semver&label=latest%20release">
-  </a>
-  <a href="https://github.com/ox1d3x3/cleanwrt-luci/releases">
-    <img alt="Total downloads" src="https://img.shields.io/github/downloads/ox1d3x3/cleanwrt-luci/total?label=downloads">
-  </a>
-  <a href="LICENSE">
-    <img alt="Licence" src="https://img.shields.io/badge/Licence-Apache--2.0-blue.svg">
-  </a>
+  <a href="https://github.com/Ox1d3x3/cleanwrt-luci/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Ox1d3x3/cleanwrt-luci?sort=semver&label=release"></a>
+  <a href="https://github.com/Ox1d3x3/cleanwrt-luci/actions/workflows/build-release.yml"><img alt="Build" src="https://github.com/Ox1d3x3/cleanwrt-luci/actions/workflows/build-release.yml/badge.svg"></a>
+  <a href="https://github.com/Ox1d3x3/cleanwrt-luci/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Ox1d3x3/cleanwrt-luci/total?label=downloads"></a>
+  <img alt="OpenWrt 23.05 | 24.10 | 25.12" src="https://img.shields.io/badge/OpenWrt-23.05%20%7C%2024.10%20%7C%2025.12-00A3E0?logo=openwrt&logoColor=white">
+  <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue"></a>
 </p>
 
 ---
 
-## Preview
-
-### Overview dashboard
-
 <p align="center">
-  <img src="docs/screenshots/cleanx-dark-light-overview.png" alt="CleanX LuCI Theme dark and light overview dashboard" width="100%">
+  <img src="docs/screenshots/cleanx-dark-light-overview.png" alt="CleanX overview dashboard in dark and light mode" width="100%">
 </p>
 
-### Channel analysis
+CleanX gives LuCI a calmer, easier-to-read interface without changing how
+OpenWrt works. Every page, form and button keeps its native LuCI behaviour;
+CleanX only restyles the layout and adds a small live dashboard on the
+Overview page.
 
-<p align="center">
-  <img src="docs/screenshots/cleanx-dark-light-channel-analysis.png" alt="CleanX LuCI Theme dark and light channel analysis page" width="100%">
-</p>
+## Features
 
-### Realtime graphs - Load
+- **Dark and light modes** that follow your system setting, with a one-click toggle.
+- **Responsive layout** — a sidebar with icons on desktop and a slide-out drawer on phones and tablets.
+- **Live Overview dashboard** showing WAN download/upload speed, traffic totals, CPU, RAM and uptime.
+- **Matching login page.**
+- **Readable LuCI pages** — tidier cards, forms, tabs, tables, modals and action buttons across Status, Network, Wireless, Firewall, System, Software and more.
+- **Lightweight** — pure CSS and JavaScript, no compiled code, no extra daemons. One architecture-independent package runs on every router CPU.
 
-<p align="center">
-  <img src="docs/screenshots/cleanx-dark-light-realtime-load.png" alt="CleanX LuCI Theme dark and light realtime graphs load page" width="100%">
-</p>
+## Screenshots
 
-CleanX is designed to make LuCI feel cleaner, easier to read and more comfortable to use on desktop, tablet and mobile screens. It keeps the normal OpenWrt/LuCI workflow intact while improving the visual layout, spacing, cards, tables, buttons, forms and dashboard output.
-
-## Latest release
-
-Download the newest `.ipk` or `.apk` package from the [GitHub Releases](https://github.com/ox1d3x3/cleanwrt-luci/releases) page. The release badge and download counter update automatically from GitHub release metadata, so this section does not need to be edited after every build.
-
-Use the package format that matches your router firmware:
-
-| Router firmware | Recommended package |
+| Channel analysis | Realtime graphs |
 | --- | --- |
-| OpenWrt 23.05 / 24.10 and other OPKG-based builds | `.ipk` |
-| OpenWrt 25.x release or APK-based builds | `.apk` |
-| OpenWrt snapshot | Snapshot `.apk` only when it matches your snapshot target |
+| ![Channel analysis in dark and light mode](docs/screenshots/cleanx-dark-light-channel-analysis.png) | ![Realtime load graphs in dark and light mode](docs/screenshots/cleanx-dark-light-realtime-load.png) |
 
-## Highlights
+## Requirements
 
-- Modern dark and light modes with a compact theme switcher.
-- Responsive sidebar with clean SVG icons and mobile drawer support.
-- Custom login page with matching CleanX styling.
-- Live router overview dashboard with WAN speed, traffic totals, CPU usage, RAM usage and uptime.
-- Improved LuCI cards, forms, tabs, buttons, tables, modals and CBI sections.
-- Cleaner status output for Overview, Network, Wireless, Firewall, System, Processes, Startup, Channel Analysis and Realtime Graphs pages.
-- Better handling for long labels, compact controls and crowded LuCI tables.
-- OpenWrt SDK based GitHub Actions workflow for `.ipk` and `.apk` package builds.
+- OpenWrt **23.05 or newer** (CleanX uses the ucode-based LuCI theme system).
+- `luci-base`, which every LuCI install already has.
+- Any CPU architecture — the package is built as `all`.
 
-## Compatibility
+## Installation
 
-CleanX uses the current LuCI theme layout:
+### One-line install
 
-```text
-ucode/template/themes/cleanx/
-```
-
-The package is architecture-independent and is intended for modern OpenWrt/LuCI builds, including:
-
-| Target | Package type |
-| --- | --- |
-| OpenWrt 23.05 / 24.10 and other OPKG-based builds | `.ipk` |
-| OpenWrt 25.x snapshots or APK-based builds | `.apk` |
-
-> Router firmware builds can differ between vendors and snapshots. Keep SSH access available when testing a new LuCI theme so you can recover quickly if the web UI cache or theme selection breaks.
-
-
-## Install from a release package
-
-Download the latest package from the [Releases](https://github.com/ox1d3x3/cleanwrt-luci/releases) page, then copy it to your router.
-
-### OPKG / `.ipk` builds
+Run this on the router over SSH. It detects whether your firmware uses `opkg`
+or `apk`, downloads the matching package from the latest release, installs it
+and switches LuCI to CleanX:
 
 ```sh
+wget -O- https://raw.githubusercontent.com/Ox1d3x3/cleanwrt-luci/main/scripts/install.sh | sh
+```
+
+To install a specific version, pass a tag: `wget -O- …/install.sh | TAG=v0.6.1 sh`.
+
+### Manual install
+
+Download the package for your firmware from the
+[latest release](https://github.com/Ox1d3x3/cleanwrt-luci/releases/latest):
+
+| Your firmware | Package manager | Download the file ending in |
+| --- | --- | --- |
+| OpenWrt 24.10 and older | `opkg` | `…-openwrt-24.10.6-universal.ipk` |
+| OpenWrt 25.12 and newer | `apk` | `…-openwrt-25.12.4-universal.apk` |
+| OpenWrt snapshot | `apk` | `…-openwrt-snapshot-universal.apk` |
+
+Copy it to the router and install it (replace `192.168.1.1` with your router's address):
+
+```sh
+# opkg-based firmware
 scp luci-theme-cleanx_*.ipk root@192.168.1.1:/tmp/
-ssh root@192.168.1.1
-opkg install /tmp/luci-theme-cleanx_*.ipk
+ssh root@192.168.1.1 'opkg install /tmp/luci-theme-cleanx_*.ipk'
+
+# apk-based firmware
+scp luci-theme-cleanx_*.apk root@192.168.1.1:/tmp/
+ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-cleanx_*.apk'
 ```
 
-### APK / `.apk` builds
+A fresh install selects CleanX automatically. Reload LuCI in your browser
+(a hard refresh, <kbd>Ctrl</kbd>+<kbd>F5</kbd>, clears any cached styles).
+Upgrades keep whichever theme you currently have selected.
+
+You can also switch themes at any time under
+**System → System → Language and Style → Design**.
+
+## Configuration
+
+Theme settings live in `/etc/config/cleanx` and are applied on the next page load:
+
+| Option | Values | Default | Description |
+| --- | --- | --- | --- |
+| `mode` | `auto`, `light`, `dark` | `auto` | Default colour scheme. `auto` follows the browser/OS. The toggle in the top bar overrides this per browser. |
+| `dashboard` | `1`, `0` | `1` | Show the live dashboard on Status → Overview. |
+| `animations` | `balanced`, `full`, `off` | `balanced` | `off` disables all motion, `full` adds the drifting background. |
+
+For example, to default to dark mode and turn animations off:
 
 ```sh
-scp luci-theme-cleanx*.apk root@192.168.1.1:/tmp/
-ssh root@192.168.1.1
-apk add --allow-untrusted /tmp/luci-theme-cleanx*.apk
+uci set cleanx.theme.mode='dark'
+uci set cleanx.theme.animations='off'
+uci commit cleanx
 ```
 
-### Apply CleanX in LuCI
+CleanX also respects the operating system's *reduce motion* setting.
 
-```sh
-uci set luci.main.mediaurlbase='/luci-static/cleanx'
-uci commit luci
-rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
-/etc/init.d/uhttpd restart
-```
+## Uninstall and recovery
 
-Then refresh LuCI in your browser.
-
-## Build packages with GitHub Actions
-
-1. Fork or upload this repository to GitHub.
-2. Open the **Actions** tab.
-3. Run **Build CleanX OpenWrt packages**.
-4. Download the generated package artifact.
-
-The workflow uses the OpenWrt SDK and creates the matching package output for the selected build target.
-
-CleanX also creates a GitHub **pre-release** after a successful OpenWrt SDK build from `main`, `master` or a manual workflow run. Each pre-release can include package files, build logs, build summaries, release notes and SHA256 checksums.
-
-Stable releases should still be promoted manually after router testing.
-
-See [`RELEASE_PROCESS.md`](RELEASE_PROCESS.md) for the full release process.
-
-## Local preview and QA mocks
-
-After cloning or extracting the repository, open the preview pages directly in a browser:
-
-```text
-preview/index.html
-preview/qa-v043/index.html
-preview/qa-v042/index.html
-preview/qa-v031/index.html
-```
-
-
-## Recovery if LuCI breaks
-
-If the theme causes a layout issue or LuCI becomes unusable, SSH into the router and switch back to the default Bootstrap theme:
+If a page ever looks broken, switch LuCI back to the default Bootstrap theme over SSH:
 
 ```sh
 uci set luci.main.mediaurlbase='/luci-static/bootstrap'
 uci commit luci
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
-/etc/init.d/uhttpd restart
 ```
 
-Remove the package if required:
+To remove CleanX completely, run
+[`scripts/uninstall.sh`](scripts/uninstall.sh) on the router, or remove the
+package yourself with `opkg remove luci-theme-cleanx` or
+`apk del luci-theme-cleanx`.
+
+> [!TIP]
+> Keep SSH access available whenever you try a new LuCI theme or firmware
+> build, so you can always recover from the command line.
+
+## Building from source
+
+Every push to `main` is built by
+[GitHub Actions](.github/workflows/build-release.yml) with the official
+OpenWrt SDKs, so you normally don't need to build anything yourself. To build
+locally on Linux:
 
 ```sh
-opkg remove luci-theme-cleanx
+# Downloads the OpenWrt SDK and builds the package into ./dist
+OPENWRT_VERSION=25.12.4 scripts/build-sdk.sh     # .apk
+OPENWRT_VERSION=24.10.6 scripts/build-sdk.sh     # .ipk
+
+# Or build inside an OpenWrt buildroot / SDK you already have
+scripts/build-openwrt-package.sh /path/to/openwrt
 ```
 
-For APK-based builds:
+You can also drop the repository into `package/` of an OpenWrt buildroot and
+select **LuCI → Themes → luci-theme-cleanx** in `make menuconfig`.
+
+Release builds minify the CSS automatically (Node.js required; the step is
+skipped when it is not installed). The repository always keeps the readable source.
+
+## Releases
+
+Releases are fully automated:
+
+- A push to `main` that changes the version publishes a **stable release** `vX.Y.Z` with
+  `.ipk`/`.apk` packages, SHA256 checksums and notes taken from [`CHANGELOG.md`](CHANGELOG.md).
+- Any other push to `main` that touches the theme or build files publishes a **pre-release** for testing
+  (documentation-only changes don't trigger a build).
+
+To cut a new release:
 
 ```sh
-apk del luci-theme-cleanx
+scripts/bump-version.sh 0.6.2   # updates every version string
+# add a "## [0.6.2]" section to CHANGELOG.md
+git commit -am "Release v0.6.2" && git push
 ```
 
-## Development notes
+## Project layout
 
-When changing the theme, test both desktop and mobile layouts. LuCI pages can vary heavily depending on installed packages, so it is worth checking common areas such as:
+```text
+htdocs/luci-static/cleanx/        Stylesheets (main.css, login.css) and logo
+htdocs/luci-static/resources/     menu-cleanx.js (layout, navigation) and cleanx-dashboard.js
+ucode/template/themes/cleanx/     LuCI page templates: header, footer, login
+root/etc/uci-defaults/            First-boot / install script that registers the theme
+root/usr/share/rpcd/acl.d/        Read-only permissions for the dashboard
+preview/                          Static mock pages for checking styles in a browser
+scripts/                          Install, uninstall, build and version tools
+```
 
-- Status overview
-- Network interfaces and devices
-- Wireless settings
-- Firewall zones and traffic rules
-- Channel analysis and realtime graphs
-- System administration pages
-- Startup, processes and scheduled tasks
-- Software and Package Manager modals
+## Development
 
+Open [`preview/index.html`](preview/index.html) in a browser to see the theme on
+static mock pages; [`preview/compat/`](preview/compat/index.html) contains mocks
+of the more complex LuCI pages. Both load the stylesheet straight from
+`htdocs/`, so edits show up on reload.
 
-## Author
+LuCI pages vary a lot depending on the installed packages, so before sending a
+change, check desktop and mobile widths on at least:
 
-Created and maintained by [@ox1d3x3](https://github.com/ox1d3x3).
+- Status → Overview, Realtime Graphs and Channel Analysis
+- Network → Interfaces (including the Devices tab), Wireless and DHCP/DNS
+- Network → Firewall → Zones and Traffic Rules
+- System → System, Startup, Processes and LED Configuration
+- System → Software / Package Manager, including its install dialogs
+- System → Backup / Flash Firmware
 
-Project repository: [ox1d3x3/cleanwrt-luci](https://github.com/ox1d3x3/cleanwrt-luci)
+Issues and pull requests are welcome.
 
-## Licence
+## License
 
-CleanX is released under the [Apache-2.0 Licence](LICENSE).
+CleanX is released under the [Apache License 2.0](LICENSE).
+
+Created and maintained by [@Ox1d3x3](https://github.com/Ox1d3x3). If CleanX is
+useful to you, a ⭐ on the repository helps other OpenWrt users find it.
