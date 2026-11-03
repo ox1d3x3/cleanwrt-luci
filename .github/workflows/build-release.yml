@@ -375,12 +375,16 @@ jobs:
           set -euo pipefail
           for v in BUSYBOX UCI_BIN APK_BIN; do test -x "${!v:-}" || { echo "::error::$v not built"; exit 1; }; done
           "$BUSYBOX" 2>&1 | head -n1 || true
+          # Artifacts keep their package-artifacts/ folder, so search for the files.
+          ARCHIVE="$(find artifacts -name "${PKG_NAME}-standalone.tar.gz" | head -n1)"
           PKG_APK="$(find artifacts -name "${PKG_NAME}_*25.12*.apk" | head -n1)"
-          test -n "$PKG_APK"
-          PKG_APK="$PKG_APK" bash tests/test-apply.sh artifacts/luci-theme-cleanx-standalone.tar.gz
+          test -n "$ARCHIVE" || { echo "::error::standalone archive not found in artifacts"; find artifacts; exit 1; }
+          test -n "$PKG_APK" || { echo "::error::25.12 .apk not found in artifacts"; find artifacts; exit 1; }
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+          PKG_APK="$PKG_APK" bash tests/test-apply.sh "$ARCHIVE"
 
       - name: Test with stock BusyBox and the uci stub
-        run: env -u BUSYBOX -u BUSYBOX_LINKS -u UCI_BIN -u APK_BIN bash tests/test-apply.sh artifacts/luci-theme-cleanx-standalone.tar.gz
+        run: env -u BUSYBOX -u BUSYBOX_LINKS -u UCI_BIN -u APK_BIN bash tests/test-apply.sh "$ARCHIVE"
 
   release:
     name: Publish GitHub release
