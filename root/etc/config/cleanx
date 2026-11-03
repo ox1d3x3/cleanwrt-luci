@@ -1,0 +1,9 @@
+config theme 'theme'
+	# Colour scheme: auto (follow the browser/OS) | light | dark
+	option mode 'auto'
+	# Live dashboard on Status > Overview: 1 = on, 0 = off
+	option dashboard '1'
+	# WAN device for the dashboard: auto, or a device name such as eth1
+	option wan_interface 'auto'
+	# Motion: balanced | full (adds drifting background) | off
+	option animations 'balanced'

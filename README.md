@@ -35,7 +35,8 @@ Overview page.
 - **Live Overview dashboard** showing WAN download/upload speed, traffic totals, CPU, RAM and uptime.
 - **Matching login page.**
 - **Readable LuCI pages** — tidier cards, forms, tabs, tables, modals and action buttons across Status, Network, Wireless, Firewall, System, Software and more.
-- **Lightweight** — pure CSS and JavaScript, no compiled code, no extra daemons. One architecture-independent package runs on every router CPU.
+- **Upgrade-friendly** — the standalone install keeps Attended Sysupgrade working and survives firmware upgrades with your settings.
+- **Lightweight** — pure CSS and JavaScript, no compiled code, no extra daemons. Runs on every router CPU.
 
 ## Screenshots
 
@@ -51,22 +52,46 @@ Overview page.
 
 ## Installation
 
-### One-line install
+### Standalone install (recommended)
 
-Run this on the router over SSH. It detects whether your firmware uses `opkg`
-or `apk`, downloads the matching package from the latest release, installs it
-and switches LuCI to CleanX:
+Run this on the router over SSH:
 
 ```sh
-wget -O- https://raw.githubusercontent.com/Ox1d3x3/cleanwrt-luci/main/scripts/install.sh | sh
+wget -O /tmp/cleanx-apply.sh https://github.com/Ox1d3x3/cleanwrt-luci/releases/latest/download/cleanx-apply.sh
+sh /tmp/cleanx-apply.sh
 ```
 
-To install a specific version, pass a tag: `wget -O- …/install.sh | TAG=v0.6.1 sh`.
+The script downloads the latest release, verifies its checksum, copies the
+theme into place and switches LuCI to CleanX. Run the same two commands again
+at any time to update.
 
-### Manual install
+**Why standalone?** OpenWrt's [Attended Sysupgrade](https://openwrt.org/docs/guide-user/installation/attended.sysupgrade)
+(the *Firmware Upgrade* page in LuCI, and `owut`) builds your new firmware from
+the list of installed packages. The build servers only know official packages,
+so a manually installed theme package makes the upgrade fail with
+*"Impossible package selection"*. A standalone install isn't registered as a
+package, so it never appears in that list — and it is added to
+`/lib/upgrade/keep.d`, so the theme is still there after the upgrade, together
+with your settings, as long as **Keep settings** is ticked.
 
-Download the package for your firmware from the
-[latest release](https://github.com/Ox1d3x3/cleanwrt-luci/releases/latest):
+Other things the script can do:
+
+| Command | What it does |
+| --- | --- |
+| `sh /tmp/cleanx-apply.sh --status` | Show how CleanX is installed and check that all its files are present |
+| `sh /tmp/cleanx-apply.sh --version v0.6.2` | Install a specific release |
+| `sh /tmp/cleanx-apply.sh --file /tmp/luci-theme-cleanx-standalone.tar.gz` | Install from a downloaded archive (no internet on the router) |
+| `sh /tmp/cleanx-apply.sh --uninstall` | Remove a standalone install and switch LuCI back to Bootstrap |
+| `sh /tmp/cleanx-apply.sh --package` | Install the regular `.ipk` / `.apk` package instead |
+
+**Already using the CleanX package?** Just run the script. It removes the
+package, installs the standalone copy and keeps your settings and theme choice.
+
+### Package install
+
+If you prefer a regular package and don't use Attended Sysupgrade, run
+`sh /tmp/cleanx-apply.sh --package`, or download the package for your firmware
+from the [latest release](https://github.com/Ox1d3x3/cleanwrt-luci/releases/latest):
 
 | Your firmware | Package manager | Download the file ending in |
 | --- | --- | --- |
@@ -74,23 +99,22 @@ Download the package for your firmware from the
 | OpenWrt 25.12 and newer | `apk` | `…-openwrt-25.12.4-universal.apk` |
 | OpenWrt snapshot | `apk` | `…-openwrt-snapshot-universal.apk` |
 
-Copy it to the router and install it (replace `192.168.1.1` with your router's address):
-
 ```sh
-# opkg-based firmware
-scp luci-theme-cleanx_*.ipk root@192.168.1.1:/tmp/
-ssh root@192.168.1.1 'opkg install /tmp/luci-theme-cleanx_*.ipk'
-
-# apk-based firmware
-scp luci-theme-cleanx_*.apk root@192.168.1.1:/tmp/
-ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-cleanx_*.apk'
+opkg install /tmp/luci-theme-cleanx_*.ipk                  # opkg-based firmware
+apk add --allow-untrusted /tmp/luci-theme-cleanx_*.apk     # apk-based firmware
 ```
 
-A fresh install selects CleanX automatically. Reload LuCI in your browser
-(a hard refresh, <kbd>Ctrl</kbd>+<kbd>F5</kbd>, clears any cached styles).
-Upgrades keep whichever theme you currently have selected.
+> [!NOTE]
+> With the package installed, Attended Sysupgrade can't build new firmware.
+> Running `cleanx-apply.sh` without options switches you to the standalone
+> install. A classic sysupgrade with a downloaded image also drops installed
+> packages, so you would need to reinstall the theme afterwards.
 
-You can also switch themes at any time under
+### After installing
+
+A fresh install selects CleanX automatically; updates keep whichever theme you
+have selected. Reload LuCI in your browser with a hard refresh
+(<kbd>Ctrl</kbd>+<kbd>F5</kbd>). You can switch themes at any time under
 **System → System → Language and Style → Design**.
 
 ## Configuration
@@ -123,10 +147,10 @@ uci commit luci
 rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 ```
 
-To remove CleanX completely, run
-[`scripts/uninstall.sh`](scripts/uninstall.sh) on the router, or remove the
-package yourself with `opkg remove luci-theme-cleanx` or
-`apk del luci-theme-cleanx`.
+To remove CleanX completely, run `sh /tmp/cleanx-apply.sh --uninstall` for a
+standalone install, or `opkg remove luci-theme-cleanx` / `apk del luci-theme-cleanx`
+for a package install. [`scripts/uninstall.sh`](scripts/uninstall.sh) handles
+either case.
 
 > [!TIP]
 > Keep SSH access available whenever you try a new LuCI theme or firmware
@@ -156,19 +180,24 @@ skipped when it is not installed). The repository always keeps the readable sour
 
 ## Releases
 
-Releases are fully automated:
+Releases are fully automated. Each one contains the standalone archive,
+`cleanx-apply.sh`, the `.ipk`/`.apk` packages and a `SHA256SUMS` file.
 
-- A push to `main` that changes the version publishes a **stable release** `vX.Y.Z` with
-  `.ipk`/`.apk` packages, SHA256 checksums and notes taken from [`CHANGELOG.md`](CHANGELOG.md).
-- Any other push to `main` that touches the theme or build files publishes a **pre-release** for testing
-  (documentation-only changes don't trigger a build).
+- A push to `main` that changes the version publishes a **stable release** `vX.Y.Z`
+  with notes taken from [`CHANGELOG.md`](CHANGELOG.md).
+- Any other push to `main` that touches the theme or build files publishes a
+  **pre-release** for testing (documentation-only changes don't trigger a build).
+
+Before publishing, CI installs the standalone archive into a simulated router
+with OpenWrt's own BusyBox, `uci` and `apk`, runs a simulated firmware upgrade,
+and migrates a real `.apk` install to standalone ([`tests/`](tests/)).
 
 To cut a new release:
 
 ```sh
-scripts/bump-version.sh 0.6.2   # updates every version string
-# add a "## [0.6.2]" section to CHANGELOG.md
-git commit -am "Release v0.6.2" && git push
+scripts/bump-version.sh 0.6.3   # updates every version string
+# add a "## [0.6.3]" section to CHANGELOG.md
+git commit -am "Release v0.6.3" && git push
 ```
 
 ## Project layout
@@ -177,10 +206,13 @@ git commit -am "Release v0.6.2" && git push
 htdocs/luci-static/cleanx/        Stylesheets (main.css, login.css) and logo
 htdocs/luci-static/resources/     menu-cleanx.js (layout, navigation) and cleanx-dashboard.js
 ucode/template/themes/cleanx/     LuCI page templates: header, footer, login
-root/etc/uci-defaults/            First-boot / install script that registers the theme
+root/etc/config/cleanx            Default theme settings
+root/etc/uci-defaults/            Registers the theme on package installs
 root/usr/share/rpcd/acl.d/        Read-only permissions for the dashboard
 preview/                          Static mock pages for checking styles in a browser
-scripts/                          Install, uninstall, build and version tools
+cleanx-apply.sh                   Standalone installer / updater / uninstaller (runs on the router)
+scripts/                          Build, archive and version tools
+tests/                            Installer tests against a simulated OpenWrt root
 ```
 
 ## Development

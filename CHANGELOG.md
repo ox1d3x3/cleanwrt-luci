@@ -4,6 +4,44 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.2] - 2026-11-03
+
+### Added
+- **Standalone install that survives firmware upgrades.** The new
+  `cleanx-apply.sh` installs CleanX without registering a package, so
+  Attended Sysupgrade (LuCI's Firmware Upgrade page and `owut`) no longer
+  fails with *"Impossible package selection"*. Every installed file is listed
+  in `/lib/upgrade/keep.d/cleanx-standalone`, so the theme and its settings
+  are carried into the new firmware when *Keep settings* is on.
+- `cleanx-apply.sh` also updates in place (removing files a newer version no
+  longer ships), checks installs with `--status`, removes them with
+  `--uninstall`, installs a pinned release with `--version`, installs offline
+  with `--file`, and still offers the classic package with `--package`.
+  Downloads are verified against `SHA256SUMS`, and free space is checked
+  before anything is changed.
+- Existing package installs switch over by simply running the script: the
+  package is removed, the standalone copy is installed, and settings and the
+  active theme are kept.
+- Releases now include `luci-theme-cleanx-standalone.tar.gz` (cut from the
+  same build as the `.ipk`, so files are byte-identical), `cleanx-apply.sh`
+  and `SHA256SUMS`.
+- CI tests the installer against a simulated router using OpenWrt's own
+  BusyBox, `uci` and `apk`, including a simulated firmware upgrade and a real
+  `.apk` package migration, before anything is published.
+
+### Fixed
+- Installing CleanX no longer removes **UniWRT Portal** from the theme list
+  when it is installed alongside. Theme entries left by early CleanX
+  development builds (UniWRT, X1Wrt) are only cleaned up when those themes
+  aren't actually present.
+- `/etc/config/cleanx` now ships with the package as a configuration file
+  with documented defaults, so package upgrades keep your settings.
+
+### Changed
+- The one-line installer (`scripts/install.sh`) now performs a standalone
+  install. `scripts/uninstall.sh` removes either kind of install.
+- Release checksums are published as `SHA256SUMS` (previously `SHA256SUMS.txt`).
+
 ## [0.6.1] - 2026-10-28
 
 ### Fixed
@@ -149,5 +187,6 @@ All notable changes to CleanX are documented here. The format follows
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.2]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Ox1d3x3/cleanwrt-luci/releases/tag/v0.6.0

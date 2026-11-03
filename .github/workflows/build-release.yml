@@ -42,7 +42,7 @@ jobs:
       - name: Shell scripts parse
         run: |
           set -euo pipefail
-          for f in scripts/*.sh root/etc/uci-defaults/*; do
+          for f in cleanx-apply.sh scripts/*.sh tests/*.sh root/etc/uci-defaults/*; do
             case "$f" in *.sh) bash -n "$f" ;; *) sh -n "$f" ;; esac
             echo "ok: $f"
           done
@@ -309,6 +309,16 @@ jobs:
           echo "Universal release asset: ${OUT}"
           ls -lah package-artifacts
 
+      - name: Build standalone archive
+        if: matrix.format == 'ipk'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Cut from the .ipk so standalone installs get byte-identical files.
+          ipk="$(find package-artifacts -maxdepth 1 -name "${PKG_NAME}_*.ipk" | head -n1)"
+          sh scripts/make-standalone.sh "$ipk" package-artifacts/luci-theme-cleanx-standalone.tar.gz
+          tar -tzvf package-artifacts/luci-theme-cleanx-standalone.tar.gz
+
       - name: Write build summary
         shell: bash
         run: |
@@ -336,10 +346,46 @@ jobs:
             build-logs/*
           if-no-files-found: error
 
+  test-standalone:
+    name: Test standalone install (OpenWrt BusyBox, uci, apk)
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - name: Checkout CleanX source
+        uses: actions/checkout@v5
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y busybox cmake pkg-config libjson-c-dev meson ninja-build libssl-dev zlib1g-dev
+
+      - name: Build OpenWrt's BusyBox, uci and apk
+        shell: bash   # -o pipefail: a failed build must not fall through to the stubs
+        run: bash tests/setup-openwrt-tools.sh "$RUNNER_TEMP/owtools" | tail -n1 | tr ' ' '\n' >> "$GITHUB_ENV"
+
+      - name: Test with the router's tools (incl. real apk migration of the 25.12 package)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for v in BUSYBOX UCI_BIN APK_BIN; do test -x "${!v:-}" || { echo "::error::$v not built"; exit 1; }; done
+          "$BUSYBOX" 2>&1 | head -n1 || true
+          PKG_APK="$(find artifacts -name "${PKG_NAME}_*25.12*.apk" | head -n1)"
+          test -n "$PKG_APK"
+          PKG_APK="$PKG_APK" bash tests/test-apply.sh artifacts/luci-theme-cleanx-standalone.tar.gz
+
+      - name: Test with stock BusyBox and the uci stub
+        run: env -u BUSYBOX -u BUSYBOX_LINKS -u UCI_BIN -u APK_BIN bash tests/test-apply.sh artifacts/luci-theme-cleanx-standalone.tar.gz
+
   release:
     name: Publish GitHub release
     runs-on: ubuntu-24.04
-    needs: build
+    needs: [build, test-standalone]
     if: github.event_name != 'pull_request'
     permissions:
       contents: write
@@ -378,7 +424,9 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf dist && mkdir -p dist
-          find downloaded-artifacts -type f \( -name "${PKG_NAME}_*.ipk" -o -name "${PKG_NAME}_*.apk" \) -exec cp -v {} dist/ \;
+          find downloaded-artifacts -type f \( -name "${PKG_NAME}_*.ipk" -o -name "${PKG_NAME}_*.apk" -o -name "${PKG_NAME}-standalone.tar.gz" \) -exec cp -v {} dist/ \;
+          test -f "dist/${PKG_NAME}-standalone.tar.gz" || { echo "::error::Standalone archive missing"; exit 1; }
+          cp -v cleanx-apply.sh dist/
 
           shopt -s nullglob
           packages=(dist/*.ipk dist/*.apk)
@@ -387,8 +435,8 @@ jobs:
             find downloaded-artifacts -maxdepth 6 -print | sort
             exit 1
           fi
-          (cd dist && sha256sum *.ipk *.apk | sort -k2 > SHA256SUMS.txt)
-          cat dist/SHA256SUMS.txt
+          (cd dist && sha256sum -- * | sort -k2 > SHA256SUMS)
+          cat dist/SHA256SUMS
 
       - name: Write release notes
         shell: bash
@@ -413,7 +461,25 @@ jobs:
 
             cat <<EOF
 
-          ## Which package do I need?
+          ## Install
+
+          Run on the router — works on OpenWrt 23.05, 24.10, 25.12 and snapshots:
+
+          \`\`\`sh
+          wget -O /tmp/cleanx-apply.sh https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/cleanx-apply.sh
+          sh /tmp/cleanx-apply.sh
+          \`\`\`
+
+          This is a **standalone install**: CleanX is not registered as a package, so
+          **Attended Sysupgrade keeps working**, and the theme is carried into the new
+          firmware when *Keep settings* is on. Run the same commands again to update;
+          \`sh /tmp/cleanx-apply.sh --uninstall\` removes it. Already have the package
+          installed? Running the script switches you over and keeps your settings.
+
+          ## Packages
+
+          Prefer a regular package? Use \`sh /tmp/cleanx-apply.sh --package\`, or download one below.
+          Attended Sysupgrade cannot build firmware while a non-official package is installed.
 
           | Router firmware | Package manager | Download |
           | --- | --- | --- |
@@ -421,14 +487,7 @@ jobs:
           | OpenWrt 25.12 and newer | \`apk\` | \`${PKG_NAME}_${VERSION}-r1_all-openwrt-25.12.4-universal.apk\` |
           | OpenWrt snapshot | \`apk\` | \`${PKG_NAME}_${VERSION}-r1_all-openwrt-snapshot-universal.apk\` |
 
-          Packages are architecture-independent (\`all\`) and work on any CPU target.
-          Quick install on the router:
-
-          \`\`\`sh
-          wget -O- https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/scripts/install.sh | sh
-          \`\`\`
-
-          SHA256 checksums are in \`SHA256SUMS.txt\`.
+          All files are architecture-independent. SHA256 checksums are in \`SHA256SUMS\`.
           EOF
           } | sed 's/^          //' > RELEASE_NOTES.md
           cat RELEASE_NOTES.md

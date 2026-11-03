@@ -10,7 +10,7 @@ LUCI_TITLE:=CleanX Theme - modern LuCI theme with live dashboard widgets
 LUCI_DEPENDS:=+luci-base
 
 PKG_NAME:=luci-theme-cleanx
-PKG_VERSION:=0.6.1
+PKG_VERSION:=0.6.2
 PKG_RELEASE:=1
 PKGARCH:=all
 LUCI_PKGARCH:=all
@@ -20,6 +20,10 @@ PKG_MAINTAINER:=Mahabub X <github.com/ox1d3x3>
 # Keep our hand-written CSS untouched. LuCI's legacy csstidy can break modern CSS.
 LUCI_MINIFY_CSS:=
 CONFIG_LUCI_CSSTIDY:=
+
+define Package/luci-theme-cleanx/conffiles
+/etc/config/cleanx
+endef
 
 define Package/luci-theme-cleanx/postrm
 #!/bin/sh

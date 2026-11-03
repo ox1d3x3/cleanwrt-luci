@@ -1,50 +1,30 @@
 #!/bin/sh
 # SPDX-License-Identifier: Apache-2.0
 #
-# Register CleanX in LuCI and remove theme entries left behind by the old
-# development builds (UniWRT / X1Wrt).
+# Register CleanX in LuCI (package installs only; the standalone installer,
+# cleanx-apply.sh, does the same registration itself).
 #
 # Fresh install: CleanX becomes the active theme.
-# Upgrade:       the user's current theme choice is kept, unless it still
-#                points at one of the retired development theme paths.
+# Upgrade:       the user's current theme choice is kept.
+#
+# Very early CleanX builds were published under the names UniWRT and X1Wrt.
+# Their theme entries are cleaned up, but only when that theme is not actually
+# installed: UniWRT Portal is now a separate, real theme that can sit
+# alongside CleanX.
 
-uci -q batch <<-'UCI'
-	delete luci.themes.UniWRT
-	delete luci.themes.UniWRTDark
-	delete luci.themes.UniWRTLight
-	delete luci.themes.uniwrt
-	delete luci.themes.X1Wrt
-	delete luci.themes.x1wrt
-	set luci.themes.CleanX='/luci-static/cleanx'
-UCI
-
-current_media="$(uci -q get luci.main.mediaurlbase)"
-case "$current_media" in
-	/luci-static/uniwrt|/luci-static/x1wrt)
+for legacy in uniwrt:UniWRT uniwrt:UniWRTDark uniwrt:UniWRTLight uniwrt:uniwrt x1wrt:X1Wrt x1wrt:x1wrt; do
+	dir="${legacy%%:*}"
+	name="${legacy#*:}"
+	[ -d "/www/luci-static/$dir" ] && continue
+	uci -q delete "luci.themes.$name"
+	[ "$(uci -q get luci.main.mediaurlbase)" = "/luci-static/$dir" ] && \
 		uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
-		;;
-	*)
-		[ "$PKG_UPGRADE" = "1" ] || uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
-		;;
-esac
+done
 
+uci -q set luci.themes.CleanX='/luci-static/cleanx'
+[ "$PKG_UPGRADE" = "1" ] || uci -q set luci.main.mediaurlbase='/luci-static/cleanx'
 uci -q commit luci
 
-# Frontend settings read by the theme header. uci cannot create a section in
-# a config file that does not exist yet, so make sure the file is present.
-[ -f /etc/config/cleanx ] || touch /etc/config/cleanx
-
-uci -q get cleanx.theme >/dev/null 2>&1 || {
-	uci -q batch <<-'UCI'
-		set cleanx.theme='theme'
-		set cleanx.theme.mode='auto'
-		set cleanx.theme.dashboard='1'
-		set cleanx.theme.wan_interface='auto'
-		set cleanx.theme.animations='balanced'
-	UCI
-	uci -q commit cleanx
-}
-
-rm -rf /tmp/luci-indexcache /tmp/luci-modulecache 2>/dev/null
+rm -rf /tmp/luci-indexcache* /tmp/luci-modulecache 2>/dev/null
 
 exit 0
