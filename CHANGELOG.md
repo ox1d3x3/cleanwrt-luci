@@ -4,6 +4,68 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.3] - 2026-11-05
+
+A deep interaction pass: every page, tab, Edit/Add dialog and control of
+OpenWrt 24.10 and 25.12 was clicked through with a real mouse on real LuCI,
+with CleanX and with stock LuCI (Bootstrap) side by side. Everything below
+was found that way and is now covered by an automated test.
+
+### Fixed
+- **Dropdown options that could not be selected.** Closed dropdowns showed
+  every choice instead of just the current one, but LuCI treats any click on
+  a closed dropdown as "open the list", so clicking the option you wanted
+  did nothing. Closed dropdowns now show only the selection, as in LuCI.
+- **Checkboxes in multi-selects that did nothing** (LED trigger modes,
+  networks in Wireless and Firewall dialogs, ...). They were visible while
+  the list was closed, where LuCI ignores clicks on them. They now appear only
+  in the open list, where they work.
+- **Selection preview duplicated every option** while a list was open; a click
+  on that copy closed the list instead of selecting.
+- **Long dropdown lists in dialogs** (IP protocol, routing tables, helpers,
+  lease times, ...) let their items spill out of the list, where the fields
+  below painted over them, or collapsed to a sliver near the edge of a dialog.
+  Open lists now have a fixed height and scroll.
+- **Tabs inside dialogs did not switch.** Every tab pane of a dialog was shown
+  at once (Mount Points, Wireless, Interfaces, Firewall, Routing, LED, ...),
+  so dialogs were very long and the tabs seemed to do nothing.
+- **Options LuCI hides were shown.** Settings whose conditions are not met
+  (for example "Bind NTP server" with the NTP server off, bonding options on a
+  bridge, VLAN ID on a non-VLAN device, TFTP options with TFTP disabled) were
+  visible and editable, but LuCI ignores them when saving.
+- **Wireless Edit dialog layout.** Device Configuration was squeezed into a
+  narrow column and Interface Configuration (Mode, ESSID, Network, ...) was
+  pushed out of reach. Sections nested in dialogs span the full width again.
+- **Empty tabs** such as DNSSEC (when it has nothing to show) appeared and
+  opened a blank page; they are hidden like in LuCI.
+- **Local Startup (rc.local) is available again** on System > Startup. Older
+  versions hid it to work around the tab bug above.
+- Items scrolled to the bottom of a dialog no longer end up hidden behind the
+  pinned Dismiss / Save bar.
+- On phones, a select with long option labels (e.g. Firewall NAT "Action")
+  no longer pushes the whole dialog sideways and cuts off its fields.
+- The sidebar no longer highlights System > Administration on every page.
+
+### Performance
+- Decorative icon loops (sidebar icons, dashboard stat icons, status dots) now
+  play twice after a page loads and then rest; they previously ran forever and
+  made the browser redraw the blurred background on every frame. With software
+  rendering (no GPU acceleration) an idle page dropped from about 180 ms to
+  17 ms per frame, the same as stock LuCI. `animations=full` keeps the loops.
+- Page animations pause while a dialog is open (dialogs: about 330 ms to 17 ms
+  per frame with software rendering), so dropdown lists in dialogs open
+  promptly.
+- The hidden page loader no longer keeps animating in the background.
+
+### Changed
+- Removed CleanX's own tab-switching scripts. LuCI switches tabs itself; the
+  extra handlers could hide the wrong group of options and are no longer
+  needed now that the styling follows LuCI's tab state.
+- New CI job: a UI interaction audit (`tests/ui/`) renders every LuCI page with
+  the real LuCI templates and JavaScript and compares CleanX against stock
+  LuCI on OpenWrt 24.10 and 25.12. Releases are blocked if it finds a control
+  that works with stock LuCI but not with CleanX.
+
 ## [0.6.2] - 2026-11-03
 
 ### Added
@@ -187,6 +249,7 @@ All notable changes to CleanX are documented here. The format follows
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.3]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Ox1d3x3/cleanwrt-luci/releases/tag/v0.6.0

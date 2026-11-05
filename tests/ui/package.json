@@ -1,0 +1,9 @@
+{
+  "name": "cleanx-ui-audit",
+  "private": true,
+  "description": "Interaction audit of the CleanX LuCI theme against stock LuCI (Bootstrap) on real LuCI pages",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "playwright": "1.63.0"
+  }
+}

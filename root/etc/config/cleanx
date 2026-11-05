@@ -5,5 +5,6 @@ config theme 'theme'
 	option dashboard '1'
 	# WAN device for the dashboard: auto, or a device name such as eth1
 	option wan_interface 'auto'
-	# Motion: balanced | full (adds drifting background) | off
+	# Motion: balanced (icons animate briefly after load) | full (continuous
+	# icon loops and drifting background; needs a fast GPU) | off
 	option animations 'balanced'

@@ -42,7 +42,7 @@ jobs:
       - name: Shell scripts parse
         run: |
           set -euo pipefail
-          for f in cleanx-apply.sh scripts/*.sh tests/*.sh root/etc/uci-defaults/*; do
+          for f in cleanx-apply.sh scripts/*.sh tests/*.sh tests/ui/*.sh root/etc/uci-defaults/*; do
             case "$f" in *.sh) bash -n "$f" ;; *) sh -n "$f" ;; esac
             echo "ok: $f"
           done
@@ -386,10 +386,47 @@ jobs:
       - name: Test with stock BusyBox and the uci stub
         run: env -u BUSYBOX -u BUSYBOX_LINKS -u UCI_BIN -u APK_BIN bash tests/test-apply.sh "$ARCHIVE"
 
+  ui-audit:
+    name: UI audit vs stock LuCI (${{ matrix.branch }})
+    runs-on: ubuntu-24.04
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [openwrt-24.10, openwrt-25.12]
+    steps:
+      - name: Checkout CleanX source
+        uses: actions/checkout@v5
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake pkg-config libjson-c-dev
+
+      - name: Install Playwright and Chromium
+        working-directory: tests/ui
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Audit every page, tab, dialog and control
+        run: bash tests/ui/run.sh ${{ matrix.branch }}
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-audit-${{ matrix.branch }}
+          path: |
+            tests/ui/.work/out-*/report.txt
+            tests/ui/.work/out-*/*.json
+            tests/ui/.work/out-*/*-shots/*
+          if-no-files-found: ignore
+
   release:
     name: Publish GitHub release
     runs-on: ubuntu-24.04
-    needs: [build, test-standalone]
+    needs: [build, test-standalone, ui-audit]
     if: github.event_name != 'pull_request'
     permissions:
       contents: write

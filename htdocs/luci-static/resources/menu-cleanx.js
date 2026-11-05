@@ -35,8 +35,6 @@ return baseclass.extend({
 		safe('ripples', this.bindRipples);
 		safe('button feedback', this.bindButtonFeedback);
 		safe('toast', this.installToast);
-		safe('cbi tabs', this.bindCbiTabsFallback);
-		safe('stable cbi tabs', this.bindCbiTabsStable);
 		safe('status refresh', this.startStatusLiveRefresh);
 
 		/* DOM enhancement passes. Each one registers itself with addPass() and
@@ -537,56 +535,6 @@ return baseclass.extend({
 	},
 
 
-	bindCbiTabsFallback() {
-		/* Native LuCI owns CBI tabs. CleanX only repairs a tab after click if the
-		 * native handler did not switch the panel within a short delay. */
-		const findPanelRoot = (menu) => {
-			let root = menu && menu.nextElementSibling;
-			if (root && (root.classList.contains('cbi-map-tabbed') || root.classList.contains('cbi-section-node-tabbed') || (root.matches && root.matches('[data-initialized][class*="tabbed"]'))))
-				return root;
-			for (let p = menu && menu.parentElement; p; p = p.parentElement) {
-				root = p.querySelector(':scope > .cbi-map-tabbed, :scope > .cbi-section-node-tabbed, :scope > [data-initialized][class*="tabbed"]');
-				if (root) return root;
-			}
-			return null;
-		};
-
-		document.addEventListener('click', (ev) => {
-			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
-			if (!a) return;
-			const li = a.closest('li[data-tab]');
-			const tab = li && li.getAttribute('data-tab');
-			const menu = a.closest('.cbi-tabmenu');
-			const panelRoot = findPanelRoot(menu);
-			if (!tab || !menu || !panelRoot) return;
-
-			window.setTimeout(() => {
-				const safeTab = (window.CSS && CSS.escape) ? CSS.escape(tab) : tab.replace(/"/g, '\\"');
-				const targetPanel = panelRoot.querySelector(':scope > [data-tab="' + safeTab + '"]');
-				if (!targetPanel || targetPanel.classList.contains('cleanx-startup-local-panel')) return;
-
-				const targetVisible = !targetPanel.hidden && getComputedStyle(targetPanel).display !== 'none';
-				if (targetVisible && li.classList.contains('cbi-tab')) return;
-
-				menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
-					if (item.classList.contains('cleanx-hidden-local-startup-tab')) return;
-					const active = item === li;
-					item.classList.toggle('cbi-tab', active);
-					item.classList.toggle('cbi-tab-disabled', !active);
-					item.classList.toggle('active', active);
-				});
-				panelRoot.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
-					if (panel.classList.contains('cleanx-startup-local-panel')) return;
-					const active = panel.getAttribute('data-tab') === tab;
-					panel.dataset.tabActive = active ? 'true' : 'false';
-					panel.hidden = !active;
-					panel.style.display = active ? '' : 'none';
-				});
-			}, 140);
-		}, false);
-	},
-
-
 	installToast() {
 		window.cleanxToast = (message, type = 'info', duration = 3500) => {
 			let stack = document.querySelector('.cleanx-toast-stack');
@@ -710,9 +658,10 @@ return baseclass.extend({
 
 
 	stabiliseNativeLuciControls() {
-		/* Final safety layer: keep LuCI controls native. No custom click handlers
-		 * are attached to checkbox/dropdown rows because LuCI already owns those
-		 * events. CleanX only marks pages and hides known-broken duplicate panels. */
+		/* Keep LuCI controls native: no click handlers on checkbox/dropdown rows
+		 * or tabs, because LuCI already owns those events (tab panes are switched
+		 * by LuCI and shown/hidden purely by CSS). CleanX only marks the page type
+		 * and native choice inputs for styling. */
 		const markPage = () => {
 			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
 			document.body.classList.toggle('cleanx-page-dnsdhcp', /dhcp|dns/.test(page));
@@ -724,51 +673,6 @@ return baseclass.extend({
 			document.body.classList.toggle('cleanx-page-networktables', /network|interfaces|wireless|dhcp|dns|routes|routing|firewall/.test(page));
 		};
 
-		const hideStartupLocalPanel = () => {
-			const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
-			if (!/startup/.test(page)) return;
-
-			/* Hide Local Startup tab entry. The actual rc.local panel can appear as a
-			 * sibling section in OpenWrt 25.x, so detect it by data-tab and content. */
-			document.querySelectorAll('.cbi-tabmenu > li[data-tab]').forEach((li) => {
-				const label = String(li.textContent || '').trim().toLowerCase();
-				const tab = String(li.getAttribute('data-tab') || '').toLowerCase();
-				if (!/local|\brc\b/.test(label + ' ' + tab)) return;
-				li.classList.add('cleanx-hidden-local-startup-tab');
-				li.style.display = 'none';
-			});
-
-			document.querySelectorAll('[data-tab]').forEach((panel) => {
-				const tab = String(panel.getAttribute('data-tab') || '').toLowerCase();
-				if (/local|\brc\b/.test(tab)) {
-					panel.classList.add('cleanx-startup-local-panel');
-					panel.dataset.cleanxStartupLocal = '1';
-					panel.style.display = 'none';
-					panel.hidden = true;
-				}
-			});
-
-			document.querySelectorAll('#maincontent .cbi-section, #maincontent .cbi-map, #maincontent textarea').forEach((node) => {
-				const text = String(node.textContent || node.value || '').toLowerCase();
-				if (!/\/etc\/rc\.local|put your custom commands here|exit 0/.test(text)) return;
-				const section = node.closest('.cbi-section, .cbi-map') || node;
-				section.classList.add('cleanx-startup-local-panel');
-				section.dataset.cleanxStartupLocal = '1';
-				section.style.display = 'none';
-				section.hidden = true;
-			});
-
-			/* Ensure first visible tab is active if the hidden local tab was active. */
-			document.querySelectorAll('.cbi-tabmenu').forEach((menu) => {
-				if (menu.querySelector(':scope > li.cbi-tab:not(.cleanx-hidden-local-startup-tab)')) return;
-				const first = menu.querySelector(':scope > li[data-tab]:not(.cleanx-hidden-local-startup-tab) > a');
-				if (!first) return;
-				first.click();
-				/* The click runs native LuCI code while the observer is paused. */
-				if (this.requestPass) this.requestPass();
-			});
-		};
-
 		const markInputsOnly = () => {
 			document.querySelectorAll('#modal_overlay input[type="checkbox"], #modal_overlay input[type="radio"], .cleanx-content input[type="checkbox"], .cleanx-content input[type="radio"]').forEach((input) => {
 				input.classList.add('cleanx-native-choice-input');
@@ -777,7 +681,7 @@ return baseclass.extend({
 
 		/* The page path never changes after load, so classify the page once. */
 		markPage();
-		this.addPass('native controls', () => { hideStartupLocalPanel(); markInputsOnly(); });
+		this.addPass('native controls', markInputsOnly);
 	},
 
 
@@ -1019,47 +923,6 @@ return baseclass.extend({
 	},
 
 
-	bindCbiTabsStable() {
-		/* OpenWrt 25.x tab panels are sometimes rendered with data-tab-active only.
-		 * This lightweight controller mirrors LuCI's behaviour when the native
-		 * listener does not switch the visible panel. */
-		const findRoot = (menu) => {
-			let node = menu && menu.nextElementSibling;
-			if (node && node.matches && node.matches('.cbi-section-node-tabbed, .cbi-map-tabbed, [class*="tabbed"]')) return node;
-			for (let p = menu && menu.parentElement; p; p = p.parentElement) {
-				node = p.querySelector(':scope > .cbi-section-node-tabbed, :scope > .cbi-map-tabbed, :scope > [class*="tabbed"]');
-				if (node) return node;
-			}
-			return null;
-		};
-		const activate = (menu, li, root) => {
-			const tab = li && li.getAttribute('data-tab');
-			if (!tab || !root) return;
-			menu.querySelectorAll(':scope > li[data-tab]').forEach((item) => {
-				const active = item === li;
-				item.classList.toggle('cbi-tab', active);
-				item.classList.toggle('cbi-tab-disabled', !active);
-				item.classList.toggle('active', active);
-			});
-			root.querySelectorAll(':scope > [data-tab]').forEach((panel) => {
-				const active = panel.getAttribute('data-tab') === tab;
-				panel.dataset.tabActive = active ? 'true' : 'false';
-				panel.hidden = !active;
-				panel.style.display = active ? '' : 'none';
-			});
-		};
-		document.addEventListener('click', (ev) => {
-			const a = ev.target.closest('.cbi-tabmenu > li[data-tab] > a');
-			if (!a) return;
-			const li = a.closest('li[data-tab]');
-			const menu = a.closest('.cbi-tabmenu');
-			const root = findRoot(menu);
-			if (!li || !menu || !root) return;
-			if ((a.getAttribute('href') || '').endsWith('#')) ev.preventDefault();
-			window.setTimeout(() => activate(menu, li, root), 40);
-		}, true);
-	},
-
 	render(tree) {
 		this.renderModeMenu(tree);
 		if (L.env.dispatchpath.length >= 3) {
@@ -1106,7 +969,10 @@ return baseclass.extend({
 			if (sub.length) {
 				const ul = E('ul', { class: 'cleanx-submenu' });
 				sub.forEach((item) => {
-					const itemActive = L.env.dispatchpath.indexOf(item.name) !== -1;
+					/* Match by position (category, then page). A plain "name appears
+					 * anywhere in the path" test marked System > Administration
+					 * ("admin") active on every page, since all paths start with admin/. */
+					const itemActive = L.env.dispatchpath[1] === child.name && L.env.dispatchpath[2] === item.name;
 					ul.appendChild(E('li', { class: itemActive ? 'active' : '' }, [
 						E('a', { href: L.url(url, child.name, item.name) }, [this.icon(item.name), E('span', { class: 'cleanx-nav-title' }, [_(item.title)])])
 					]));

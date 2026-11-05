@@ -213,7 +213,7 @@ Theme settings live in `/etc/config/cleanx` and are applied on the next page loa
 | --- | --- | --- | --- |
 | `mode` | `auto`, `light`, `dark` | `auto` | Default colour scheme. `auto` follows the browser/OS. The toggle in the top bar overrides this per browser. |
 | `dashboard` | `1`, `0` | `1` | Show the live dashboard on Status → Overview. |
-| `animations` | `balanced`, `full`, `off` | `balanced` | `off` disables all motion, `full` adds the drifting background. |
+| `animations` | `balanced`, `full`, `off` | `balanced` | `balanced`: hover effects, and icon animations that play briefly after a page loads. `full`: icon animations loop continuously and the background drifts (needs a fast GPU). `off`: no motion. |
 
 For example, to default to dark mode and turn animations off:
 
@@ -283,9 +283,17 @@ Releases are fully automated. Each one contains the standalone archive,
 - Any other push to `main` that touches the theme or build files publishes a
   **pre-release** for testing (documentation-only changes don't trigger a build).
 
-Before publishing, CI installs the standalone archive into a simulated router
-with OpenWrt's own BusyBox, `uci` and `apk`, runs a simulated firmware upgrade,
-and migrates a real `.apk` install to standalone ([`tests/`](tests/)).
+Before publishing, CI runs two test suites:
+
+- **Installer** ([`tests/`](tests/)): installs the standalone archive into a
+  simulated router with OpenWrt's own BusyBox, `uci` and `apk`, runs a
+  simulated firmware upgrade, and migrates a real `.apk` install to standalone.
+- **UI interaction audit** ([`tests/ui/`](tests/ui/)): renders every LuCI page
+  of OpenWrt 24.10 and 25.12 with the real LuCI templates and JavaScript, then
+  clicks through every tab, Edit/Add dialog, checkbox, select, text field and
+  dropdown with a real mouse — once with CleanX and once with stock LuCI
+  (Bootstrap). The release is blocked if anything works with Bootstrap but not
+  with CleanX, or if CleanX shows something LuCI hides.
 
 To cut a new release:
 
@@ -308,6 +316,7 @@ preview/                          Static mock pages for checking styles in a bro
 cleanx-apply.sh                   Standalone installer / updater / uninstaller (runs on the router)
 scripts/                          Build, archive and version tools
 tests/                            Installer tests against a simulated OpenWrt root
+tests/ui/                         UI interaction audit against stock LuCI (see Development)
 ```
 
 ## Development
@@ -317,8 +326,20 @@ static mock pages; [`preview/compat/`](preview/compat/index.html) contains mocks
 of the more complex LuCI pages. Both load the stylesheet straight from
 `htdocs/`, so edits show up on reload.
 
-LuCI pages vary a lot depending on the installed packages, so before sending a
-change, check desktop and mobile widths on at least:
+To run the same UI interaction audit as CI (needs Node.js, Python 3, git,
+cmake and the json-c headers):
+
+```sh
+cd tests/ui && npm install && npx playwright install chromium && cd ../..
+tests/ui/run.sh openwrt-25.12                      # or openwrt-24.10
+tests/ui/run.sh openwrt-25.12 390x844              # phone-sized viewport
+tests/ui/run.sh openwrt-25.12 1440x900 'firewall'  # only matching pages
+```
+
+It prints a report of any control that is covered, hidden, can't be selected
+or behaves differently from stock LuCI. LuCI pages also vary with the installed
+packages, so it is still worth checking desktop and mobile widths by hand on at
+least:
 
 - Status → Overview, Realtime Graphs and Channel Analysis
 - Network → Interfaces (including the Devices tab), Wireless and DHCP/DNS

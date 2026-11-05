@@ -1,4 +1,4 @@
-/*! CleanX Theme v0.6.2 - SPDX-License-Identifier: Apache-2.0 */
+/*! CleanX Theme v0.6.3 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -5326,9 +5326,6 @@ body[data-page*="startup"] .cleanx-content .btn {
 	line-height: 1 !important;
 	white-space: nowrap !important;
 }
-body.cleanx-page-startup .cleanx-hidden-local-startup-tab {
-	display: none !important;
-}
 
 /* Channel Analysis, Load and Realtime Graphs: reserve full-width, full-height
  * graph space and do not let card/table wrappers clip half of the plot. */
@@ -5789,12 +5786,7 @@ body.cleanx-page-leds .cleanx-content input[type="radio"] {
 	pointer-events: auto !important;
 }
 
-/* Startup: hide the unreliable Local Startup panel completely when CleanX marks
- * it. Keep the service list compact and professional. */
-body.cleanx-page-startup .cleanx-startup-local-panel,
-body.cleanx-page-startup [data-cleanx-startup-local="1"] {
-	display: none !important;
-}
+/* Startup: keep the service list compact and professional. */
 body.cleanx-page-startup .cleanx-content .cleanx-table-wrap {
 	max-height: none !important;
 	overflow-x: auto !important;
@@ -9962,4 +9954,125 @@ body[data-page="admin-network-network"] .cleanx-content tr.cleanx-inline-cell-la
 	clip: rect(0, 0, 0, 0) !important;
 	white-space: nowrap !important;
 	border: 0 !important;
+}
+
+/* ==========================================================================
+ * Interaction integrity (v0.6.3)
+ *
+ * LuCI decides what is shown with a few simple signals: the "hidden" class,
+ * data-tab-active on tab panes, an inline display:none on tab items, and the
+ * "display" attribute on dropdown items. Several earlier CleanX layers forced
+ * elements visible with !important and overrode those signals, so options
+ * appeared where LuCI hides them, dialog tabs stopped switching and closed
+ * dropdowns showed every choice (the first click then only opened the list).
+ *
+ * The rules below restore LuCI's own behaviour everywhere, including dialogs.
+ * Each selector carries two :not(#…) guards; they match every element but add
+ * ID-level specificity, so no styling rule above can override them.
+ * ========================================================================== */
+
+/* 1. Options whose dependencies are not met, unused maps and table cells.
+ *    LuCI marks them with class "hidden" and expects the theme to hide them. */
+.hidden:not(#cx-guard-a):not(#cx-guard-b) {
+	display: none !important;
+}
+
+/* 2. Inactive tab panes, on pages and in dialogs. */
+[data-tab][data-tab-active="false"]:not(li):not(#cx-guard-a):not(#cx-guard-b) {
+	display: none !important;
+}
+
+/* 3. Tabs LuCI hides because their pane has nothing to show (inline style). */
+.cbi-tabmenu > li[style*="display:none"]:not(#cx-guard-a):not(#cx-guard-b),
+.cbi-tabmenu > li[style*="display: none"]:not(#cx-guard-a):not(#cx-guard-b) {
+	display: none !important;
+}
+
+/* 4. A closed dropdown shows only its current selection; LuCI marks those
+ *    items with a "display" attribute. The same goes for the selection preview
+ *    LuCI keeps in the field while the list is open (a click there closes the
+ *    list instead of selecting). The full list is shown once opened. */
+.cbi-dropdown:not([open]):not([empty]) > ul > li:not([display]):not(#cx-guard-a):not(#cx-guard-b),
+.cbi-dropdown:not([empty]) > ul.preview > li:not([display]):not(#cx-guard-a):not(#cx-guard-b) {
+	display: none !important;
+}
+
+/* 4b. Multi-selects carry a checkbox in each item. LuCI shows it only in the
+ *     open list; a click on it while closed is deliberately ignored, so a
+ *     visible checkbox there could be clicked without anything happening. */
+.cbi-dropdown:not([open]) > ul > li > form:not(#cx-guard-a):not(#cx-guard-b),
+.cbi-dropdown > ul.preview > li > form:not(#cx-guard-a):not(#cx-guard-b) {
+	display: none !important;
+}
+
+/* 4c. CleanX shows an open list inline under its field. LuCI sizes the list
+ *     for a floating overlay (sometimes only a few pixels tall near the edge
+ *     of a dialog), and earlier rules let the items spill out of it, where the
+ *     fields below painted over them. Give inline lists a predictable height
+ *     and let long ones scroll, as stock LuCI does. */
+.cbi-dropdown[open] > ul.dropdown:not(#cx-guard-a):not(#cx-guard-b) {
+	max-height: min(55vh, 420px) !important;
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+	overscroll-behavior: contain;
+}
+
+/* 5. Option rows that contain a whole section (Wireless "Device/Interface
+ *    Configuration", the DHCP server section in Interfaces > Edit, ...) span
+ *    the full dialog width instead of being squeezed into the label column. */
+#modal_overlay .modal .cbi-value[data-widget$="ContainerValue"]:not(#cx-guard-a),
+#modal_overlay .modal .cbi-value:has(> .cbi-section):not(#cx-guard-a),
+#modal_overlay .modal .cbi-value:has(> fieldset.cbi-section):not(#cx-guard-a) {
+	display: block !important;
+	grid-template-columns: none !important;
+}
+
+/* 6. The page loader fades out after load, but its pulse kept running forever
+ *    on the invisible element. */
+#cleanx-page-loader.cleanx-hidden,
+#cleanx-page-loader.cleanx-hidden * {
+	animation: none !important;
+}
+
+/* 7. Decorative icon loops (sidebar icons, dashboard stat icons, status dots)
+ *    play two cycles and then rest in the default "balanced" mode. Every loop
+ *    that keeps running forces the blurred glass layers behind it to be redrawn
+ *    on every frame, which made pages and especially dialogs sluggish (slow
+ *    clicks, late dropdown lists) on devices without fast GPU compositing.
+ *    Hover effects are unchanged; animations=full keeps the endless loops. */
+html:not([data-cleanx-animations="full"]) .cleanx-nav-icon::before,
+html:not([data-cleanx-animations="full"]) .cleanx-stat-icon::before,
+html:not([data-cleanx-animations="full"]) .cleanx-nav-icon svg *,
+html:not([data-cleanx-animations="full"]) .cleanx-stat-icon svg *,
+html:not([data-cleanx-animations="full"]) .cleanx-live-dot,
+html:not([data-cleanx-animations="full"]) .cleanx-router-pill span,
+html:not([data-cleanx-animations="full"]) .cleanx-main-nav a:not(:hover) .cleanx-nav-icon svg,
+html:not([data-cleanx-animations="full"]) .cleanx-mobile-list .cleanx-nav-icon svg,
+html:not([data-cleanx-animations="full"]) .cleanx-stat-card:not(:hover) .cleanx-stat-icon svg {
+	animation-iteration-count: 2 !important;
+}
+
+/* 8. While a dialog is open, the page behind it is blurred and unseen; pause
+ *    its animations so they do not keep forcing the dialog backdrop to redraw.
+ *    Dialogs live outside .cleanx-app-shell, so their own spinners still run. */
+body.modal-overlay-active .cleanx-app-shell *,
+body.modal-overlay-active .cleanx-app-shell *::before,
+body.modal-overlay-active .cleanx-app-shell *::after {
+	animation-play-state: paused !important;
+}
+
+/* 9. The dialog footer (Dismiss / Save) stays pinned to the bottom of the
+ *    dialog. Keep whatever the browser or LuCI scrolls into view there (a
+ *    focused field, a dropdown item, a validation error) clear of it. */
+#modal_overlay .modal {
+	scroll-padding-top: 12px;
+	scroll-padding-bottom: 76px;
+}
+
+/* 10. A native select is as wide as its longest option. On narrow screens that
+ *     pushed dialogs sideways (e.g. Firewall NAT "Action"), cutting off the
+ *     start of every field. Keep selects within their field, like stock LuCI. */
+.cleanx-content select:not(#cx-guard-a),
+#modal_overlay select:not(#cx-guard-a) {
+	max-width: 100% !important;
 }

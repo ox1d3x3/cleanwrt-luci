@@ -14,3 +14,8 @@ preview/*_files/
 Thumbs.db
 .vscode/
 .idea/
+
+# UI audit working files (LuCI checkout, ucode build, reports)
+tests/ui/.work/
+tests/ui/node_modules/
+tests/ui/package-lock.json

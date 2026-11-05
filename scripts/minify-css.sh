@@ -5,6 +5,7 @@
 # right before it is built. The repository keeps the readable CSS.
 #
 #   scripts/minify-css.sh /path/to/staged/luci-theme-cleanx
+#   scripts/minify-css.sh /path/to/any/dir/with/css
 #
 # LuCI's own csstidy step is disabled in the Makefile because it breaks modern
 # CSS, so this uses csso in --no-restructure mode: whitespace, comments and
@@ -22,7 +23,12 @@ if ! command -v npx >/dev/null 2>&1; then
 	exit 0
 fi
 
-find "$PKG_DIR/htdocs" -type f -name '*.css' -print0 | while IFS= read -r -d '' css; do
+# A package source has its stylesheets under htdocs/; any other directory is
+# searched as is (the UI audit minifies an assembled web root this way).
+CSS_ROOT="$PKG_DIR/htdocs"
+[ -d "$CSS_ROOT" ] || CSS_ROOT="$PKG_DIR"
+
+find "$CSS_ROOT" -type f -name '*.css' -print0 | while IFS= read -r -d '' css; do
 	before=$(wc -c < "$css")
 	npx --yes "$CSSO_PKG" --no-restructure --input "$css" --output "$css.min"
 	mv "$css.min" "$css"
