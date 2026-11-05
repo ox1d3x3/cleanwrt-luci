@@ -137,14 +137,22 @@ check "theme still registered and active" bash -c "[ '$(uciget luci.themes.Clean
 sysupgrade_keep
 check "and survives a second upgrade" all_present
 
-SECTION="3. update: keeps settings and theme choice, removes obsolete files"; echo "== 3. update: keeps settings and theme choice, removes obsolete files =="
+SECTION="3. update: keeps settings, re-applies the theme, removes obsolete files"; echo "== 3. update: keeps settings, re-applies the theme, removes obsolete files =="
+# Another theme was picked since (e.g. trying a different theme); running the
+# installer again means "use CleanX", unless --keep-theme says otherwise.
 uci_ set luci.main.mediaurlbase=/luci-static/bootstrap; uci_ commit luci
+check "re-run with --keep-theme succeeds" run --file "$ARCHIVE" --keep-theme
+check "--keep-theme leaves the user's theme active" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/bootstrap ]
+check "--keep-theme says which theme stays" grep -q "stays on the bootstrap theme" "$T/out"
 mkdir -p "$CLEANX_ROOT/www/luci-static/cleanx/old"; echo x > "$CLEANX_ROOT/www/luci-static/cleanx/old/legacy.css"
 echo "/www/luci-static/cleanx/old/legacy.css" >> "$CLEANX_ROOT/$KEEP"
 check "re-run succeeds" run --file "$ARCHIVE"
 check "reports a same-version refresh" grep -q "already installed" "$T/out"
 check "user settings untouched" grep -q "38cc65" "$CLEANX_ROOT/etc/config/cleanx"
-check "user's theme choice not overridden on update" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/bootstrap ]
+check "plain re-run makes CleanX the active theme again" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/cleanx ]
+check "…and says it switched from bootstrap" grep -q "was using the bootstrap theme" "$T/out"
+check "re-run while CleanX is active succeeds" run --file "$ARCHIVE"
+check "…and does not claim a theme switch" bash -c "! grep -q 'was using' '$T/out'"
 check "obsolete file and its empty dir removed" bash -c "[ ! -e '$CLEANX_ROOT/www/luci-static/cleanx/old' ]"
 check "obsolete file dropped from manifest" bash -c "! grep -q legacy.css '$CLEANX_ROOT/$KEEP'"
 
@@ -234,12 +242,23 @@ check "owut remove entry for the theme dropped" bash -c "! CLEANX_ROOT='$CLEANX_
 check "…other owut remove entries kept" bash -c "CLEANX_ROOT='$CLEANX_ROOT' '$BB/uci' -q get attendedsysupgrade.owut.remove | grep -q luci-app-foo"
 check "now reported as standalone" bash -c "PATH='$BB' '$BUSYBOX' sh '$SCRIPT' --status | grep -q standalone"
 
-SECTION="9b. migration keeps a different active theme"; echo "== 9b. migration keeps a different active theme =="
+SECTION="9b. migration with --keep-theme keeps a different active theme"; echo "== 9b. migration with --keep-theme keeps a different active theme =="
 pkg_root 9b; apk_stub ok
 uci_ set luci.main.mediaurlbase=/luci-static/bootstrap; uci_ commit luci
-check "switch to standalone succeeds" run --file "$ARCHIVE"
+check "switch to standalone succeeds" run --file "$ARCHIVE" --keep-theme
 check "CleanX registered" [ "$(uciget luci.themes.CleanX)" = /luci-static/cleanx ]
 check "user's Bootstrap choice kept" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/bootstrap ]
+
+SECTION="9c. plain migration makes CleanX active"; echo "== 9c. plain migration makes CleanX active =="
+pkg_root 9c; apk_stub ok
+uci_ set luci.main.mediaurlbase=/luci-static/bootstrap; uci_ commit luci
+check "switch to standalone succeeds" run --file "$ARCHIVE"
+check "CleanX is the active theme" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/cleanx ]
+
+SECTION="9d. migration with --keep-theme keeps CleanX active (package postrm reset it)"; echo "== 9d. migration with --keep-theme keeps CleanX active (package postrm reset it) =="
+pkg_root 9d; apk_stub ok
+check "switch to standalone succeeds" run --file "$ARCHIVE" --keep-theme
+check "CleanX still the active theme" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/cleanx ]
 rm -f "$BB/apk"
 
 SECTION="10. apk failure leaves everything as it was"; echo "== 10. apk failure leaves everything as it was =="
@@ -356,7 +375,15 @@ uci_ set luci.themes.UniWRT=/luci-static/uniwrt; uci_ set luci.main.mediaurlbase
 check "install succeeds" run --file "$ARCHIVE"
 check "UniWRT theme entry kept" [ "$(uciget luci.themes.UniWRT)" = /luci-static/uniwrt ]
 check "CleanX registered too" [ "$(uciget luci.themes.CleanX)" = /luci-static/cleanx ]
+check "CleanX made the active theme" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/cleanx ]
 check "UniWRT files untouched" [ -d "$CLEANX_ROOT/www/luci-static/uniwrt" ]
+# UniWRT picked again later (e.g. by UniWRT's own installer), then CleanX's
+# installer is run to update: CleanX must become the active theme again.
+uci_ set luci.main.mediaurlbase=/luci-static/uniwrt; uci_ commit luci
+check "update while UniWRT is active succeeds" run --file "$ARCHIVE"
+check "CleanX is the active theme again" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/cleanx ]
+check "…and says it switched from uniwrt" grep -q "was using the uniwrt theme" "$T/out"
+check "UniWRT still registered" [ "$(uciget luci.themes.UniWRT)" = /luci-static/uniwrt ]
 check "uninstall succeeds" run --uninstall
 check "…and still leaves UniWRT registered" [ "$(uciget luci.themes.UniWRT)" = /luci-static/uniwrt ]
 

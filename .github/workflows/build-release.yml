@@ -516,8 +516,10 @@ jobs:
           This is a **standalone install**: CleanX is not registered as a package, so
           **Attended Sysupgrade keeps working**, and the theme is carried into the new
           firmware when *Keep settings* is on. Run the same commands again to update;
-          \`sh /tmp/cleanx-apply.sh --uninstall\` removes it. Already have the package
-          installed? Running the script switches you over and keeps your settings.
+          the script also makes CleanX the active theme (add \`--keep-theme\` to stay
+          on your current one). \`sh /tmp/cleanx-apply.sh --uninstall\` removes it.
+          Already have the package installed? Running the script switches you over
+          and keeps your settings.
 
           ## Packages
 

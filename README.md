@@ -140,8 +140,9 @@ switches LuCI to CleanX.
 **3. Reload LuCI** in your browser with a hard refresh
 (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>, or <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on macOS).
 
-**To update later**, run the same command from step 2 again. Your settings and
-theme choice are kept.
+**To update later**, run the same command from step 2 again. Your settings are
+kept, and CleanX becomes the active theme again even if you switched to another
+theme (such as UniWRT) in the meantime. Add `--keep-theme` to update without switching.
 
 **Already have the CleanX package installed?** Run the same command. It removes
 the package, installs the standalone copy and keeps your settings and theme
@@ -151,7 +152,8 @@ Once the script is on the router, it can also do the following:
 
 | Command | What it does |
 | --- | --- |
-| `sh /tmp/cleanx-apply.sh` | Install, or update to the latest release |
+| `sh /tmp/cleanx-apply.sh` | Install, or update to the latest release, and make CleanX the active theme |
+| `sh /tmp/cleanx-apply.sh --keep-theme` | Update CleanX's files but leave LuCI on whichever theme it is using |
 | `sh /tmp/cleanx-apply.sh --status` | Show the installed version and how it is installed, and check every file is present |
 | `sh /tmp/cleanx-apply.sh --version v0.6.2` | Install a specific release |
 | `sh /tmp/cleanx-apply.sh --file /tmp/luci-theme-cleanx-standalone.tar.gz` | Install from a downloaded archive ([no internet on the router](#no-internet-on-the-router)) |
@@ -233,9 +235,11 @@ To switch to the standalone install later, run the
 
 ### Selecting the theme
 
-A fresh install switches LuCI to CleanX automatically; updates never override a
-theme you have chosen since. You can switch themes at any time under
-**System → System → Language and Style → Design**, or with:
+Running `cleanx-apply.sh` makes CleanX the active theme, including when it is
+already installed and you switched to another theme in the meantime (add
+`--keep-theme` to update without switching). Package upgrades through
+`apk`/`opkg` keep whatever theme you have chosen. You can switch themes at any
+time under **System → System → Language and Style → Design**, or with:
 
 ```sh
 uci set luci.main.mediaurlbase='/luci-static/cleanx'
@@ -338,9 +342,9 @@ Before publishing, CI runs two test suites:
 To cut a new release:
 
 ```sh
-scripts/bump-version.sh 0.6.4   # updates every version string
-# add a "## [0.6.4]" section to CHANGELOG.md
-git commit -am "Release v0.6.4" && git push
+scripts/bump-version.sh 0.6.5   # updates every version string
+# add a "## [0.6.5]" section to CHANGELOG.md
+git commit -am "Release v0.6.5" && git push
 ```
 
 ## Project layout

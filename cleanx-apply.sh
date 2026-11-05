@@ -10,6 +10,7 @@
 # Options:
 #   --version vX.Y.Z   Install that release instead of the latest
 #   --file PATH        Install from a downloaded luci-theme-cleanx-standalone.tar.gz
+#   --keep-theme       Update CleanX's files but leave LuCI on its current theme
 #
 # Why "standalone"?
 #   Attended Sysupgrade (the LuCI upgrade page and owut) asks OpenWrt's build
@@ -45,7 +46,7 @@ say()  { printf '\033[1;34m[cleanx]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[cleanx]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[cleanx]\033[0m %s\n' "$*" >&2; exit 1; }
 
-usage() { sed -n '3,13p' "$0" 2>/dev/null | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '3,14p' "$0" 2>/dev/null | sed 's/^# \{0,1\}//'; }
 
 TMP=""
 cleanup() { [ -n "$TMP" ] && rm -rf "$TMP"; return 0; }
@@ -249,16 +250,17 @@ do_install() {
 
 	fresh=1
 	standalone_installed && fresh=0
+	# The theme LuCI uses right now, before anything below can change it (the
+	# package's postrm resets it when switching from the package).
+	user_theme="$(active_theme)"
 
 	# Switching from the package: remove it first, so it is no longer
 	# registered in the package database (that is what breaks sysupgrade).
-	# The package's postrm unregisters CleanX and switches LuCI to Bootstrap,
-	# so remember whether CleanX was the active theme and restore that below.
+	# The package's postrm unregisters CleanX and switches LuCI to Bootstrap;
+	# the theme is set again below (user_theme remembers the one in use).
 	migrated=0
-	was_active=0
 	if pkg_installed; then
 		fresh=0
-		[ "$(active_theme)" = "$THEME_PATH" ] && was_active=1
 		say "Removing the $PKG package (replaced by the standalone install)"
 		[ -f "$R$CONFIG" ] && cp -p "$R$CONFIG" "$TMP/cleanx.config"
 		if command -v apk >/dev/null 2>&1; then
@@ -312,24 +314,39 @@ do_install() {
 	} > "$R$KEEP.cleanx-new"
 	mv -f "$R$KEEP.cleanx-new" "$R$KEEP"
 
-	# Same registration as the package's uci-defaults script: always list the
-	# theme, but only make it active on a fresh install (or if it was active
-	# before the package was swapped out).
-	drop_legacy_themes
+	# Always list the theme. Running the installer means "use CleanX", so make
+	# it the active theme too — also when it is already installed and another
+	# theme (UniWRT, Bootstrap, ...) was picked since — unless --keep-theme asks
+	# to leave LuCI on the theme it was using. (Package upgrades, which run
+	# without anyone asking, keep the user's choice.)
 	uci -q set luci.themes.$THEME_NAME="$THEME_PATH"
-	if [ "$fresh" = 1 ] || [ "$was_active" = 1 ]; then
+	switched=0
+	if [ "$KEEPTHEME" = 1 ]; then
+		[ -n "$user_theme" ] && [ "$(active_theme)" != "$user_theme" ] && uci -q set luci.main.mediaurlbase="$user_theme"
+	else
 		uci -q set luci.main.mediaurlbase="$THEME_PATH"
+		[ "$user_theme" != "$THEME_PATH" ] && switched=1
 	fi
+	drop_legacy_themes   # also moves LuCI off a theme whose files are gone
 	uci -q commit luci
 	drop_owut_remove
 	clear_caches
 
 	if [ "$fresh" = 1 ]; then
-		say "Done — CleanX $NEWVER is installed and active."
+		if [ "$(active_theme)" = "$THEME_PATH" ]; then say "Done — CleanX $NEWVER is installed and active."
+		else say "Done — CleanX $NEWVER is installed."; fi
 	elif [ "$migrated" = 1 ]; then
 		say "Done — switched to the standalone install (CleanX $NEWVER). Your settings were kept."
 	else
 		say "Done — CleanX is now $NEWVER."
+	fi
+	if [ "$switched" = 1 ] && [ "$fresh" = 0 ] && [ -n "$user_theme" ]; then
+		say "LuCI was using the ${user_theme##*/} theme — CleanX is the active theme again."
+		say "(Run with --keep-theme to update CleanX without switching.)"
+	elif [ "$switched" = 1 ] && [ -n "$user_theme" ]; then
+		say "CleanX is now the active theme (LuCI was using ${user_theme##*/})."
+	elif [ "$(active_theme)" != "$THEME_PATH" ]; then
+		say "LuCI stays on the $(active_theme | sed 's,.*/,,') theme (--keep-theme); pick CleanX under System → System → Language and Style."
 	fi
 	say "Attended Sysupgrade will now work, and the theme stays installed across"
 	say "firmware upgrades made with \"Keep settings\" enabled."
@@ -399,9 +416,11 @@ do_package() {
 	else opkg install "$TMP/$file"; fi
 
 	uci -q set luci.themes.$THEME_NAME="$THEME_PATH"
-	uci -q set luci.main.mediaurlbase="$THEME_PATH"
+	[ "$KEEPTHEME" = 1 ] || uci -q set luci.main.mediaurlbase="$THEME_PATH"
 	uci -q commit luci
 	clear_caches
+	if [ "$(active_theme)" = "$THEME_PATH" ]; then say "CleanX is the active theme."
+	else say "LuCI stays on the $(active_theme | sed 's,.*/,,') theme (--keep-theme)."; fi
 	say "Done. Note: Attended Sysupgrade cannot build firmware while the package"
 	say "is installed — run this script without options to switch to the standalone install."
 }
@@ -441,9 +460,10 @@ do_status() {
 
 # ------------------------------------------------------------------ main ----
 
-MODE=install; WANT=""; FILE=""
+MODE=install; WANT=""; FILE=""; KEEPTHEME=0
 while [ $# -gt 0 ]; do
 	case "$1" in
+		--keep-theme)         KEEPTHEME=1 ;;
 		--uninstall|--remove) MODE=uninstall ;;
 		--status)             MODE=status ;;
 		--package)            MODE=package ;;

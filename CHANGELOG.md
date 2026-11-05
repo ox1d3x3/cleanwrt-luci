@@ -4,6 +4,23 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.5] - 2026-11-06
+
+### Fixed
+- **Running `cleanx-apply.sh` now always makes CleanX the active theme.**
+  Before, only a fresh install switched LuCI to CleanX. Running the script to
+  update while another theme was active updated CleanX's files but left that
+  theme in place. This was easy to hit with UniWRT installed too, since
+  UniWRT's own installer makes UniWRT active. Now the theme you last ran the
+  installer for is the one LuCI shows, and the script says when it switched
+  (for example "LuCI was using the uniwrt theme — CleanX is the active theme
+  again").
+
+### Added
+- `--keep-theme` option: update CleanX's files but leave LuCI on whichever theme
+  it is using. This was the previous behaviour for updates. Package upgrades
+  through `apk`/`opkg` still never change your theme.
+
 ## [0.6.4] - 2026-11-05
 
 ### Added
@@ -303,6 +320,7 @@ was found that way and is now covered by an automated test.
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.5]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.1...v0.6.2
