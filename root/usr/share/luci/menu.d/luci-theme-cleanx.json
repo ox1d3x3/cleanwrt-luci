@@ -1,0 +1,13 @@
+{
+	"admin/cleanx-netmap": {
+		"title": "Network Map",
+		"order": 15,
+		"action": {
+			"type": "view",
+			"path": "cleanx/netmap"
+		},
+		"depends": {
+			"acl": [ "luci-theme-cleanx" ]
+		}
+	}
+}

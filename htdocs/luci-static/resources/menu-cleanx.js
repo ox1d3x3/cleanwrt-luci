@@ -135,7 +135,8 @@ return baseclass.extend({
 			services: '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-8 8l-7 7a2.1 2.1 0 0 1-3-3l7-7a6 6 0 0 1 8-8z"/></svg>',
 			reboot: '<svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.5 9A9 9 0 0 0 5.6 5.6L1 10m22 4-4.6 4.4A9 9 0 0 1 3.5 15"/></svg>',
 			logout: '<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>',
-			admin: '<svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 1-5 5 1 7-6-3.5L6 22l1-7-5-5 7-1z"/></svg>'
+			admin: '<svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 1-5 5 1 7-6-3.5L6 22l1-7-5-5 7-1z"/></svg>',
+			'cleanx-netmap': '<svg viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="5" rx="1.5"/><rect x="2.5" y="16.5" width="6" height="5" rx="1.5"/><rect x="15.5" y="16.5" width="6" height="5" rx="1.5"/><path d="M12 7.5v4.5"/><path d="M5.5 16.5V14a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v2.5"/></svg>'
 		};
 		const fallbackKey = icons[key] ? key : (icons[key.split('_')[0]] ? key.split('_')[0] : 'status');
 		const safeKey = fallbackKey.replace(/[^a-z0-9_-]/g, '-');
@@ -237,6 +238,9 @@ return baseclass.extend({
 			main.querySelectorAll('button, input[type="submit"], input[type="button"], input[type="reset"], a.cbi-button, .cbi-button, a.btn, .btn').forEach((btn) => {
 				if (btn.classList && btn.classList.contains('cbi-dropdown')) return;
 				if (btn.classList.contains('cleanx-enhanced-button')) return;
+				/* Network Map device and icon tiles are styled by the map itself;
+				 * device names must not turn them into "danger"/"save" buttons */
+				if (btn.closest('.cx-nm') || btn.classList.contains('cx-nm-pick')) return;
 				btn.classList.add('cleanx-enhanced-button');
 
 				const text = String(btn.textContent || btn.value || btn.getAttribute('aria-label') || '').trim().toLowerCase().replace(/\.+$/g, '');
@@ -955,11 +959,20 @@ return baseclass.extend({
 		}
 	},
 
+	/* UniWRT's Network Map only works under UniWRT. When both themes are
+	 * installed, CleanX lists its own map once instead of two "Network Map"
+	 * entries. */
+	visibleChildren(tree) {
+		const children = ui.menu.getChildren(tree);
+		if (!children.some((c) => c.name === 'cleanx-netmap')) return children;
+		return children.filter((c) => c.name !== 'uniwrt-netmap');
+	},
+
 	renderMainMenu(tree, url) {
 		const top = document.getElementById('topmenu');
 		if (!top) return;
 		top.innerHTML = '';
-		ui.menu.getChildren(tree).forEach((child) => {
+		this.visibleChildren(tree).forEach((child) => {
 			const sub = ui.menu.getChildren(child);
 			const active = L.env.dispatchpath[1] === child.name || L.env.dispatchpath[2] === child.name;
 			const link = E('a', { href: sub.length ? L.url(url, child.name, sub[0].name) : L.url(url, child.name) }, [
@@ -988,7 +1001,7 @@ return baseclass.extend({
 		const list = document.getElementById('cleanx-mobile-list');
 		if (!list) return;
 		list.innerHTML = '';
-		ui.menu.getChildren(tree).forEach((child) => {
+		this.visibleChildren(tree).forEach((child) => {
 			const sub = ui.menu.getChildren(child);
 			const li = E('li', {}, [
 				E('a', { href: sub.length ? L.url(url, child.name, sub[0].name) : L.url(url, child.name) }, [this.icon(child.name), E('span', {}, [_(child.title)])])

@@ -95,7 +95,8 @@ const UCI = {
 	]),
 	ucitrack: cfg([]),
 	cleanx: cfg([
-		['theme', 'theme', { mode: 'auto', dashboard: '1', wan_interface: 'auto', animations: 'balanced' }],
+		['theme', 'theme', { mode: 'auto', dashboard: '1', wan_interface: 'auto', animations: 'balanced', netmap_interval: '3' }],
+		['host', 'h_f0b429112233', { mac: 'F0:B4:29:11:22:33', name: 'Living room TV', icon: 'tv' }],
 	]),
 };
 
@@ -200,6 +201,82 @@ const FILES = {
 	'/usr/lib/os-release': 'NAME="OpenWrt"\n',
 };
 
+// ------------------------------------------------------------ network map
+// Clients for the Network Map: Wi-Fi stations per AP interface, wired hosts
+// behind bridge ports (brforward), and traffic counters that grow at a fixed
+// rate so the map shows live rates. setScenario('ap') turns the router into
+// an access point behind a main router (default route on br-lan, the WAN
+// port bridged into the LAN); 'offline' takes the WAN down.
+let SCENARIO = 'router';
+function setScenario(name) { SCENARIO = ['ap', 'offline'].includes(name) ? name : 'router'; }
+const T0 = Math.floor(Date.now() / 1000);
+const grow = (base, bps) => base + Math.floor((Date.now() / 1000 - T0) * bps / 8);
+const CLIENTS = [
+	// mac, name, ip, where, bps, signal
+	['aa:bb:cc:dd:ee:01', 'nas', '192.168.1.10', 'lan1', 45e6],
+	['b4:2e:99:10:20:30', 'desktop-7fq2', '192.168.1.50', 'lan2', 0],
+	['3c:52:82:44:55:66', 'HP-LaserJet-M404', '192.168.1.20', 'lan4', 0],
+	['52:54:00:12:34:56', null, '192.168.1.77', 'lan4', 0],
+	['24:0a:c4:11:22:33', 'esp-kitchen-plug', '192.168.1.130', 'phy0-ap0', 0, -71],
+	['da:a1:19:5c:2e:01', null, '192.168.1.140', 'phy0-ap0', 120e3, -80],
+	['aa:bb:cc:dd:ee:02', 'laptop', '192.168.1.101', 'phy1-ap0', 8e6, -48],
+	['aa:bb:cc:dd:ee:03', 'phone', '192.168.1.102', 'phy1-ap0', 0, -58],
+	['f0:b4:29:11:22:33', 'Living-Room-TV', '192.168.1.120', 'phy1-ap0', 18e6, -62],
+	['ee:12:7a:30:40:50', 'iPhone-15', '192.168.1.145', 'phy1-ap0', 600e3, -52],
+	['8c:79:f5:61:62:63', 'Galaxy-Tab-S9', '192.168.3.120', 'phy0-ap1', 0, -60],
+];
+const MAIN_ROUTER = ['f4:92:bf:00:00:01', 'main-router', '192.168.1.1'];
+const PORT_NO = { lan1: 1, lan2: 2, lan4: 3, wan: 4, 'phy0-ap0': 5, 'phy1-ap0': 6 };
+function hostHints() {
+	const h = {};
+	for (const [mac, name, ip] of CLIENTS) h[mac] = { ...(name ? { name } : {}), ipaddrs: [ip], ip6addrs: mac === 'aa:bb:cc:dd:ee:02' ? ['fd3c:9e5a:21b0::101'] : [] };
+	if (SCENARIO === 'ap') h[MAIN_ROUTER[0]] = { name: MAIN_ROUTER[1], ipaddrs: [MAIN_ROUTER[2]], ip6addrs: [] };
+	return h;
+}
+function assoc(dev) {
+	return CLIENTS.filter((c) => c[3] === dev).map(([mac, , , , bps, signal], i) => ({
+		mac: mac.toUpperCase(), signal, noise: -95, inactive: bps ? 20 : 4000, connected_time: 3600 * (i + 1) + 420,
+		rx: { rate: 866000 - i * 120000, mhz: 80, mcs: 9, vht: true, packets: 1000, bytes: grow(5e6, bps * 0.2) },
+		tx: { rate: 780000 - i * 100000, mhz: 80, mcs: 8, vht: true, packets: 2000, bytes: grow(9e6, bps * 0.8) },
+	}));
+}
+function brforward() {
+	const rows = CLIENTS.filter((c) => PORT_NO[c[3]]).map((c) => [c[0], PORT_NO[c[3]]]);
+	if (SCENARIO === 'ap') rows.push([MAIN_ROUTER[0], PORT_NO.wan], ['11:22:33:44:55:66', PORT_NO.wan]);
+	const buf = Buffer.alloc(16 * (rows.length + 1));
+	rows.forEach(([mac, port], i) => {
+		mac.split(':').forEach((b, j) => { buf[i * 16 + j] = parseInt(b, 16); });
+		buf[i * 16 + 6] = port & 0xff; buf[i * 16 + 7] = 0; buf.writeUInt32LE(150, i * 16 + 8); buf[i * 16 + 12] = port >> 8;
+	});
+	const own = rows.length * 16;   // the bridge's own address: is_local
+	'aa:bb:cc:00:00:09'.split(':').forEach((b, j) => { buf[own + j] = parseInt(b, 16); });
+	buf[own + 6] = 1; buf[own + 7] = 1;
+	return buf.toString('base64');
+}
+function portBytes(name) {
+	const bps = { wan: 31e6, lan1: 45e6, lan2: 0, lan4: 0 }[name];
+	return bps === undefined ? null : { rx_bytes: grow(4e9, bps * 0.7), tx_bytes: grow(9e8, bps * 0.3) };
+}
+function networkDevices() {
+	const out = {};
+	for (const [n, d] of Object.entries(NETDEVS)) {
+		const b = portBytes(n);
+		out[n] = b ? { ...d, stats: { ...d.stats, ...b } } : d;
+	}
+	if (SCENARIO === 'ap') {
+		const ports = ['lan1', 'lan2', 'lan4', 'wan', 'phy0-ap0', 'phy1-ap0'];
+		out['br-lan'] = { ...out['br-lan'], ports, bridge: { ...out['br-lan'].bridge, ports }, ipaddrs: [{ address: '192.168.1.2', netmask: '24' }] };
+		out.wan = { ...out.wan, ipaddrs: [], ip6addrs: [] };
+	}
+	return out;
+}
+function interfaces() {
+	if (SCENARIO === 'offline') return { interface: IFACES.interface.map((i) => /^wan/.test(i.interface) ? { ...i, up: false, 'ipv4-address': [], route: [] } : i) };
+	if (SCENARIO !== 'ap') return IFACES;
+	return { interface: IFACES.interface.filter((i) => !/^wan/.test(i.interface)).map((i) => i.interface !== 'lan' ? i
+		: { ...i, 'ipv4-address': [{ address: '192.168.1.2', mask: 24 }], route: [{ target: '0.0.0.0', mask: 0, nexthop: '192.168.1.1', source: '192.168.1.2/32' }] }) };
+}
+
 const LOGTEXT = Array.from({ length: 30 }, (_, i) => `Thu Nov  5 15:${String(10 + i).padStart(2, '0')}:00 2026 daemon.info dnsmasq[1600]: query[A] example${i}.org from 192.168.1.${100 + i}`).join('\n');
 
 function now() { return Math.floor(Date.now() / 1000); }
@@ -248,13 +325,13 @@ function call(object, method, args = {}) {
 	case 'luci.setInitAction': return [0, { result: true }];
 	case 'luci.setPassword': return [0, { result: true }];
 	case 'luci-rpc.getBoardJSON': return [0, BOARD];
-	case 'luci-rpc.getNetworkDevices': return [0, NETDEVS];
+	case 'luci-rpc.getNetworkDevices': return [0, networkDevices()];
 	case 'luci-rpc.getWirelessDevices': return [0, WIRELESS];
-	case 'luci-rpc.getHostHints': return [0, { 'aa:bb:cc:dd:ee:01': { name: 'nas', ipaddrs: ['192.168.1.10'], ip6addrs: [] }, 'aa:bb:cc:dd:ee:02': { name: 'laptop', ipaddrs: ['192.168.1.101'], ip6addrs: ['fd3c:9e5a:21b0::101'] }, 'aa:bb:cc:dd:ee:03': { name: 'phone', ipaddrs: ['192.168.1.102'], ip6addrs: [] } }];
+	case 'luci-rpc.getHostHints': return [0, hostHints()];
 	case 'luci-rpc.getDUIDHints': return [0, { '000100012a3b4c5d': { name: 'laptop', hostname: 'laptop' } }];
 	case 'luci-rpc.getDHCPLeases': return [0, { dhcp_leases: [{ hostname: 'laptop', ipaddr: '192.168.1.101', macaddr: 'aa:bb:cc:dd:ee:02', expires: 40000 }, { hostname: 'phone', ipaddr: '192.168.1.102', macaddr: 'aa:bb:cc:dd:ee:03', expires: 30000 }], dhcp6_leases: [{ hostname: 'laptop', ip6addrs: ['fd3c:9e5a:21b0::101/128'], duid: '000100012a3b4c5d', expires: 40000 }] }];
-	case 'network.interface.dump': return [0, IFACES];
-	case 'network.interface.status': { const i = IFACES.interface.find((x) => x.interface === args.interface); return i ? [0, i] : [4]; }
+	case 'network.interface.dump': return [0, interfaces()];
+	case 'network.interface.status': { const i = interfaces().interface.find((x) => x.interface === args.interface); return i ? [0, i] : [4]; }
 	case 'network.device.status': { const d = NETDEVS[args.name]; return d ? [0, { ...d, statistics: STATS, carrier: true, speed: '1000F' }] : [0, Object.fromEntries(Object.entries(NETDEVS).map(([n, v]) => [n, { ...v, statistics: STATS }]))]; }
 	case 'network.get_proto_handlers': return [0, { static: { no_device: false, no_proto_task: true }, dhcp: {}, dhcpv6: {}, pppoe: {}, none: { no_device: false }, '6in4': { no_device: true }, pppoa: {}, pptp: { no_device: true } }];
 	case 'network.wireless.status': return [0, WIRELESS];
@@ -264,13 +341,18 @@ function call(object, method, args = {}) {
 	case 'iwinfo.freqlist': return [0, freqlist(args.device || '')];
 	case 'iwinfo.txpowerlist': return [0, { results: [0, 5, 10, 13, 15, 17, 20, 23].map((dbm) => ({ dbm, mw: Math.round(10 ** (dbm / 10)), active: dbm === 20 })) }];
 	case 'iwinfo.countrylist': return [0, { results: [['AU', 'AU'], ['DE', 'DE'], ['GB', 'GB'], ['US', 'US'], ['00', '00']].map(([code, iso3166]) => ({ code, iso3166, active: code === 'AU' })) }];
-	case 'iwinfo.assoclist': return [0, { results: [{ mac: 'AA:BB:CC:DD:EE:02', signal: -48, noise: -95, inactive: 120, rx: { rate: 866000, mhz: 80, mcs: 9, ht: false, vht: true }, tx: { rate: 866000, mhz: 80, mcs: 9, vht: true } }] }];
+	case 'iwinfo.assoclist': return [0, { results: assoc(args.device) }];
 	case 'iwinfo.scan': return [0, { results: [] }];
 	case 'system.board': return [0, { kernel: '6.6.73', hostname: 'OpenWrt', system: 'ARMv8 Processor rev 4', model: BOARD.model.name, board_name: 'mock,router', rootfs_type: 'squashfs', release: { distribution: 'OpenWrt', version: process.env.OWVER || '25.12.4', revision: 'r29300-mock', target: 'mediatek/filogic', description: `OpenWrt ${process.env.OWVER || '25.12.4'} r29300-mock` } }];
 	case 'system.info': return [0, { localtime: now(), uptime: 186400, load: [8000, 6000, 4000], memory: { total: 512000000, free: 300000000, shared: 1000000, buffered: 4000000, available: 330000000, cached: 50000000 }, root: { total: 102400, free: 90000, used: 12400, avail: 90000 }, tmp: { total: 250000, free: 248000, used: 2000, avail: 248000 }, swap: { total: 0, free: 0 } }];
 	case 'system.reboot': return [0, {}];
 	case 'system.validate_firmware_image': return [0, { valid: true, forceable: true, allow_backup: true, tests: {} }];
-	case 'file.read': return FILES[args.path] !== undefined ? [0, { data: FILES[args.path] }] : [4];
+	case 'file.read': {
+		if (/^\/sys\/class\/net\/br-lan\/brforward$/.test(args.path)) return [0, { data: brforward() }];
+		const pn = /^\/sys\/class\/net\/([^/]+)\/brport\/port_no$/.exec(args.path);
+		if (pn) return PORT_NO[pn[1]] ? [0, { data: '0x' + PORT_NO[pn[1]].toString(16) + '\n' }] : [4];
+		return FILES[args.path] !== undefined ? [0, { data: FILES[args.path] }] : [4];
+	}
 	case 'file.write': case 'file.remove': return [0, {}];
 	case 'file.stat': case 'file.lstat': {
 		if (FILES[args.path] !== undefined || /^\/(www|etc|bin|sbin|usr\/sbin\/(iptables|ip6tables|nft))/.test(args.path) || ['/bin/ping6', '/bin/traceroute6', '/lib/upgrade/platform.sh', '/usr/sbin/nft'].includes(args.path))
@@ -296,4 +378,4 @@ function call(object, method, args = {}) {
 	return null;
 }
 
-module.exports = { call, UCI };
+module.exports = { call, UCI, setScenario };

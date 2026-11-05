@@ -73,7 +73,10 @@ const HELPERS = () => {
 			if (!root) return [];
 			const out = [];
 			const add = (el, kind, target, extra = {}) => {
-				const key = `${kind}|${anchor(el)}|${el.name || ''}|${kind === 'button' || kind === 'tab' ? txt(el) : ''}${extra.k || ''}`;
+				// live values (traffic rates on the Network Map) must not make a
+				// button look like a new control on every refresh
+				const label = kind === 'button' || kind === 'tab' ? (el.textContent || el.value || '').replace(/\d+(\.\d+)?\s?[kMG]?bps/g, '').replace(/\s+/g, ' ').trim().slice(0, 40) : '';
+				const key = `${kind}|${anchor(el)}|${el.name || ''}|${label}${extra.k || ''}`;
 				out.push({ id: idOf(el), kind, key, label: txt(el.closest('.cbi-value')?.querySelector('.cbi-value-title') || el), tid: target ? idOf(target) : null });
 			};
 			root.querySelectorAll('input, select, textarea').forEach((el) => {

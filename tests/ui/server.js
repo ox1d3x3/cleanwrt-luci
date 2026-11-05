@@ -138,6 +138,7 @@ http.createServer((req, res) => {
 	}
 	if (url.pathname.startsWith('/cgi-bin/cgi-exec')) return send(200, 'text/plain', '');
 	if (url.pathname === '/__unknown') return send(200, 'application/json', JSON.stringify(Object.fromEntries(unknownCalls)));
+	if (url.pathname === '/__scenario') { mock.setScenario(url.searchParams.get('name')); return send(200, 'text/plain', 'ok'); }
 	if (url.pathname === '/__pages') {
 		const pages = [];
 		const walk = (node, parts) => {

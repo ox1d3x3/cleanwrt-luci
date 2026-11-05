@@ -4,6 +4,60 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.4] - 2026-11-05
+
+### Added
+- **Network Map**, a new page in the sidebar: a live map of everything
+  connected to the router, drawn in CleanX's own style. It runs from the
+  Internet to the router, then to each Wi-Fi and wired network and the devices
+  on it.
+  - Links light up and move while traffic flows, faster with more traffic.
+    Quiet links rest and offline ones are dashed.
+  - Summary cards show the number of devices, Internet speed (download and
+    upload), Wi-Fi networks and radios, and the most active device.
+  - Each device shows a type icon, its IP address, Wi-Fi signal and current
+    speed. Wired devices show the LAN port they are plugged into, read from the
+    bridge's forwarding table.
+  - Selecting a device opens its details: IPv4/IPv6, MAC, signal, link rate,
+    connected time, current traffic and why it was detected as that type. The
+    dialog can also rename the device and change its icon. Names and icons are
+    saved to `/etc/config/cleanx`, so they are kept across firmware upgrades.
+    Names given in UniWRT's map are shown too.
+  - Device types come from the hostname, the maker of the network card and
+    private (randomised) Wi-Fi addresses. The `ufpd` fingerprinting service is
+    used too when it is installed.
+  - **Access-point mode**: when the router sits behind a main router, the map
+    shows the main router at the top, marks the LAN port it is connected to,
+    and still places wired devices by port.
+  - Works in light and dark mode, on desktop and phone, and with the keyboard.
+- New `netmap_interval` option (3–60 seconds, default 5).
+
+### Performance
+- The Network Map costs the router about as much as LuCI's own Status pages:
+  one batched request per refresh, and only while the page is open in a
+  visible tab. Layout, device detection and rate maths run in the browser, and
+  the page is only rebuilt when devices join, leave or are renamed.
+- Links are drawn with CSS; nothing is measured in JavaScript, and they are
+  animated by the browser's compositor. They move only while traffic flows,
+  pause while a dialog is open, and stay still with `animations=off` or the
+  system's *reduce motion* setting. The page also leaves out the faint blurred
+  background shapes, which the browser would otherwise re-blur on every frame.
+  This keeps the moving links at 60 fps even without GPU acceleration, where
+  frames otherwise took about 130 ms.
+
+### Changed
+- With UniWRT installed alongside, CleanX's sidebar lists one Network Map, its
+  own. UniWRT's map only works under UniWRT.
+- The theme's rpcd access rules now also cover the Network Map: host hints,
+  network and Wi-Fi devices, Wi-Fi station lists, bridge port tables, and
+  saving names to the `cleanx` config.
+- CI runs new Network Map checks (`tests/ui/netmap.test.js`) after the UI audit
+  on OpenWrt 24.10 and 25.12. They cover desktop, phone, light and dark mode,
+  access-point mode, the device dialog, saving a name and icon, and the
+  message shown under other themes. The mocked router gained Wi-Fi clients,
+  wired hosts behind bridge ports, live traffic counters and an access-point
+  scenario.
+
 ## [0.6.3] - 2026-11-05
 
 A deep interaction pass: every page, tab, Edit/Add dialog and control of
@@ -249,6 +303,7 @@ was found that way and is now covered by an automated test.
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.4]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.0...v0.6.1

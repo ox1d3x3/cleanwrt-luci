@@ -1,6 +1,6 @@
 {
 	"luci-theme-cleanx": {
-		"description": "CleanX theme dashboard read access",
+		"description": "CleanX theme: Overview dashboard and Network Map",
 		"read": {
 			"ubus": {
 				"system": [
@@ -13,17 +13,59 @@
 				],
 				"network.device": [
 					"status"
+				],
+				"luci-rpc": [
+					"getBoardJSON",
+					"getHostHints",
+					"getNetworkDevices",
+					"getWirelessDevices"
+				],
+				"iwinfo": [
+					"assoclist"
+				],
+				"fingerprint": [
+					"fingerprint"
+				],
+				"file": [
+					"read"
 				]
 			},
 			"uci": [
 				"network",
-				"cleanx"
+				"wireless",
+				"cleanx",
+				"uniwrt"
 			],
 			"file": {
 				"/proc/stat": [
 					"read"
+				],
+				"/sys/class/net/*/brforward": [
+					"read"
+				],
+				"/sys/class/net/*/brport/port_no": [
+					"read"
+				],
+				"/sys/devices/*/brforward": [
+					"read"
+				],
+				"/sys/devices/*/brport/port_no": [
+					"read"
 				]
 			}
+		},
+		"write": {
+			"ubus": {
+				"uci": [
+					"add",
+					"set",
+					"delete",
+					"commit"
+				]
+			},
+			"uci": [
+				"cleanx"
+			]
 		}
 	}
 }

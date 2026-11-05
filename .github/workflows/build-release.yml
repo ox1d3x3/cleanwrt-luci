@@ -50,11 +50,11 @@ jobs:
       - name: LuCI JavaScript modules parse
         run: |
           set -euo pipefail
-          for f in htdocs/luci-static/resources/*.js; do
+          for f in $(find htdocs/luci-static/resources -name '*.js' | sort); do
             node -e "
               const src = require('fs').readFileSync(process.argv[1], 'utf8')
                 .replace(/^'(use strict|require [^']+)';\s*/gm, '');
-              new Function('baseclass', 'rpc', 'poll', 'ui', 'E', 'L', '_', src);
+              new Function('baseclass', 'view', 'rpc', 'poll', 'ui', 'uci', 'E', 'L', '_', 'N_', src);
             " "$f"
             echo "ok: $f"
           done
@@ -62,7 +62,7 @@ jobs:
       - name: ACL and JSON files parse
         run: |
           set -euo pipefail
-          for f in root/usr/share/rpcd/acl.d/*.json; do
+          for f in root/usr/share/rpcd/acl.d/*.json root/usr/share/luci/menu.d/*.json; do
             python3 -m json.tool "$f" > /dev/null
             echo "ok: $f"
           done
@@ -409,7 +409,7 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
-      - name: Audit every page, tab, dialog and control
+      - name: Audit every page, tab, dialog and control, then the Network Map
         run: bash tests/ui/run.sh ${{ matrix.branch }}
 
       - name: Upload audit report
@@ -419,8 +419,10 @@ jobs:
           name: ui-audit-${{ matrix.branch }}
           path: |
             tests/ui/.work/out-*/report.txt
+            tests/ui/.work/out-*/netmap.txt
             tests/ui/.work/out-*/*.json
             tests/ui/.work/out-*/*-shots/*
+            tests/ui/.work/out-*/netmap/*
           if-no-files-found: ignore
 
   release:

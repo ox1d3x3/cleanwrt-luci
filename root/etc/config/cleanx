@@ -8,3 +8,11 @@ config theme 'theme'
 	# Motion: balanced (icons animate briefly after load) | full (continuous
 	# icon loops and drifting background; needs a fast GPU) | off
 	option animations 'balanced'
+	# Network Map: seconds between refreshes while the page is open (3-60)
+	option netmap_interval '5'
+
+# Network Map device names and icons are stored as 'host' sections, e.g.
+# config host 'h_aabbccddeeff'
+#	option mac 'AA:BB:CC:DD:EE:FF'
+#	option name 'Living room TV'
+#	option icon 'tv'

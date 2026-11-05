@@ -204,7 +204,8 @@ case "\$1" in
         # like the real removal: files go, postrm unregisters the theme
         rm -f "\$CLEANX_ROOT/pkg-installed" "\$CLEANX_ROOT/etc/config/cleanx"
         rm -rf "\$CLEANX_ROOT/www/luci-static/cleanx" "\$CLEANX_ROOT/usr/share/ucode/luci/template/themes/cleanx" \
-               "\$CLEANX_ROOT/www/luci-static/resources/view/cleanx" "\$CLEANX_ROOT"/www/luci-static/resources/*cleanx*.js
+               "\$CLEANX_ROOT/www/luci-static/resources/view/cleanx" "\$CLEANX_ROOT"/www/luci-static/resources/*cleanx*.js \
+               "\$CLEANX_ROOT/usr/share/luci/menu.d/luci-theme-cleanx.json" "\$CLEANX_ROOT/usr/share/rpcd/acl.d/luci-theme-cleanx.json"
         # CleanX's postrm also moves LuCI off the theme it just removed
         "$BB/uci" -q delete luci.themes.CleanX
         [ "\$("$BB/uci" -q get luci.main.mediaurlbase)" = /luci-static/cleanx ] && "$BB/uci" -q set luci.main.mediaurlbase=/luci-static/bootstrap

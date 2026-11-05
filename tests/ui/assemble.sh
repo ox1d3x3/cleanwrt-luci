@@ -14,6 +14,7 @@ cp -a "$LUCI/themes/luci-theme-bootstrap/ucode/template/themes/." "$OUT/tpl/them
 # CleanX exactly as the package lays it out
 cp -a "$CX/htdocs/luci-static/." "$OUT/www/luci-static/"
 cp -a "$CX/ucode/template/themes/cleanx" "$OUT/tpl/themes/"
+[ -d "$CX/root/usr/share/luci/menu.d" ] && cp -a "$CX/root/usr/share/luci/menu.d/." "$OUT/menu.d/"
 # Test the stylesheets exactly as releases ship them (minified). MINIFY=0 tests
 # the readable source instead.
 if [ "${MINIFY:-1}" = 1 ]; then

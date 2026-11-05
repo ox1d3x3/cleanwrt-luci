@@ -6,7 +6,7 @@
 
 <p align="center">
   A clean, modern theme for the OpenWrt LuCI web interface —<br>
-  dark and light modes, a responsive layout and a live router dashboard.
+  dark and light modes, a responsive layout, a live router dashboard and a network map.
 </p>
 
 <p align="center">
@@ -25,8 +25,8 @@
 
 CleanX gives LuCI a calmer, easier-to-read interface without changing how
 OpenWrt works. Every page, form and button keeps its native LuCI behaviour;
-CleanX only restyles the layout and adds a small live dashboard on the
-Overview page.
+CleanX restyles the layout and adds two things of its own: a live dashboard on
+the Overview page and a Network Map of everything connected to your router.
 
 ## Quick install
 
@@ -50,6 +50,7 @@ See [Installation](#installation) for step-by-step instructions and other option
 - **Dark and light modes** that follow your system setting, with a one-click toggle.
 - **Responsive layout** — a sidebar with icons on desktop and a slide-out drawer on phones and tablets.
 - **Live Overview dashboard** showing WAN download/upload speed, traffic totals, CPU, RAM and uptime.
+- **Network Map** — every device on your Wi-Fi and LAN, live, with type icons, signal, speed and the LAN port it is plugged into. Rename devices and pick their icons. [More below](#network-map).
 - **Matching login page.**
 - **Readable LuCI pages** — tidier cards, forms, tabs, tables, modals and action buttons across Status, Network, Wireless, Firewall, System, Software and more.
 - **Upgrade-friendly** — the standalone install keeps Attended Sysupgrade working and survives firmware upgrades with your settings.
@@ -57,9 +58,45 @@ See [Installation](#installation) for step-by-step instructions and other option
 
 ## Screenshots
 
+| Network Map | Device details |
+| --- | --- |
+| ![Network Map in dark mode](docs/screenshots/cleanx-network-map.png) | ![Device details dialog with icon picker](docs/screenshots/cleanx-network-map-device.png) |
+
 | Channel analysis | Realtime graphs |
 | --- | --- |
 | ![Channel analysis in dark and light mode](docs/screenshots/cleanx-dark-light-channel-analysis.png) | ![Realtime load graphs in dark and light mode](docs/screenshots/cleanx-dark-light-realtime-load.png) |
+
+## Network Map
+
+Open **Network Map** in the sidebar for a live view of your network:
+Internet → your router → each Wi-Fi network and wired network → the devices on it.
+
+- **Live traffic.** Links light up and move while data flows, faster with more
+  traffic; quiet links rest and offline ones are dashed. Summary cards show the
+  number of devices, your Internet speed (download and upload), your Wi-Fi
+  networks and the busiest device right now.
+- **Every device at a glance** — its type icon, IP address, Wi-Fi signal and
+  current speed. Wired devices show the LAN port they are plugged into.
+- **Device details.** Select a device to see its IPv4/IPv6 and MAC addresses,
+  signal, link rate, how long it has been connected and why it was detected as
+  that type, and to **rename it or pick a different icon**. Names and icons are
+  saved on the router in `/etc/config/cleanx`, so they are kept across firmware
+  upgrades and show up in every browser. Names you gave devices in UniWRT's map
+  are picked up too.
+- **Automatic device types** from the device's name, the maker of its network
+  card, and private (randomised) Wi-Fi addresses, which are typical of phones.
+  With the optional `ufpd` fingerprinting service installed, its results are used as well.
+- **Access points.** If your OpenWrt device is an access point behind another
+  router, the map shows the main router at the top and marks the LAN port it is
+  connected to. Devices that get their address from the main router are still
+  listed.
+
+The map is light on the router: it asks for data LuCI's own Status pages use
+(DHCP leases, the neighbour table, the Wi-Fi station list and interface
+counters) in one request per refresh, and only while the page is open in a
+visible browser tab. Everything else happens in your browser. It refreshes every
+5 seconds; change that with `netmap_interval` (see [Configuration](#configuration)).
+No data is sent anywhere outside your network.
 
 ## Requirements
 
@@ -213,7 +250,8 @@ Theme settings live in `/etc/config/cleanx` and are applied on the next page loa
 | --- | --- | --- | --- |
 | `mode` | `auto`, `light`, `dark` | `auto` | Default colour scheme. `auto` follows the browser/OS. The toggle in the top bar overrides this per browser. |
 | `dashboard` | `1`, `0` | `1` | Show the live dashboard on Status → Overview. |
-| `animations` | `balanced`, `full`, `off` | `balanced` | `balanced`: hover effects, and icon animations that play briefly after a page loads. `full`: icon animations loop continuously and the background drifts (needs a fast GPU). `off`: no motion. |
+| `animations` | `balanced`, `full`, `off` | `balanced` | `balanced`: hover effects, and icon animations that play briefly after a page loads. `full`: icon animations loop continuously and the background drifts (needs a fast GPU). `off`: no motion (the Network Map then shows busy links highlighted but still). |
+| `netmap_interval` | `3` – `60` | `5` | Seconds between Network Map refreshes while the page is open. |
 
 For example, to default to dark mode and turn animations off:
 
@@ -293,14 +331,16 @@ Before publishing, CI runs two test suites:
   clicks through every tab, Edit/Add dialog, checkbox, select, text field and
   dropdown with a real mouse — once with CleanX and once with stock LuCI
   (Bootstrap). The release is blocked if anything works with Bootstrap but not
-  with CleanX, or if CleanX shows something LuCI hides.
+  with CleanX, or if CleanX shows something LuCI hides. The same job checks the
+  Network Map on desktop and phone, in light and dark mode and in access-point
+  mode, including renaming a device.
 
 To cut a new release:
 
 ```sh
-scripts/bump-version.sh 0.6.3   # updates every version string
-# add a "## [0.6.3]" section to CHANGELOG.md
-git commit -am "Release v0.6.3" && git push
+scripts/bump-version.sh 0.6.4   # updates every version string
+# add a "## [0.6.4]" section to CHANGELOG.md
+git commit -am "Release v0.6.4" && git push
 ```
 
 ## Project layout
@@ -308,10 +348,12 @@ git commit -am "Release v0.6.3" && git push
 ```text
 htdocs/luci-static/cleanx/        Stylesheets (main.css, login.css) and logo
 htdocs/luci-static/resources/     menu-cleanx.js (layout, navigation) and cleanx-dashboard.js
+htdocs/luci-static/resources/view/cleanx/netmap.js   The Network Map page
 ucode/template/themes/cleanx/     LuCI page templates: header, footer, login
 root/etc/config/cleanx            Default theme settings
 root/etc/uci-defaults/            Registers the theme on package installs
-root/usr/share/rpcd/acl.d/        Read-only permissions for the dashboard
+root/usr/share/luci/menu.d/       Adds Network Map to the LuCI menu
+root/usr/share/rpcd/acl.d/        Permissions for the dashboard and Network Map
 preview/                          Static mock pages for checking styles in a browser
 cleanx-apply.sh                   Standalone installer / updater / uninstaller (runs on the router)
 scripts/                          Build, archive and version tools
@@ -342,6 +384,7 @@ packages, so it is still worth checking desktop and mobile widths by hand on at
 least:
 
 - Status → Overview, Realtime Graphs and Channel Analysis
+- Network Map, including a device's details dialog
 - Network → Interfaces (including the Devices tab), Wireless and DHCP/DNS
 - Network → Firewall → Zones and Traffic Rules
 - System → System, Startup, Processes and LED Configuration
