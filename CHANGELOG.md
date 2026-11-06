@@ -4,6 +4,30 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.7] - 2026-11-06
+
+### Added
+- **System → CleanX Theme**, CleanX's own settings page: colour scheme,
+  animations, the Overview dashboard and how often the Network Map refreshes.
+  It is a regular LuCI form, so it also works while another theme is active.
+
+### Fixed
+- **No more pages from another theme in CleanX.** With a second theme
+  installed, its own settings page (for example "UniWRT Theme" under System)
+  still showed in CleanX's menu. CleanX now leaves every menu entry another
+  theme adds for itself out of its menu, at every level, and opens its own
+  page instead if one is visited directly (that theme's settings page leads
+  to System → CleanX Theme).
+- **The colour scheme set on the router now takes effect.** Every page load
+  stored the router's setting in the browser, and that stored copy then
+  overrode any later change. A browser now only remembers a scheme picked
+  with the switch in the top bar.
+
+### Changed
+- The Network Map only uses CleanX's own device names
+  (`/etc/config/cleanx`). It no longer reads another theme's configuration,
+  and the theme's access rules no longer allow it.
+
 ## [0.6.6] - 2026-11-06
 
 ### Fixed
@@ -380,6 +404,7 @@ was found that way and is now covered by an automated test.
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.7]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.3...v0.6.4

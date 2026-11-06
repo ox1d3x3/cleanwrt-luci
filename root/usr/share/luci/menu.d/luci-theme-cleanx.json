@@ -7,7 +7,22 @@
 			"path": "cleanx/netmap"
 		},
 		"depends": {
-			"acl": [ "luci-theme-cleanx" ]
+			"acl": [
+				"luci-theme-cleanx"
+			]
+		}
+	},
+	"admin/system/cleanx": {
+		"title": "CleanX Theme",
+		"order": 90,
+		"action": {
+			"type": "view",
+			"path": "cleanx/settings"
+		},
+		"depends": {
+			"acl": [
+				"luci-theme-cleanx"
+			]
 		}
 	}
 }

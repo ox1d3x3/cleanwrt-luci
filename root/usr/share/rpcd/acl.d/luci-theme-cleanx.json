@@ -33,8 +33,7 @@
 			"uci": [
 				"network",
 				"wireless",
-				"cleanx",
-				"uniwrt"
+				"cleanx"
 			],
 			"file": {
 				"/proc/stat": [

@@ -223,22 +223,19 @@ return view.extend({
 	load: function() {
 		return Promise.all([
 			uci.load('cleanx').catch(() => {}),
-			uci.load('uniwrt').catch(() => {}),   /* names given in UniWRT, if installed */
 			L.resolveDefault(callBoard(), {}),
 			L.resolveDefault(callSystem(), {})
 		]);
 	},
 
-	/* Device names and icons: CleanX's own entries win; names set in UniWRT
-	   are shown for devices CleanX has no entry for. */
+	/* Device names and icons the user chose (config host sections in
+	   /etc/config/cleanx), by MAC address. */
 	overrides: function() {
 		const o = {};
-		const read = (conf) => { try { return uci.sections(conf, 'host') || []; } catch (e) { return []; } };
-		read('uniwrt').forEach((s) => {
-			if (s.mac) o[s.mac.toUpperCase()] = { icon: s.icon || null, name: s.name || null, sid: null, imported: true };
-		});
-		read('cleanx').forEach((s) => {
-			if (s.mac) o[s.mac.toUpperCase()] = { icon: s.icon || null, name: s.name || null, sid: s['.name'], imported: false };
+		let hosts = [];
+		try { hosts = uci.sections('cleanx', 'host') || []; } catch (e) {}
+		hosts.forEach((s) => {
+			if (s.mac) o[s.mac.toUpperCase()] = { icon: s.icon || null, name: s.name || null, sid: s['.name'] };
 		});
 		return o;
 	},
@@ -458,7 +455,6 @@ return view.extend({
 				c.label = o.name || h.name || c.ips[0] || c.mac;
 				c.customName = o.name || '';
 				c.sid = o.sid || null;
-				c.imported = !!o.imported;
 				total++; if (c.wifi) nwifi++;
 				if (c.rate >= ACTIVE && (!top || c.rate > top.rate)) top = c;
 			});
@@ -803,8 +799,7 @@ return view.extend({
 					row(_('Detected as'), (TYPE_NAME[c.auto] || '') + ' — ' + c.reason)
 				))
 			]),
-			E('div', { 'class': 'cx-nm-field' }, [ E('label', { 'for': nameId }, [ _('Name') ]), nameInput,
-				c.imported && c.customName ? E('small', {}, [ _('Name set in UniWRT. Saving stores it in CleanX.') ]) : '' ]),
+			E('div', { 'class': 'cx-nm-field' }, [ E('label', { 'for': nameId }, [ _('Name') ]), nameInput ]),
 			E('div', { 'class': 'cx-nm-field' }, [ E('span', { 'class': 'cx-nm-field-label' }, [ _('Icon') ]), tiles ]),
 			E('div', { 'class': 'right cx-nm-actions' }, [
 				E('button', { 'class': 'btn cbi-button', 'click': ui.hideModal }, [ _('Cancel') ]), ' ',
@@ -818,11 +813,10 @@ return view.extend({
 	save: function(c, name, type) {
 		const self = this, sid = c.sid || ('h_' + c.mac.replace(/:/g, '').toLowerCase());
 		return uci.load('cleanx').then(() => {
-			if (!name && !type && !c.imported) {
+			if (!name && !type) {
+				/* back to the automatic name and icon */
 				if (uci.get('cleanx', sid)) uci.remove('cleanx', sid);
 			} else {
-				/* a device named in UniWRT keeps an (empty) entry, so clearing it
-				   here really clears it instead of falling back to the old name */
 				if (!uci.get('cleanx', sid)) uci.add('cleanx', 'host', sid);
 				uci.set('cleanx', sid, 'mac', c.mac);
 				uci.set('cleanx', sid, 'name', name || null);

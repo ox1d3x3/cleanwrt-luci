@@ -155,23 +155,29 @@ return baseclass.extend({
 
 		const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
-		const applyTheme = (choice) => {
-			const mode = choice || this.storageGet(themeKey) || html.dataset.cleanxMode || 'auto';
+		/* A browser only remembers a scheme picked with the top-bar switch
+		 * (light or dark). Otherwise the router's setting (System → CleanX
+		 * Theme) applies, so changing it there takes effect everywhere. Older
+		 * versions stored the router's setting on every page load, which made
+		 * later changes to it look ignored; such a stored "auto" is ignored. */
+		const picked = () => { const v = this.storageGet(themeKey); return v === 'light' || v === 'dark' ? v : null; };
+		const applyTheme = (mode) => {
 			const dark = mode === 'dark' || (mode !== 'light' && !!darkQuery && darkQuery.matches);
 			html.dataset.cleanxTheme = dark ? 'dark' : 'light';
 			html.dataset.cleanxThemeChoice = mode;
-			this.storageSet(themeKey, mode);
 		};
 
-		applyTheme(this.storageGet(themeKey) || html.dataset.cleanxMode || 'auto');
+		applyTheme(picked() || html.dataset.cleanxMode || 'auto');
 
 		if (darkQuery && darkQuery.addEventListener) {
-			darkQuery.addEventListener('change', () => {
-				if ((this.storageGet(themeKey) || 'auto') === 'auto') applyTheme('auto');
-			});
+			darkQuery.addEventListener('change', () => applyTheme(picked() || html.dataset.cleanxMode || 'auto'));
 		}
 
-		toggle?.addEventListener('click', () => applyTheme(html.dataset.cleanxTheme === 'dark' ? 'light' : 'dark'));
+		toggle?.addEventListener('click', () => {
+			const mode = html.dataset.cleanxTheme === 'dark' ? 'light' : 'dark';
+			this.storageSet(themeKey, mode);
+			applyTheme(mode);
+		});
 
 		const setDrawer = (open) => {
 			if (!mobileDrawer || !mobileBtn) return;
@@ -891,13 +897,13 @@ return baseclass.extend({
 		}
 	},
 
-	/* Pages UniWRT adds (its Overview and Network Map) only work under
-	 * UniWRT. When both themes are installed, CleanX leaves them out of its
-	 * menu: Status → Overview and CleanX's own Network Map cover them, and
+	/* Menu entries another installed theme adds for itself (its overview,
+	 * network map and settings pages) belong to that theme, not to CleanX.
+	 * CleanX leaves them out of its menu at every level; Status → Overview,
+	 * CleanX's Network Map and System → CleanX Theme cover them, and
 	 * header.ut forwards anyone who still lands on one. */
 	visibleChildren(tree) {
-		const foreign = [ 'uniwrt-overview', 'uniwrt-netmap' ];
-		return ui.menu.getChildren(tree).filter((c) => foreign.indexOf(c.name) < 0);
+		return ui.menu.getChildren(tree).filter((c) => !/^uniwrt(-|$)/.test(c.name));
 	},
 
 	renderMainMenu(tree, url) {
@@ -905,7 +911,7 @@ return baseclass.extend({
 		if (!top) return;
 		top.innerHTML = '';
 		this.visibleChildren(tree).forEach((child) => {
-			const sub = ui.menu.getChildren(child);
+			const sub = this.visibleChildren(child);
 			const active = L.env.dispatchpath[1] === child.name || L.env.dispatchpath[2] === child.name;
 			const link = E('a', { href: sub.length ? L.url(url, child.name, sub[0].name) : L.url(url, child.name) }, [
 				this.icon(child.name), E('span', { class: 'cleanx-nav-title' }, [_(child.title)]), sub.length ? E('span', { class: 'cleanx-nav-chevron' }, ['›']) : ''
@@ -934,7 +940,7 @@ return baseclass.extend({
 		if (!list) return;
 		list.innerHTML = '';
 		this.visibleChildren(tree).forEach((child) => {
-			const sub = ui.menu.getChildren(child);
+			const sub = this.visibleChildren(child);
 			const li = E('li', {}, [
 				E('a', { href: sub.length ? L.url(url, child.name, sub[0].name) : L.url(url, child.name) }, [this.icon(child.name), E('span', {}, [_(child.title)])])
 			]);
@@ -949,7 +955,7 @@ return baseclass.extend({
 
 	renderTabMenu(tree, url, level = 0) {
 		const container = document.getElementById('tabmenu');
-		const children = ui.menu.getChildren(tree);
+		const children = this.visibleChildren(tree);
 		let activeNode = null;
 		if (!container || !children.length) return;
 		const ul = E('ul', { class: 'tabs' });

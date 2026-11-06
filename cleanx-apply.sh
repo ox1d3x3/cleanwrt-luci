@@ -316,7 +316,7 @@ do_install() {
 
 	# Always list the theme. Running the installer means "use CleanX", so make
 	# it the active theme too — also when it is already installed and another
-	# theme (UniWRT, Bootstrap, ...) was picked since — unless --keep-theme asks
+	# theme (Bootstrap or any other) was picked since — unless --keep-theme asks
 	# to leave LuCI on the theme it was using. (Package upgrades, which run
 	# without anyone asking, keep the user's choice.)
 	uci -q set luci.themes.$THEME_NAME="$THEME_PATH"

@@ -179,29 +179,81 @@ const groups = (page) => page.$$eval('.cx-nm-net', (els) => els.map((e) => ({ id
 		await fetch(`${BASE}/__scenario?name=router`);
 	}
 
-	// ----------------------------------- UniWRT installed alongside CleanX
-	// UniWRT's Overview sorts before Status, so LuCI opens it first; under
-	// CleanX it would render unstyled. CleanX must forward it and keep both
-	// UniWRT-only pages out of its menu.
+	// ---------------------------- another theme (UniWRT) installed alongside
+	// Its start page sorts before Status, so LuCI opens it first; under
+	// CleanX it would render unstyled. CleanX must open its own pages instead
+	// and show nothing of the other theme in its menu, at any level.
 	{
 		await fetch(`${BASE}/__coexist?on=1`);
 		const { ctx, page, errors } = await open(browser);
 		await page.waitForSelector('.cx-nm-nets', { timeout: 15000 });
-		const nav = await page.$$eval('#topmenu > li > a', (as) => as.map((a) => a.textContent.trim()));
-		check('UniWRT: its Overview and Network Map are not in CleanX\'s menu', nav.filter((t) => t === 'Overview' || t === 'Network Map').length === 1 && nav.includes('Network Map'), JSON.stringify(nav));
-		const mob = await page.$$eval('#cleanx-mobile-list a', (as) => as.map((a) => a.getAttribute('href') || '')).catch(() => []);
-		check('UniWRT: mobile menu leaves them out too', !mob.some((h) => /uniwrt-(overview|netmap)/.test(h)), JSON.stringify(mob.filter((h) => /uniwrt/.test(h))));
-		for (const [from, to] of [['admin', 'admin/status/overview'], ['admin/uniwrt-overview', 'admin/status/overview'], ['admin/uniwrt-netmap', 'admin/cleanx-netmap']]) {
+		const menuText = (sel) => page.$$eval(sel, (as) => as.map((a) => a.textContent.replace(/\s+/g, ' ').trim()));
+		const nav = await menuText('#topmenu > li > a');
+		check('other theme: its Overview and Network Map are not in CleanX\'s menu', nav.filter((t) => t === 'Overview' || t === 'Network Map').length === 1 && nav.includes('Network Map'), JSON.stringify(nav));
+		const all = await menuText('#topmenu a');
+		check('other theme: nothing named after it anywhere in CleanX\'s menu', !all.some((t) => /uniwrt/i.test(t)) && all.includes('CleanX Theme'), JSON.stringify(all.filter((t) => /theme/i.test(t))));
+		const mob = await page.$$eval('#cleanx-mobile-list a', (as) => as.map((a) => (a.getAttribute('href') || '') + ' ' + a.textContent)).catch(() => []);
+		check('other theme: mobile menu leaves it out too', !mob.some((h) => /uniwrt/i.test(h)), JSON.stringify(mob.filter((h) => /uniwrt/i.test(h))));
+		for (const [from, to] of [['admin', 'admin/status/overview'], ['admin/uniwrt-overview', 'admin/status/overview'], ['admin/uniwrt-netmap', 'admin/cleanx-netmap'], ['admin/system/uniwrt', 'admin/system/cleanx']]) {
 			await page.goto(`${BASE}/cgi-bin/luci/${from}`, { waitUntil: 'load' });
-			await page.waitForURL(new RegExp(to.replace('/', '\\/') + '$'), { timeout: 5000 }).catch(() => {});
+			await page.waitForURL(new RegExp(to.replace(/\//g, '\\/') + '$'), { timeout: 5000 }).catch(() => {});
 			const url = page.url().replace(/^.*\/cgi-bin\/luci\//, '');
-			check(`UniWRT: /${from} opens CleanX's ${to}`, url === to, url);
+			check(`other theme: /${from} opens CleanX's ${to}`, url === to, url);
 		}
-		const settings = await page.goto(`${BASE}/cgi-bin/luci/admin/system/uniwrt`, { waitUntil: 'load' }).then(() => page.url());
-		check('UniWRT: its settings page is left alone', /admin\/system\/uniwrt$/.test(settings), settings);
-		check('no page errors (UniWRT alongside)', errors.length === 0, errors.join(' | '));
+		const words = await page.evaluate(() => document.body.innerText);
+		check('other theme: no mention of it on CleanX\'s pages', !/uniwrt/i.test(words));
+		check('no page errors (other theme alongside)', errors.length === 0, errors.join(' | '));
 		await ctx.close();
 		await fetch(`${BASE}/__coexist?on=0`);
+	}
+
+	// ------------------------------- colour scheme: router setting vs switch
+	{
+		const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
+		await ctx.addCookies([{ name: 'theme', value: 'cleanx', url: BASE }]);
+		const page = await ctx.newPage();
+		await page.goto(`${BASE}/cgi-bin/luci/admin/system/system`, { waitUntil: 'load' });
+		/* a value older versions stored on every page load must not stick */
+		await page.evaluate(() => localStorage.setItem('cleanx.theme', 'auto'));
+		await page.reload({ waitUntil: 'load' });
+		await page.waitForTimeout(500);
+		const st = await page.evaluate(() => ({ theme: document.documentElement.dataset.cleanxTheme, stored: localStorage.getItem('cleanx.theme') }));
+		check('scheme: follows the router setting ("auto" → device is dark)', st.theme === 'dark', JSON.stringify(st));
+		await page.click('#cleanx-theme-toggle');
+		await page.reload({ waitUntil: 'load' });
+		await page.waitForTimeout(500);
+		const st2 = await page.evaluate(() => ({ theme: document.documentElement.dataset.cleanxTheme, stored: localStorage.getItem('cleanx.theme') }));
+		check('scheme: the top-bar switch is remembered by this browser', st2.theme === 'light' && st2.stored === 'light', JSON.stringify(st2));
+		await ctx.close();
+	}
+
+	// ------------------------------------------ System → CleanX Theme
+	for (const theme of ['cleanx', 'bootstrap']) {
+		const { ctx, page, errors, calls } = await open(browser, { theme });
+		await page.goto(`${BASE}/cgi-bin/luci/admin/system/cleanx`, { waitUntil: 'load' });
+		await page.waitForSelector('#cbi-cleanx', { timeout: 10000 });
+		await page.waitForTimeout(500);
+		const f = await page.evaluate(() => {
+			const val = (n) => { const e = document.getElementById(`widget.cbid.cleanx.theme.${n}`) || document.querySelector(`#cbi-cleanx-theme-${n} input[type=checkbox]`); return e ? (e.type === 'checkbox' ? String(e.checked) : e.value) : null; };
+			return { title: (document.querySelector('#cbi-cleanx h2') || {}).textContent, mode: val('mode'), animations: val('animations'), dashboard: val('dashboard'), interval: val('netmap_interval') };
+		});
+		check(`settings (${theme}): CleanX Theme page shows the current settings`, f.title === 'CleanX Theme' && f.mode === 'auto' && f.animations === 'balanced' && f.dashboard === 'true' && f.interval === '3', JSON.stringify(f));
+		if (theme === 'cleanx') {
+			const input = await page.$('[id="widget.cbid.cleanx.theme.netmap_interval"]');
+			await input.fill('99');
+			await input.press('Tab');
+			const bad = await page.$eval('[id="widget.cbid.cleanx.theme.netmap_interval"]', (e) => e.classList.contains('cbi-input-invalid'));
+			check('settings: refresh outside 3-60 is refused', bad);
+			await input.fill('10');
+			await input.press('Tab');
+			const before = calls.length;
+			await page.click('.cbi-page-actions .cbi-button-save, .cbi-page-actions button.cbi-button-save');
+			await page.waitForTimeout(1500);
+			const saved = calls.slice(before).filter((c) => c.object === 'uci' && c.method === 'set' && c.args.config === 'cleanx');
+			check('settings: Save writes to /etc/config/cleanx', saved.some((c) => (c.args.values || {}).netmap_interval === '10'), JSON.stringify(saved.map((c) => c.args.values)));
+		}
+		check(`no page errors (settings, ${theme})`, errors.length === 0, errors.join(' | '));
+		await ctx.close();
 	}
 
 	// ------------------------------------------------- another theme active

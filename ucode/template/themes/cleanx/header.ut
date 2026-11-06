@@ -16,14 +16,16 @@
 	const dashboard = cfg.dashboard == '0' ? '0' : '1';
 	const animations = cfg.animations || 'balanced';
 
-	/* Pages another installed theme adds that only work under that theme.
-	   UniWRT's Overview sorts before Status, so LuCI even opens it right after
-	   login; under CleanX it would render unstyled (one huge icon). Send
-	   those to CleanX's own page instead. */
-	const foreign_pages = { 'uniwrt-overview': 'admin/status/overview', 'uniwrt-netmap': 'admin/cleanx-netmap' };
-	const resolved_path = ctx?.path ?? [];
-	const redirect_to = (!blank_page && length(resolved_path) == 2 && resolved_path[0] == 'admin')
-		? foreign_pages[resolved_path[1]] : null;
+	/* Pages another installed theme adds for itself belong to that theme.
+	   Its start page sorts before Status, so LuCI even opens it right after
+	   login, and under CleanX it renders unstyled (one huge icon). Open
+	   CleanX's own page instead. */
+	const foreign_pages = {
+		'admin/uniwrt-overview': 'admin/status/overview',
+		'admin/uniwrt-netmap':   'admin/cleanx-netmap',
+		'admin/system/uniwrt':   'admin/system/cleanx'
+	};
+	const redirect_to = !blank_page ? foreign_pages[join('/', ctx?.path ?? [])] : null;
 
 	http.prepare_content('text/html; charset=UTF-8');
 -%}
@@ -45,6 +47,8 @@
 		var key = 'cleanx.theme';
 		var saved = null;
 		try { saved = localStorage.getItem(key); } catch (e) {}
+		/* only a scheme picked with the top-bar switch overrides the router's setting */
+		if (saved !== 'light' && saved !== 'dark') saved = null;
 		saved = saved || '{{ entityencode(theme_mode, true) }}' || 'auto';
 		var dark = saved === 'dark' || (saved !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 		document.documentElement.dataset.cleanxTheme = dark ? 'dark' : 'light';
@@ -52,9 +56,9 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.6">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.7">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.6">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.7">
 	{% endif %}
 
 	<script>

@@ -56,7 +56,8 @@ See [Installation](#installation) for step-by-step instructions and other option
 - **Upgrade-friendly** — the standalone install keeps Attended Sysupgrade working and survives firmware upgrades with your settings.
 - **Lightweight** — pure CSS and JavaScript, no compiled code, no extra daemons. Runs on every router CPU.
 - **Fast on any device** — smooth at 60 fps even in browsers without graphics acceleration (virtual machines, remote desktops, old laptops, budget phones), and it adds no router requests to LuCI's pages beyond the Overview dashboard and the Network Map.
-- **Gets along with UniWRT** — with both themes installed, CleanX shows its own Overview and Network Map instead of UniWRT's, which only work under UniWRT.
+- **Settings page** — System → CleanX Theme for the colour scheme, animations, the Overview dashboard and the Network Map.
+- **Gets along with other themes** — pages another installed theme adds for itself (its own overview, network map or settings) are left out of CleanX's menu, and CleanX opens its own pages instead.
 
 ## Screenshots
 
@@ -83,8 +84,7 @@ Internet → your router → each Wi-Fi network and wired network → the device
   signal, link rate, how long it has been connected and why it was detected as
   that type, and to **rename it or pick a different icon**. Names and icons are
   saved on the router in `/etc/config/cleanx`, so they are kept across firmware
-  upgrades and show up in every browser. Names you gave devices in UniWRT's map
-  are picked up too.
+  upgrades and show up in every browser.
 - **Automatic device types** from the device's name, the maker of its network
   card, and private (randomised) Wi-Fi addresses, which are typical of phones.
   With the optional `ufpd` fingerprinting service installed, its results are used as well.
@@ -144,7 +144,7 @@ switches LuCI to CleanX.
 
 **To update later**, run the same command from step 2 again. Your settings are
 kept, and CleanX becomes the active theme again even if you switched to another
-theme (such as UniWRT) in the meantime. Add `--keep-theme` to update without switching.
+theme in the meantime. Add `--keep-theme` to update without switching.
 
 **Already have the CleanX package installed?** Run the same command. It removes
 the package, installs the standalone copy and keeps your settings and theme
@@ -250,11 +250,13 @@ uci commit luci
 
 ## Configuration
 
-Theme settings live in `/etc/config/cleanx` and are applied on the next page load:
+Open **System → CleanX Theme** to change these settings, then save and reload
+the page. They are stored in `/etc/config/cleanx`, so they can also be set
+with `uci`:
 
 | Option | Values | Default | Description |
 | --- | --- | --- | --- |
-| `mode` | `auto`, `light`, `dark` | `auto` | Default colour scheme. `auto` follows the browser/OS. The toggle in the top bar overrides this per browser. |
+| `mode` | `auto`, `light`, `dark` | `auto` | Colour scheme. `auto` follows the browser/OS. A scheme picked with the switch in the top bar overrides this in that browser. |
 | `dashboard` | `1`, `0` | `1` | Show the live dashboard on Status → Overview. |
 | `animations` | `balanced`, `full`, `off` | `balanced` | `balanced`: hover effects, and icon animations that play briefly after a page loads. `full`: icon animations loop continuously and the background drifts (needs a fast GPU). `off`: no motion (the Network Map then shows busy links highlighted but still). |
 | `netmap_interval` | `3` – `60` | `5` | Seconds between Network Map refreshes while the page is open. |
@@ -340,16 +342,16 @@ Before publishing, CI runs two test suites:
   anything works with Bootstrap but not with CleanX, or if CleanX shows
   something LuCI hides. The same jobs check the Network Map (light and dark,
   access-point mode, renaming a device), the login page, CleanX alongside
-  UniWRT, and the health of every page at rest: no JavaScript errors, sideways
+  another theme, and the health of every page at rest: no JavaScript errors, sideways
   scrolling, oversized graphics, broken images, controls pushed off-screen or
   extra router requests compared with stock LuCI.
 
 To cut a new release:
 
 ```sh
-scripts/bump-version.sh 0.6.6   # updates every version string
-# add a "## [0.6.6]" section to CHANGELOG.md
-git commit -am "Release v0.6.6" && git push
+scripts/bump-version.sh 0.6.7   # updates every version string
+# add a "## [0.6.7]" section to CHANGELOG.md
+git commit -am "Release v0.6.7" && git push
 ```
 
 ## Project layout
@@ -358,10 +360,11 @@ git commit -am "Release v0.6.6" && git push
 htdocs/luci-static/cleanx/        Stylesheets (main.css, login.css) and logo
 htdocs/luci-static/resources/     menu-cleanx.js (layout, navigation) and cleanx-dashboard.js
 htdocs/luci-static/resources/view/cleanx/netmap.js   The Network Map page
+htdocs/luci-static/resources/view/cleanx/settings.js System → CleanX Theme
 ucode/template/themes/cleanx/     LuCI page templates: header, footer, login
 root/etc/config/cleanx            Default theme settings
 root/etc/uci-defaults/            Registers the theme on package installs
-root/usr/share/luci/menu.d/       Adds Network Map to the LuCI menu
+root/usr/share/luci/menu.d/       Adds Network Map and CleanX Theme to the LuCI menu
 root/usr/share/rpcd/acl.d/        Permissions for the dashboard and Network Map
 preview/                          Static mock pages for checking styles in a browser
 cleanx-apply.sh                   Standalone installer / updater / uninstaller (runs on the router)
@@ -395,6 +398,7 @@ least:
 
 - Status → Overview, Realtime Graphs and Channel Analysis
 - Network Map, including a device's details dialog
+- System → CleanX Theme
 - Network → Interfaces (including the Devices tab), Wireless and DHCP/DNS
 - Network → Firewall → Zones and Traffic Rules
 - System → System, Startup, Processes and LED Configuration
