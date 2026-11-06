@@ -58,7 +58,10 @@ async function scan(browser, theme, pages) {
 				const scrolls = (e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { const ox = getComputedStyle(a).overflowX; if ((ox === 'auto' || ox === 'scroll') && a.scrollWidth > a.clientWidth) return true; } return false; };
 				const offRight = [...document.querySelectorAll('#maincontent button, #maincontent input:not([type=hidden]), #maincontent select, #maincontent .cbi-dropdown, #maincontent a.btn')]
 					.filter((e) => vis(e) && e.getBoundingClientRect().right > window.innerWidth + 2 && !scrolls(e)).map(name);
-				return { sideways, huge, broken, offRight: [...new Set(offRight)].slice(0, 8) };
+				/* CleanX's sidebar must never scroll sideways (stock LuCI has none) */
+				const side = document.querySelector('.cleanx-sidebar');
+				const sidebarSideways = side ? side.scrollWidth - side.clientWidth : 0;
+				return { sideways, sidebarSideways, huge, broken, offRight: [...new Set(offRight)].slice(0, 8) };
 			}, { W, H });
 			out[pg] = { errors: [...new Set(errors)], failed: [...new Set(failed)], requests, ...dom };
 		} catch (e) {
@@ -89,6 +92,7 @@ async function scan(browser, theme, pages) {
 		for (const e of only('huge')) problems.push(`${pg}: oversized graphic with CleanX — ${e}`);
 		for (const e of only('offRight')) problems.push(`${pg}: control off the right edge with CleanX — ${e}`);
 		if (c.sideways > 1 && !(b.sideways > 1)) problems.push(`${pg}: page scrolls sideways with CleanX (${c.sideways}px)`);
+		if (c.sidebarSideways > 1) problems.push(`${pg}: CleanX's sidebar scrolls sideways (${c.sidebarSideways}px)`);
 		/* CleanX's own live pages poll on purpose; elsewhere it must not add router requests */
 		const own = /^admin\/(status\/overview|cleanx-netmap)$/.test(pg);
 		if (!own && c.requests > b.requests + 1) problems.push(`${pg}: ${c.requests} router requests while idle with CleanX vs ${b.requests} with stock LuCI`);

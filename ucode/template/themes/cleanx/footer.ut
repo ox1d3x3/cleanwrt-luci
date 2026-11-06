@@ -6,7 +6,9 @@
 		</div>
 	</div>
 	<script>L.require('menu-cleanx')</script>
+	{% if (join('/', ctx?.path ?? []) == 'admin/status/overview'): %}
 	<script>L.require('cleanx-dashboard')</script>
+	{% endif %}
 	{% endif %}
 </body>
 </html>

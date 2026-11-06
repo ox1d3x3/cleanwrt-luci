@@ -107,3 +107,20 @@ html[data-cleanx-theme="dark"] {
 		radial-gradient(circle at 50% 110%, rgba(5,150,105,.10), transparent 36rem),
 		linear-gradient(140deg, #050507, #0a0d13 52%, #050507) !important;
 }
+
+/* CleanX v0.6.6 - rendering performance. The background glows are soft
+   radial gradients with the falloff of the old blurred discs, so nothing is
+   re-blurred per frame, and they only drift with animations=full. The card
+   no longer blurs what is behind it: only these smooth glows are, where a
+   blur shows nothing. The page looks the same and no longer keeps the
+   browser busy while it sits open (it used to animate forever). */
+.cleanx-login-bg span { filter: none !important; border-radius: 0 !important; background-color: transparent !important; }
+.cleanx-login-bg span:nth-child(n) { animation: none; }
+.cleanx-login-bg span:nth-child(1) { width: 1196px; height: 1196px; top: -518px; right: -438px; background-image: radial-gradient(closest-side, rgba(96,165,250,.995), rgba(96,165,250,.978) 15%, rgba(96,165,250,.876) 30%, rgba(96,165,250,.669) 42%, rgba(96,165,250,.386) 54%, rgba(96,165,250,.154) 66%, rgba(96,165,250,.04) 78%, rgba(96,165,250,.006) 90%, rgba(96,165,250,0)); }
+.cleanx-login-bg span:nth-child(2) { width: 1216px; height: 1216px; bottom: -548px; left: -468px; background-image: radial-gradient(closest-side, rgba(167,139,250,.996), rgba(167,139,250,.982) 15%, rgba(167,139,250,.891) 30%, rgba(167,139,250,.692) 42%, rgba(167,139,250,.406) 54%, rgba(167,139,250,.163) 66%, rgba(167,139,250,.042) 78%, rgba(167,139,250,.007) 90%, rgba(167,139,250,0)); }
+.cleanx-login-bg span:nth-child(3) { width: 916px; height: 916px; top: calc(36% - 288px); left: calc(46% - 288px); background-image: radial-gradient(closest-side, rgba(52,211,153,.792), rgba(52,211,153,.71) 15%, rgba(52,211,153,.5) 30%, rgba(52,211,153,.304) 42%, rgba(52,211,153,.147) 54%, rgba(52,211,153,.055) 66%, rgba(52,211,153,.016) 78%, rgba(52,211,153,.003) 90%, rgba(52,211,153,0)); }
+.cleanx-login-bg span:nth-child(4) { width: 836px; height: 836px; right: calc(24% - 288px); bottom: calc(14% - 288px); background-image: radial-gradient(closest-side, rgba(90,200,250,.6), rgba(90,200,250,.526) 15%, rgba(90,200,250,.352) 30%, rgba(90,200,250,.206) 42%, rgba(90,200,250,.098) 54%, rgba(90,200,250,.037) 66%, rgba(90,200,250,.011) 78%, rgba(90,200,250,.003) 90%, rgba(90,200,250,0)); }
+html[data-cleanx-animations="full"] .cleanx-login-bg span:nth-child(1) { animation: cleanxDriftA 16s ease-in-out infinite; }
+html[data-cleanx-animations="full"] .cleanx-login-bg span:nth-child(2) { animation: cleanxDriftB 20s ease-in-out infinite; }
+html[data-cleanx-animations="full"] .cleanx-login-bg span:nth-child(3) { animation: cleanxDriftC 24s ease-in-out infinite; }
+.cleanx-login-card { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }

@@ -4,6 +4,66 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.6] - 2026-11-06
+
+### Fixed
+- **The Overview page with UniWRT installed alongside.** UniWRT adds its own
+  "Overview" page, which sorts before Status, so LuCI even opened it right
+  after login. Under CleanX that page renders without UniWRT's stylesheet:
+  just its description and one huge icon. CleanX now opens its own Overview
+  (Status → Overview) instead, does the same for UniWRT's Network Map, and
+  leaves both UniWRT-only pages out of its menu. UniWRT's settings page stays
+  available.
+- **"Reserve IP" buttons on the Overview were cut off.** The DHCP lease tables
+  (which gained DUID/IAID columns in OpenWrt 25.12) were clipped at the card
+  edge on status pages. Wide data tables now scroll sideways inside their card
+  instead.
+- **The sidebar scrolled sideways** (a horizontal scrollbar under the menu on
+  Windows). An invisible shine layer of the logo was sized against the whole
+  sidebar; it is now confined to the logo, and the logo's hover shine no
+  longer sweeps across the entire sidebar.
+- Overview dashboard: the load average showed raw numbers (e.g. "655.00")
+  on an idle router. RAM "used" now matches LuCI's Memory section. The
+  subtitle shows the router model and firmware, and the WAN pill turns red
+  while the WAN port has no link.
+
+### Performance
+- **Smooth on any hardware.** In browsers without graphics acceleration
+  (virtual machines, remote desktops, old laptops, budget phones) every page
+  ran at 7 to 9 frames per second while anything moved: a hover, a progress
+  bar, the sidebar icons after a page load, the Network Map's links. Now it is
+  60 frames per second, and with a GPU the theme uses less power. The look is
+  unchanged (screenshots before and after differ by at most a few shades):
+  - The background glows are soft gradients instead of blurred layers the
+    browser had to recompute on every frame.
+  - The frosted-glass blur is kept where page content actually passes behind
+    it: the top bar, menus, tooltips and the dialog backdrop. The sidebar,
+    cards, tables and port boxes sit on the plain background, where a blur
+    shows nothing, yet each one (about 40 on the Overview) cost a full extra
+    pass per frame.
+  - The login page no longer animates its background forever and no longer
+    blurs it: 12 to 60 fps without a GPU, and an idle login tab stays idle.
+    The drifting glows remain with `animations=full`.
+- **Fewer router requests on the Overview: now the same as stock LuCI.**
+  CleanX polled memory usage every 3 seconds, duplicating LuCI's own Memory
+  section, and the dashboard polled every 2 seconds in separate requests.
+  The duplicate poll is gone, and the dashboard refreshes with LuCI's
+  sections in the same request (LuCI's refresh interval, 5 s by default).
+- Less work after every page update: CleanX's enhancer no longer revisits
+  buttons it has already handled, and two loops that tagged every field and
+  card with classes nothing used are gone. The dashboard script is only
+  loaded on the Overview page.
+- With *reduce motion* enabled in the operating system, looping animations
+  now stop instead of spinning at full speed.
+
+### Changed
+- CI runs the UI audit at phone size as well as desktop size, on OpenWrt
+  24.10 and 25.12. A new page health scan (`tests/ui/health.js`) opens every
+  page with CleanX and with stock LuCI and blocks a release on CleanX-only
+  JavaScript errors, sideways scrolling, oversized graphics, broken images,
+  controls pushed off-screen or extra router requests. New checks cover the
+  login page and CleanX installed alongside UniWRT.
+
 ## [0.6.5] - 2026-11-06
 
 ### Fixed
@@ -320,6 +380,7 @@ was found that way and is now covered by an automated test.
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.6]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.2...v0.6.3

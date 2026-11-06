@@ -189,7 +189,7 @@ html[data-cleanx-animations="full"] .cleanx-blob-c { animation: cleanxFloatC 24s
 @keyframes cleanxFloatB { 0%,100%{ transform: translate3d(0,0,0);} 50%{ transform: translate3d(50px,-28px,0);} }
 @keyframes cleanxFloatC { 0%,100%{ transform: translate3d(0,0,0);} 50%{ transform: translate3d(-28px,-30px,0);} }
 
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; } }
 [data-cleanx-animations="off"] *, [data-cleanx-animations="off"] *::before, [data-cleanx-animations="off"] *::after { animation: none !important; transition: none !important; }
 @media (max-width: 1240px) { .cleanx-stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .cleanx-mode-menu { display:none !important; } }
 @media (max-width: 900px) {
@@ -9965,6 +9965,12 @@ body[data-page] .cleanx-content .cleanx-table-wrap > table.cleanx-data-table {
 	table-layout: auto !important;
 	overflow: visible !important;
 }
+
+/* The brand mark's shine layers are positioned against the mark itself.
+   Without this they were sized against the whole sidebar: an invisible
+   500 x 1600 px layer gave the sidebar a sideways scrollbar, and on hover
+   the sheen swept across the entire sidebar instead of the logo. */
+.cleanx-brand-mark { position: relative; }
 
 /* Overview: WAN pill turns red while the WAN port is down or unplugged */
 #cleanx-wan-pill.is-down .cleanx-live-dot { background: #ff453a !important; box-shadow: 0 0 0 4px rgba(255,69,58,.16) !important; animation: none !important; }

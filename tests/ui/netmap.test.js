@@ -216,6 +216,29 @@ const groups = (page) => page.$$eval('.cx-nm-net', (els) => els.map((e) => ({ id
 		await ctx.close();
 	}
 
+	// --------------------------------------------------------- login page
+	for (const [vp, scheme] of [[[1440, 900], 'light'], [[390, 844], 'dark']]) {
+		const ctx = await browser.newContext({ viewport: { width: vp[0], height: vp[1] }, colorScheme: scheme });
+		await ctx.addCookies([{ name: 'theme', value: 'cleanx', url: BASE }]);
+		const page = await ctx.newPage();
+		const errors = [];
+		page.on('pageerror', (e) => errors.push(e.message));
+		await page.goto(`${BASE}/cgi-bin/luci/__login`, { waitUntil: 'load' });
+		await page.waitForTimeout(700);
+		const st = await page.evaluate(() => {
+			const card = document.querySelector('.cleanx-login-card'), r = card && card.getBoundingClientRect();
+			return { card: !!card && r.width > 200 && r.right <= innerWidth && r.left >= 0, user: !!document.querySelector('#luci_username'), pass: !!document.querySelector('#luci_password'),
+				focused: document.activeElement && document.activeElement.id, sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+				moving: [...document.querySelectorAll('.cleanx-login-bg span')].filter((e) => getComputedStyle(e).animationName !== 'none').length };
+		});
+		check(`login (${vp[0]}px): sign-in form shown and fits`, st.card && st.user && st.pass && st.sideways <= 0, JSON.stringify(st));
+		check(`login (${vp[0]}px): username field focused`, st.focused === 'luci_username', st.focused);
+		check(`login (${vp[0]}px): background at rest (animations=balanced)`, st.moving === 0, String(st.moving));
+		await page.screenshot({ path: path.join(OUT, `login-${vp[0]}-${scheme}.png`) });
+		check(`no page errors (login ${vp[0]}px)`, errors.length === 0, errors.join(' | '));
+		await ctx.close();
+	}
+
 	await browser.close();
 	console.log(failed ? `NETMAP: ${failed} check(s) failed` : 'NETMAP: all checks passed');
 	process.exit(failed ? 1 : 0);

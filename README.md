@@ -55,6 +55,8 @@ See [Installation](#installation) for step-by-step instructions and other option
 - **Readable LuCI pages** — tidier cards, forms, tabs, tables, modals and action buttons across Status, Network, Wireless, Firewall, System, Software and more.
 - **Upgrade-friendly** — the standalone install keeps Attended Sysupgrade working and survives firmware upgrades with your settings.
 - **Lightweight** — pure CSS and JavaScript, no compiled code, no extra daemons. Runs on every router CPU.
+- **Fast on any device** — smooth at 60 fps even in browsers without graphics acceleration (virtual machines, remote desktops, old laptops, budget phones), and it adds no router requests to LuCI's pages beyond the Overview dashboard and the Network Map.
+- **Gets along with UniWRT** — with both themes installed, CleanX shows its own Overview and Network Map instead of UniWRT's, which only work under UniWRT.
 
 ## Screenshots
 
@@ -331,20 +333,23 @@ Before publishing, CI runs two test suites:
   simulated router with OpenWrt's own BusyBox, `uci` and `apk`, runs a
   simulated firmware upgrade, and migrates a real `.apk` install to standalone.
 - **UI interaction audit** ([`tests/ui/`](tests/ui/)): renders every LuCI page
-  of OpenWrt 24.10 and 25.12 with the real LuCI templates and JavaScript, then
-  clicks through every tab, Edit/Add dialog, checkbox, select, text field and
-  dropdown with a real mouse — once with CleanX and once with stock LuCI
-  (Bootstrap). The release is blocked if anything works with Bootstrap but not
-  with CleanX, or if CleanX shows something LuCI hides. The same job checks the
-  Network Map on desktop and phone, in light and dark mode and in access-point
-  mode, including renaming a device.
+  of OpenWrt 24.10 and 25.12 with the real LuCI templates and JavaScript, at
+  desktop and phone sizes, then clicks through every tab, Edit/Add dialog,
+  checkbox, select, text field and dropdown with a real mouse — once with
+  CleanX and once with stock LuCI (Bootstrap). The release is blocked if
+  anything works with Bootstrap but not with CleanX, or if CleanX shows
+  something LuCI hides. The same jobs check the Network Map (light and dark,
+  access-point mode, renaming a device), the login page, CleanX alongside
+  UniWRT, and the health of every page at rest: no JavaScript errors, sideways
+  scrolling, oversized graphics, broken images, controls pushed off-screen or
+  extra router requests compared with stock LuCI.
 
 To cut a new release:
 
 ```sh
-scripts/bump-version.sh 0.6.5   # updates every version string
-# add a "## [0.6.5]" section to CHANGELOG.md
-git commit -am "Release v0.6.5" && git push
+scripts/bump-version.sh 0.6.6   # updates every version string
+# add a "## [0.6.6]" section to CHANGELOG.md
+git commit -am "Release v0.6.6" && git push
 ```
 
 ## Project layout
@@ -383,7 +388,8 @@ tests/ui/run.sh openwrt-25.12 1440x900 'firewall'  # only matching pages
 ```
 
 It prints a report of any control that is covered, hidden, can't be selected
-or behaves differently from stock LuCI. LuCI pages also vary with the installed
+or behaves differently from stock LuCI, followed by the Network Map checks and
+the page health scan. LuCI pages also vary with the installed
 packages, so it is still worth checking desktop and mobile widths by hand on at
 least:
 

@@ -166,6 +166,12 @@ http.createServer((req, res) => {
 		if (parts[0] === 'admin' && parts[1] === 'menu') return send(200, 'application/json', JSON.stringify(menuJson(TREE)));
 		if (parts[0] === 'admin' && parts[1] === 'translations') return send(200, 'application/javascript', 'window.TR={};');
 		if (parts[0] === 'admin' && parts[1] === 'uci') return send(200, 'application/json', '{}');
+		if (parts[0] === '__login') {   // the login page, as LuCI shows it when signed out
+			const env = { ...process.env, TPL: path.join(ROOT, 'tpl'), THEME: theme, REQPATH: 'admin', RESOLVED: 'admin', TITLE: '', VIEW: '', BLANK: '1', LD_LIBRARY_PATH: UC,
+				ENTRY: fs.existsSync(path.join(ROOT, 'tpl', 'themes', theme, 'sysauth.ut')) ? `themes/${theme}/sysauth` : 'sysauth' };
+			const html = execFileSync(path.join(UC, 'ucode'), ['-L', path.join(RENDER, 'lib'), '-L', UC, path.join(RENDER, 'driver.uc')], { env, cwd: RENDER, maxBuffer: 1 << 24 }).toString();
+			return send(200, 'text/html; charset=UTF-8', html);
+		}
 		const html = renderPage(parts.length ? parts : ['admin'], theme);
 		if (!html) return send(404, 'text/plain', 'no page');
 		return send(200, 'text/html; charset=UTF-8', html, { 'Set-Cookie': `theme=${theme}; path=/` });
