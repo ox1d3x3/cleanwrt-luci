@@ -13,18 +13,26 @@ return baseclass.extend({
 	callInterfaceDump: rpc.declare({ object: 'network.interface', method: 'dump' }),
 	callDeviceStatus: rpc.declare({ object: 'network.device', method: 'status', params: [ 'name' ] }),
 	callProcStat: rpc.declare({ object: 'file', method: 'read', params: [ 'path' ], reject: false }),
+	callBoard: rpc.declare({ object: 'system', method: 'board' }),
 
 	__init__() {
 		if (document.body.dataset.cleanxDashboard === '0') return;
 		if (!this.isOverviewPage()) return;
 		this.mount();
 		this.update();
-		poll.add(() => this.update(), 2);
+		this.describeRouter();
+		/* Same interval as LuCI's own Overview sections (System → System →
+		 * Language and Style → Refresh interval, 5 s by default), so the
+		 * dashboard's calls ride in the same request instead of adding one. */
+		poll.add(() => this.update(), Math.max(2, Number(L.env.pollinterval) || 5));
 	},
 
+	/* The page LuCI actually shows (dispatchpath), not the address typed:
+	 * /admin can open another page first (another theme's start page, say). */
 	isOverviewPage() {
-		const page = document.body.dataset.page || '';
-		return page === 'admin-status-overview' || location.pathname.indexOf('/admin/status/overview') !== -1 || location.pathname.replace(/\/+$/, '').endsWith('/admin');
+		const path = (L.env.dispatchpath || []).join('/');
+		if (path) return path === 'admin/status/overview';
+		return (document.body.dataset.page || '') === 'admin-status-overview';
 	},
 
 	icon(type) {
@@ -47,9 +55,9 @@ return baseclass.extend({
 				E('div', {}, [
 					E('p', { class: 'cleanx-eyebrow' }, [ 'CleanX' ]),
 					E('h1', {}, [ 'Network Overview' ]),
-					E('p', {}, [ 'Current router status.' ])
+					E('p', { id: 'cleanx-router-line' }, [ 'Current router status.' ])
 				]),
-				E('div', { class: 'cleanx-pill' }, [ E('span', { class: 'cleanx-live-dot' }), 'WAN: ', E('span', { id: 'cleanx-wan-device' }, [ 'detecting' ]) ])
+				E('div', { class: 'cleanx-pill', id: 'cleanx-wan-pill' }, [ E('span', { class: 'cleanx-live-dot' }), 'WAN: ', E('span', { id: 'cleanx-wan-device' }, [ 'detecting' ]) ])
 			]),
 			E('div', { class: 'cleanx-stat-grid cleanx-stat-grid-live' }, [
 				this.card('Download', 'cleanx-down-rate', '0 B/s', 'Total RX: ', 'cleanx-total-rx', 'cleanx-down-meter', 'down'),
@@ -95,6 +103,15 @@ return baseclass.extend({
 			this.text('cleanx-up-rate', 'Unavailable');
 			console.warn('[CleanX] Dashboard update failed:', err);
 		}
+	},
+
+	/* "Model · OpenWrt version" under the title, read once. */
+	async describeRouter() {
+		try {
+			const b = await this.callBoard();
+			const line = [ b?.model, b?.release?.description || [ b?.release?.distribution, b?.release?.version ].filter(Boolean).join(' ') ].filter(Boolean).join(' · ');
+			if (line) this.text('cleanx-router-line', line);
+		} catch (_) {}
 	},
 
 	async detectWanDevice() {
@@ -144,6 +161,9 @@ return baseclass.extend({
 	},
 
 	updateNetwork(device) {
+		/* red dot when the WAN port has no link or is down */
+		const pill = document.getElementById('cleanx-wan-pill');
+		if (pill) pill.classList.toggle('is-down', !!device && typeof device === 'object' && (device.up === false || device.carrier === false));
 		const stats = device?.statistics || device || {};
 		const rx = Number(stats.rx_bytes || 0);
 		const tx = Number(stats.tx_bytes || 0);
@@ -167,8 +187,12 @@ return baseclass.extend({
 
 	updateSystem(system, cpuPct) {
 		const uptime = this.formatDuration(Number(system?.uptime || 0));
-		const memTotal = Number(system?.memory?.total || 0);
-		const memFree = Number(system?.memory?.free || 0) + Number(system?.memory?.buffered || 0) + Number(system?.memory?.cached || 0);
+		/* "used" as LuCI's Memory section counts it: total minus what the
+		 * kernel can hand out (available), else free + buffers + cache */
+		const mem = system?.memory || {};
+		const memTotal = Number(mem.total || 0);
+		const memFree = mem.available != null ? Number(mem.available)
+			: Number(mem.free || 0) + Number(mem.buffered || 0) + Number(mem.cached || 0);
 		const used = memTotal ? Math.max(memTotal - memFree, 0) : 0;
 		const ramPct = memTotal ? Math.round((used / memTotal) * 100) : 0;
 		const load = this.formatLoad(system?.load);
@@ -189,18 +213,16 @@ return baseclass.extend({
 		this.meter('cleanx-ram-meter', ramPct);
 	},
 
+	/* ubus system info reports load averages in 1/65536 units (always, also
+	 * for a nearly idle router: 0.01 arrives as 655), as LuCI shows them. */
 	formatLoad(load) {
 		if (!Array.isArray(load) || !load.length) return 'n/a';
-		return load.slice(0, 3).map((v) => {
-			const n = Number(v || 0);
-			return (n > 1000 ? n / 65535 : n).toFixed(2);
-		}).join(', ');
+		return load.slice(0, 3).map((v) => (Number(v || 0) / 65535).toFixed(2)).join(', ');
 	},
 
 	loadToPct(load) {
 		if (!Array.isArray(load) || !load.length) return { pct: 0 };
-		const raw = Number(load[0] || 0);
-		const avg = raw > 1000 ? raw / 65535 : raw;
+		const avg = Number(load[0] || 0) / 65535;
 		return { pct: Math.max(0, Math.min(100, Math.round(avg * 100))) };
 	},
 

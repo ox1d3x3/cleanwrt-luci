@@ -3,6 +3,7 @@ import { striptags, entityencode } from 'html';
 const LOADFILE = loadfile, CALL = call, PROTO = proto, G = global;
 const TPL = getenv('TPL'), theme = getenv('THEME'), view = getenv('VIEW');
 const reqpath = filter(split(getenv('REQPATH'), '/'), length);
+const resolved = filter(split(getenv('RESOLVED') ?? getenv('REQPATH'), '/'), length);
 const title = getenv('TITLE');
 const scope = {
 	theme, view,
@@ -11,7 +12,7 @@ const scope = {
 		prepare_content: () => null,
 		getenv: (k) => ({ SCRIPT_NAME: '/cgi-bin/luci', PATH_INFO: '/' + join('/', reqpath), DOCUMENT_ROOT: '/www' })[k],
 	},
-	ctx: { request_path: reqpath, path: reqpath, authsession: 'mocksid', authtoken: 'mocktoken' },
+	ctx: { request_path: reqpath, path: resolved, authsession: 'mocksid', authtoken: 'mocktoken' },
 	config: { main: {}, apply: {} },
 	dispatcher: {
 		lang: 'en',

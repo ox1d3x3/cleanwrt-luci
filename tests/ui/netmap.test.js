@@ -179,6 +179,31 @@ const groups = (page) => page.$$eval('.cx-nm-net', (els) => els.map((e) => ({ id
 		await fetch(`${BASE}/__scenario?name=router`);
 	}
 
+	// ----------------------------------- UniWRT installed alongside CleanX
+	// UniWRT's Overview sorts before Status, so LuCI opens it first; under
+	// CleanX it would render unstyled. CleanX must forward it and keep both
+	// UniWRT-only pages out of its menu.
+	{
+		await fetch(`${BASE}/__coexist?on=1`);
+		const { ctx, page, errors } = await open(browser);
+		await page.waitForSelector('.cx-nm-nets', { timeout: 15000 });
+		const nav = await page.$$eval('#topmenu > li > a', (as) => as.map((a) => a.textContent.trim()));
+		check('UniWRT: its Overview and Network Map are not in CleanX\'s menu', nav.filter((t) => t === 'Overview' || t === 'Network Map').length === 1 && nav.includes('Network Map'), JSON.stringify(nav));
+		const mob = await page.$$eval('#cleanx-mobile-list a', (as) => as.map((a) => a.getAttribute('href') || '')).catch(() => []);
+		check('UniWRT: mobile menu leaves them out too', !mob.some((h) => /uniwrt-(overview|netmap)/.test(h)), JSON.stringify(mob.filter((h) => /uniwrt/.test(h))));
+		for (const [from, to] of [['admin', 'admin/status/overview'], ['admin/uniwrt-overview', 'admin/status/overview'], ['admin/uniwrt-netmap', 'admin/cleanx-netmap']]) {
+			await page.goto(`${BASE}/cgi-bin/luci/${from}`, { waitUntil: 'load' });
+			await page.waitForURL(new RegExp(to.replace('/', '\\/') + '$'), { timeout: 5000 }).catch(() => {});
+			const url = page.url().replace(/^.*\/cgi-bin\/luci\//, '');
+			check(`UniWRT: /${from} opens CleanX's ${to}`, url === to, url);
+		}
+		const settings = await page.goto(`${BASE}/cgi-bin/luci/admin/system/uniwrt`, { waitUntil: 'load' }).then(() => page.url());
+		check('UniWRT: its settings page is left alone', /admin\/system\/uniwrt$/.test(settings), settings);
+		check('no page errors (UniWRT alongside)', errors.length === 0, errors.join(' | '));
+		await ctx.close();
+		await fetch(`${BASE}/__coexist?on=0`);
+	}
+
 	// ------------------------------------------------- another theme active
 	{
 		const { ctx, page, errors, calls } = await open(browser, { theme: 'bootstrap' });

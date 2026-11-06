@@ -16,12 +16,25 @@
 	const dashboard = cfg.dashboard == '0' ? '0' : '1';
 	const animations = cfg.animations || 'balanced';
 
+	/* Pages another installed theme adds that only work under that theme.
+	   UniWRT's Overview sorts before Status, so LuCI even opens it right after
+	   login; under CleanX it would render unstyled (one huge icon). Send
+	   those to CleanX's own page instead. */
+	const foreign_pages = { 'uniwrt-overview': 'admin/status/overview', 'uniwrt-netmap': 'admin/cleanx-netmap' };
+	const resolved_path = ctx?.path ?? [];
+	const redirect_to = (!blank_page && length(resolved_path) == 2 && resolved_path[0] == 'admin')
+		? foreign_pages[resolved_path[1]] : null;
+
 	http.prepare_content('text/html; charset=UTF-8');
 -%}
 <!DOCTYPE html>
 <html lang="{{ dispatcher.lang }}" data-cleanx-mode="{{ entityencode(theme_mode, true) }}" data-cleanx-animations="{{ entityencode(animations, true) }}">
 <head>
 	<meta charset="utf-8">
+	{% if (redirect_to): %}
+	<meta http-equiv="refresh" content="0; url={{ dispatcher.build_url(redirect_to) }}">
+	<script>location.replace({{ sprintf('%J', dispatcher.build_url(redirect_to)) }});</script>
+	{% endif %}
 	<title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
@@ -39,9 +52,9 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.5">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.6">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.5">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.6">
 	{% endif %}
 
 	<script>

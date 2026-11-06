@@ -387,13 +387,14 @@ jobs:
         run: env -u BUSYBOX -u BUSYBOX_LINKS -u UCI_BIN -u APK_BIN bash tests/test-apply.sh "$ARCHIVE"
 
   ui-audit:
-    name: UI audit vs stock LuCI (${{ matrix.branch }})
+    name: UI audit vs stock LuCI (${{ matrix.branch }}, ${{ matrix.viewport }})
     runs-on: ubuntu-24.04
     needs: check
     strategy:
       fail-fast: false
       matrix:
         branch: [openwrt-24.10, openwrt-25.12]
+        viewport: [1440x900, 390x844]   # desktop, phone
     steps:
       - name: Checkout CleanX source
         uses: actions/checkout@v5
@@ -409,17 +410,18 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
-      - name: Audit every page, tab, dialog and control, then the Network Map
-        run: bash tests/ui/run.sh ${{ matrix.branch }}
+      - name: Audit every page, tab, dialog and control, the Network Map and page health
+        run: bash tests/ui/run.sh ${{ matrix.branch }} ${{ matrix.viewport }}
 
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: ui-audit-${{ matrix.branch }}
+          name: ui-audit-${{ matrix.branch }}-${{ matrix.viewport }}
           path: |
             tests/ui/.work/out-*/report.txt
             tests/ui/.work/out-*/netmap.txt
+            tests/ui/.work/out-*/health.txt
             tests/ui/.work/out-*/*.json
             tests/ui/.work/out-*/*-shots/*
             tests/ui/.work/out-*/netmap/*

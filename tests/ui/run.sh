@@ -9,7 +9,8 @@
 # checkbox, select, text field and dropdown with a real mouse in Chromium.
 # Fails when something works with Bootstrap but not with CleanX, or when
 # CleanX shows something LuCI hides (inactive options, tab panes, ...).
-# Then runs the Network Map checks (netmap.test.js).
+# Then runs the Network Map checks (netmap.test.js) and the page health scan
+# (health.js).
 #
 # Needs Node.js with Playwright + Chromium, and Python 3. Run setup.sh first.
 set -euo pipefail
@@ -53,3 +54,9 @@ if [ -z "$FILTER" ] || echo "admin/cleanx-netmap" | grep -Eq "$FILTER"; then
 	echo "== Network Map checks"
 	node "$HERE/netmap.test.js" "http://localhost:$PORT" "$OUT/netmap" | tee "$OUT/netmap.txt"
 fi
+
+# Every page once more, at rest: JavaScript errors, sideways scrolling,
+# oversized graphics, broken images, controls off-screen and extra router
+# requests — anything that happens with CleanX but not with stock LuCI.
+echo "== Page health"
+node "$HERE/health.js" "http://localhost:$PORT" "$OUT/health.json" "$VIEWPORT" "$FILTER" | tee "$OUT/health.txt"

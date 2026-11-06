@@ -1,11 +1,8 @@
 'use strict';
 'require baseclass';
 'require ui';
-'require rpc';
-'require poll';
 
 return baseclass.extend({
-	callSystemInfo: rpc.declare({ object: 'system', method: 'info' }),
 
 	__init__() {
 		/* Start the loader failsafe first. Some LuCI pages expose unusual DOM
@@ -35,7 +32,6 @@ return baseclass.extend({
 		safe('ripples', this.bindRipples);
 		safe('button feedback', this.bindButtonFeedback);
 		safe('toast', this.installToast);
-		safe('status refresh', this.startStatusLiveRefresh);
 
 		/* DOM enhancement passes. Each one registers itself with addPass() and
 		 * they all share a single MutationObserver (see startPassScheduler). The
@@ -231,13 +227,10 @@ return baseclass.extend({
 
 			this.fixPortStatusCards(main);
 
-			main.querySelectorAll('.cbi-map, .cbi-section, fieldset, .panel, .modal').forEach((node) => {
-				node.classList.add('cleanx-enhanced-card');
-			});
-
-			main.querySelectorAll('button, input[type="submit"], input[type="button"], input[type="reset"], a.cbi-button, .cbi-button, a.btn, .btn').forEach((btn) => {
+			/* Only buttons not seen before: this pass runs after every DOM change,
+			 * and pages like Software list thousands of rows. */
+			main.querySelectorAll(':is(button, input[type="submit"], input[type="button"], input[type="reset"], a.cbi-button, .cbi-button, a.btn, .btn):not(.cleanx-enhanced-button)').forEach((btn) => {
 				if (btn.classList && btn.classList.contains('cbi-dropdown')) return;
-				if (btn.classList.contains('cleanx-enhanced-button')) return;
 				/* Network Map device and icon tiles are styled by the map itself;
 				 * device names must not turn them into "danger"/"save" buttons */
 				if (btn.closest('.cx-nm') || btn.classList.contains('cx-nm-pick')) return;
@@ -259,9 +252,6 @@ return baseclass.extend({
 					btn.setAttribute('title', String(btn.textContent || btn.value).trim());
 			});
 
-			main.querySelectorAll('input, select, textarea').forEach((field) => {
-				field.classList.add('cleanx-enhanced-field');
-			});
 		};
 
 		this.addPass('luci content', enhance);
@@ -316,64 +306,6 @@ return baseclass.extend({
 				br.dataset.cleanxHidden = '1';
 			});
 		});
-	},
-
-	startStatusLiveRefresh() {
-		const page = String(document.body.dataset.page || location.pathname || '').toLowerCase();
-		if (!/admin-status-overview|status\/overview|\/admin$/.test(page)) return;
-
-		const fmtBytes = (value) => {
-			const units = [ 'B', 'KB', 'MB', 'GB', 'TB', 'PB' ];
-			let n = Number(value || 0), u = 0;
-			while (n >= 1024 && u < units.length - 1) { n /= 1024; u++; }
-			const d = u === 0 || n >= 100 ? 0 : n >= 10 ? 1 : 2;
-			return n.toFixed(d) + ' ' + units[u];
-		};
-
-		const setProgress = (row, value, max) => {
-			if (!row || !max) return;
-			const pct = Math.max(0, Math.min(100, Math.floor((100 / max) * value)));
-			const bar = row.querySelector('.cbi-progressbar, .progress');
-			if (!bar) return;
-			let fill = bar.firstElementChild || bar.appendChild(document.createElement('div'));
-			bar.title = '%s / %s (%d%%)'.format(fmtBytes(value), fmtBytes(max), pct);
-			bar.dataset.cleanxLive = 'true';
-			fill.style.width = pct.toFixed(2) + '%';
-		};
-
-		const findRow = (label) => {
-			label = label.toLowerCase();
-			for (const row of document.querySelectorAll('#maincontent table.table tr, #maincontent .table .tr')) {
-				const first = row.querySelector('td:first-child, .td:first-child, .td.left, td.left');
-				const text = String(first?.textContent || '').trim().toLowerCase();
-				if (text === label) return row;
-			}
-			return null;
-		};
-
-		const update = async () => {
-			if (document.hidden) return;
-			try {
-				const system = await this.callSystemInfo();
-				const mem = system?.memory || {};
-				const swap = system?.swap || {};
-				const total = Number(mem.total || 0);
-				if (total) {
-					const available = Number(mem.available || ((mem.free || 0) + (mem.buffered || 0)) || 0);
-					const used = Math.max(total - Number(mem.free || 0), 0);
-					setProgress(findRow('Total Available'), available, total);
-					setProgress(findRow('Used'), used, total);
-					if (mem.buffered) setProgress(findRow('Buffered'), Number(mem.buffered), total);
-					if (mem.cached) setProgress(findRow('Cached'), Number(mem.cached), total);
-				}
-				if (swap.total > 0) setProgress(findRow('Swap free'), Number(swap.free || 0), Number(swap.total || 0));
-			} catch (err) {
-				console.debug('[CleanX] Status memory refresh skipped:', err);
-			}
-		};
-
-		update();
-		poll.add(update, 3);
 	},
 
 	patchChangeIndicator() {
@@ -959,13 +891,13 @@ return baseclass.extend({
 		}
 	},
 
-	/* UniWRT's Network Map only works under UniWRT. When both themes are
-	 * installed, CleanX lists its own map once instead of two "Network Map"
-	 * entries. */
+	/* Pages UniWRT adds (its Overview and Network Map) only work under
+	 * UniWRT. When both themes are installed, CleanX leaves them out of its
+	 * menu: Status → Overview and CleanX's own Network Map cover them, and
+	 * header.ut forwards anyone who still lands on one. */
 	visibleChildren(tree) {
-		const children = ui.menu.getChildren(tree);
-		if (!children.some((c) => c.name === 'cleanx-netmap')) return children;
-		return children.filter((c) => c.name !== 'uniwrt-netmap');
+		const foreign = [ 'uniwrt-overview', 'uniwrt-netmap' ];
+		return ui.menu.getChildren(tree).filter((c) => foreign.indexOf(c.name) < 0);
 	},
 
 	renderMainMenu(tree, url) {

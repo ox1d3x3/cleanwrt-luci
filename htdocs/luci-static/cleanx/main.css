@@ -1,4 +1,4 @@
-/*! CleanX Theme v0.6.5 - SPDX-License-Identifier: Apache-2.0 */
+/*! CleanX Theme v0.6.6 - SPDX-License-Identifier: Apache-2.0 */
 :root {
 	--cleanx-bg: #f5f5f7;
 	--cleanx-bg-rgb: 245,245,247;
@@ -9956,6 +9956,19 @@ body[data-page="admin-network-network"] .cleanx-content tr.cleanx-inline-cell-la
 	border: 0 !important;
 }
 
+/* Data tables (with a header row) inside CleanX's scroll wrapper size to
+   their content and let the wrapper scroll sideways. Status pages forced a
+   fixed layout with clipped overflow on every table, which cut off the last
+   columns of wide tables, e.g. the DHCP leases' "Reserve IP" buttons on the
+   Overview page. */
+body[data-page] .cleanx-content .cleanx-table-wrap > table.cleanx-data-table {
+	table-layout: auto !important;
+	overflow: visible !important;
+}
+
+/* Overview: WAN pill turns red while the WAN port is down or unplugged */
+#cleanx-wan-pill.is-down .cleanx-live-dot { background: #ff453a !important; box-shadow: 0 0 0 4px rgba(255,69,58,.16) !important; animation: none !important; }
+
 /* ==========================================================================
  * Network Map (v0.6.4) — view/cleanx/netmap.js
  *
@@ -10078,11 +10091,6 @@ body[data-page="admin-network-network"] .cleanx-content tr.cleanx-inline-cell-la
 .cx-nm-h.is-high::after { animation: cxNmFlowH .6s linear infinite; }
 .cx-nm-v.is-down { background: repeating-linear-gradient(180deg, var(--cleanx-muted-2) 0 4px, transparent 4px 9px); opacity: .55; }
 .cx-nm-h.is-down { background: repeating-linear-gradient(90deg, var(--cleanx-muted-2) 0 4px, transparent 4px 9px); opacity: .55; }
-/* The faint background blobs are blurred compositor layers: while anything
-   moves, the browser re-blurs them every frame, which costs ~130 ms per
-   frame without GPU help. At their 7% opacity they add nothing to this page,
-   so the map leaves them out and its moving links stay at 60 fps. */
-body[data-page="admin-cleanx-netmap"] .cleanx-blob { display: none !important; }
 @keyframes cxNmFlowV { from { transform: translateY(0); } to { transform: translateY(28px); } }
 @keyframes cxNmFlowH { from { transform: translateX(0); } to { transform: translateX(28px); } }
 /* no motion: active links stay highlighted with a still dash pattern */
@@ -10224,6 +10232,37 @@ body.modal-overlay-active .cx-nm-link::after { animation-play-state: paused !imp
 	.cx-nm-kv { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 	.cx-nm-kv dd { margin-bottom: 8px; }
 	.cx-nm-icons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ==========================================================================
+ * Rendering performance (v0.6.6)
+ *
+ * Measured with software rendering (no GPU help: virtual machines, remote
+ * desktops, old laptops, budget phones), where every effect below is paid
+ * on every frame while anything on the page moves (a hover, a progress bar,
+ * the sidebar icons after a page load, the Network Map's links). Pages went
+ * from 7-9 fps to 60 fps; with a GPU it saves battery and keeps low-end
+ * phones smooth. The look is unchanged (screenshots differ by 1-5 of 255
+ * levels).
+ * ========================================================================== */
+
+/* 1. The background glows are soft radial gradients with the falloff of the
+ *    old blurred discs (same size, colour, position and opacity). A blur
+ *    filter had to be recomputed every frame; a gradient is drawn once. */
+.cleanx-bg .cleanx-blob { filter: none !important; transform: none; border-radius: 0; background-color: transparent !important; }
+.cleanx-bg .cleanx-blob-a { width: 1268px; height: 1268px; top: -564px; right: -504px; background-image: radial-gradient(closest-side, rgba(96,165,250,.94), rgba(96,165,250,.882) 15%, rgba(96,165,250,.689) 30%, rgba(96,165,250,.457) 42%, rgba(96,165,250,.235) 54%, rgba(96,165,250,.089) 66%, rgba(96,165,250,.024) 78%, rgba(96,165,250,.005) 90%, rgba(96,165,250,0)); }
+.cleanx-bg .cleanx-blob-b { width: 1328px; height: 1328px; bottom: -624px; left: -544px; background-image: radial-gradient(closest-side, rgba(167,139,250,.968), rgba(167,139,250,.925) 15%, rgba(167,139,250,.756) 30%, rgba(167,139,250,.523) 42%, rgba(167,139,250,.277) 54%, rgba(167,139,250,.106) 66%, rgba(167,139,250,.028) 78%, rgba(167,139,250,.005) 90%, rgba(167,139,250,0)); }
+.cleanx-bg .cleanx-blob-c { width: 1028px; height: 1028px; top: calc(33% - 354px); left: calc(47% - 354px); background-image: radial-gradient(closest-side, rgba(52,211,153,.601), rgba(52,211,153,.527) 15%, rgba(52,211,153,.352) 30%, rgba(52,211,153,.206) 42%, rgba(52,211,153,.098) 54%, rgba(52,211,153,.038) 66%, rgba(52,211,153,.011) 78%, rgba(52,211,153,.003) 90%, rgba(52,211,153,0)); }
+
+/* 2. Frosted-glass blur only where page content actually passes behind: the
+ *    top bar, the mobile menu, dialogs' backdrop, pop-up menus and tooltips.
+ *    The sidebar, cards, tables and port boxes only ever sit on the smooth
+ *    page background, where a blur shows nothing, yet each one (up to 40 on
+ *    the Overview, some nested) cost a full backdrop pass per frame. */
+html body .cleanx-app-shell :is(.cleanx-sidebar, .cbi-map, .cbi-section, table, .table, .ifacebox, .cleanx-stat-card, .cleanx-hero, .cleanx-dashboard-meta, ul.tabs, fieldset, .panel, .cleanx-table-wrap, .cx-nm-card),
+html body #modal_overlay .modal {
+	-webkit-backdrop-filter: none !important;
+	backdrop-filter: none !important;
 }
 
 /* ==========================================================================

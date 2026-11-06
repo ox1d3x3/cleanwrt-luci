@@ -32,10 +32,18 @@ function checkDepends(spec) {
 	if (d.uci) for (const c of Object.keys(d.uci)) if (!mock.UCI[c]) return false;
 	return true;
 }
+// /__coexist?on=1 adds tests/ui/fixtures/uniwrt (UniWRT installed alongside)
+const COEXIST = path.join(__dirname, 'fixtures', 'uniwrt');
+let coexist = false;
+function menuFiles() {
+	const list = (dir) => fs.readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => ({ f, dir }));
+	const files = list(path.join(ROOT, 'menu.d')).concat(coexist ? list(path.join(COEXIST, 'menu.d')) : []);
+	return files.sort((a, b) => a.f.localeCompare(b.f));
+}
 function buildTree() {
 	const tree = { action: { type: 'firstchild' } };
-	for (const f of fs.readdirSync(path.join(ROOT, 'menu.d')).sort()) {
-		const data = JSON.parse(fs.readFileSync(path.join(ROOT, 'menu.d', f), 'utf8'));
+	for (const { f, dir } of menuFiles()) {
+		const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
 		for (const [p, spec] of Object.entries(data)) {
 			let node = tree, wildcard = false;
 			for (const s of p.split('/').filter(Boolean)) {
@@ -53,7 +61,7 @@ function buildTree() {
 	}
 	return tree;
 }
-const TREE = buildTree();
+let TREE = buildTree();
 function menuJson(node) {
 	const out = { ...node };
 	delete out.depends; delete out.wildcardaction;
@@ -90,7 +98,8 @@ function renderPage(parts, theme) {
 	const r = resolve(parts);
 	if (!r) return null;
 	const a = r.node.action;
-	const env = { ...process.env, TPL: path.join(ROOT, 'tpl'), THEME: theme, REQPATH: r.parts.join('/'), TITLE: r.node.title || '', LD_LIBRARY_PATH: UC };
+	// like LuCI: request_path is what was asked for, path the page it resolved to
+	const env = { ...process.env, TPL: path.join(ROOT, 'tpl'), THEME: theme, REQPATH: parts.join('/'), RESOLVED: r.parts.join('/'), TITLE: r.node.title || '', LD_LIBRARY_PATH: UC };
 	if (a.type === 'view') { env.VIEW = a.path; env.ENTRY = 'view'; }
 	else if (a.type === 'template') { env.VIEW = ''; env.ENTRY = a.path; }
 	else return null;
@@ -139,6 +148,7 @@ http.createServer((req, res) => {
 	if (url.pathname.startsWith('/cgi-bin/cgi-exec')) return send(200, 'text/plain', '');
 	if (url.pathname === '/__unknown') return send(200, 'application/json', JSON.stringify(Object.fromEntries(unknownCalls)));
 	if (url.pathname === '/__scenario') { mock.setScenario(url.searchParams.get('name')); return send(200, 'text/plain', 'ok'); }
+	if (url.pathname === '/__coexist') { coexist = url.searchParams.get('on') === '1'; TREE = buildTree(); return send(200, 'text/plain', 'ok'); }
 	if (url.pathname === '/__pages') {
 		const pages = [];
 		const walk = (node, parts) => {
@@ -160,8 +170,10 @@ http.createServer((req, res) => {
 		if (!html) return send(404, 'text/plain', 'no page');
 		return send(200, 'text/html; charset=UTF-8', html, { 'Set-Cookie': `theme=${theme}; path=/` });
 	}
-	const file = path.join(ROOT, 'www', path.normalize(url.pathname));
-	if (file.startsWith(path.join(ROOT, 'www')) && fs.existsSync(file) && fs.statSync(file).isFile())
-		return send(200, TYPES[path.extname(file)] || 'application/octet-stream', fs.readFileSync(file));
+	for (const base of coexist ? [ROOT, COEXIST] : [ROOT]) {
+		const file = path.join(base, 'www', path.normalize(url.pathname));
+		if (file.startsWith(path.join(base, 'www')) && fs.existsSync(file) && fs.statSync(file).isFile())
+			return send(200, TYPES[path.extname(file)] || 'application/octet-stream', fs.readFileSync(file));
+	}
 	send(404, 'text/plain', 'not found');
 }).listen(PORT, () => console.log(`harness ${ROOT} on :${PORT}`));
