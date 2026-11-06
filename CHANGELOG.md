@@ -27,6 +27,8 @@ All notable changes to CleanX are documented here. The format follows
 - The Network Map only uses CleanX's own device names
   (`/etc/config/cleanx`). It no longer reads another theme's configuration,
   and the theme's access rules no longer allow it.
+- Removed the `wan_interface` option from the default configuration. It was
+  never read: the dashboard finds the WAN device by itself.
 
 ## [0.6.6] - 2026-11-06
 

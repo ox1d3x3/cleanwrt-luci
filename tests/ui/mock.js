@@ -95,7 +95,7 @@ const UCI = {
 	]),
 	ucitrack: cfg([]),
 	cleanx: cfg([
-		['theme', 'theme', { mode: 'auto', dashboard: '1', wan_interface: 'auto', animations: 'balanced', netmap_interval: '3' }],
+		['theme', 'theme', { mode: 'auto', dashboard: '1', animations: 'balanced', netmap_interval: '3' }],
 		['host', 'h_f0b429112233', { mac: 'F0:B4:29:11:22:33', name: 'Living room TV', icon: 'tv' }],
 	]),
 };
