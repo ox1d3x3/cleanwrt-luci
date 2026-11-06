@@ -56,9 +56,9 @@
 	})();
 	</script>
 	{% if (blank_page): %}
-	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.7">
+	<link rel="stylesheet" href="{{ media }}/login.css?v=0.6.8">
 	{% else %}
-	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.7">
+	<link rel="stylesheet" href="{{ media }}/main.css?v=0.6.8">
 	{% endif %}
 
 	<script>

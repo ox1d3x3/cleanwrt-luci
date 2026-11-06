@@ -139,6 +139,15 @@ release_base() {
 clear_caches() {
 	rm -rf "$R"/tmp/luci-indexcache* "$R"/tmp/luci-modulecache 2>/dev/null || true
 	[ -x "$R/etc/init.d/rpcd" ] && "$R/etc/init.d/rpcd" reload >/dev/null 2>&1 || true
+	# LuCI loads every script as name.js?v=<LuCI version>-<time the package
+	# database last changed>, and browsers keep a cached script for as long as
+	# that address stays the same. Installing a package updates the database;
+	# a standalone install has to touch it, or browsers keep running the
+	# previous CleanX scripts (menu, dashboard, Network Map) after an update.
+	for db in "$R/lib/apk/db/installed" "$R/usr/lib/opkg/status"; do
+		if [ -f "$db" ]; then touch "$db" 2>/dev/null || true; break; fi
+	done
+	return 0
 }
 
 # A permanent owut "remove" entry for the theme makes older owut versions fail

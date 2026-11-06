@@ -31,9 +31,12 @@ tar -xzf "$WORK/data.tar.gz" -C "$WORK/root"
 VERSION_FILE="$WORK/root/usr/share/ucode/luci/template/themes/cleanx/version"
 [ -f "$VERSION_FILE" ] || { echo "error: not a luci-theme-cleanx package" >&2; exit 1; }
 
-# Deterministic archive: sorted, root-owned, fixed mtimes.
+# Deterministic archive: sorted, root-owned, every file dated to the release
+# commit. A real date matters: the router's web server sends it as
+# Last-Modified, and a 1970 date makes browsers keep cached copies for years.
+STAMP="${SOURCE_DATE_EPOCH:-$(git -C "$(dirname "$0")" log -1 --format=%ct 2>/dev/null || date +%s)}"
 ( cd "$WORK/root" && find . \( -type f -o -type l \) | LC_ALL=C sort > "$WORK/list" )
-tar --owner=0 --group=0 --numeric-owner --mtime='@0' \
+tar --owner=0 --group=0 --numeric-owner --mtime="@$STAMP" \
 	-C "$WORK/root" -czf "$OUT" -T "$WORK/list"
 
 echo "Built $(basename "$OUT") — CleanX $(tr -d '[:space:]' < "$VERSION_FILE"), $(wc -l < "$WORK/list" | tr -d ' ') files"

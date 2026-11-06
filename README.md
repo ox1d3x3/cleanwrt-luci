@@ -273,6 +273,14 @@ CleanX also respects the operating system's *reduce motion* setting.
 
 ## Uninstall and recovery
 
+If something still looks like the previous version after an update (the
+installer handles this since 0.6.8), make browsers load the theme's scripts
+again, then reload the page:
+
+```sh
+touch /lib/apk/db/installed 2>/dev/null || touch /usr/lib/opkg/status
+```
+
 If a page ever looks broken, switch LuCI back to the default Bootstrap theme over SSH:
 
 ```sh
@@ -349,9 +357,9 @@ Before publishing, CI runs two test suites:
 To cut a new release:
 
 ```sh
-scripts/bump-version.sh 0.6.7   # updates every version string
-# add a "## [0.6.7]" section to CHANGELOG.md
-git commit -am "Release v0.6.7" && git push
+scripts/bump-version.sh 0.6.8   # updates every version string
+# add a "## [0.6.8]" section to CHANGELOG.md
+git commit -am "Release v0.6.8" && git push
 ```
 
 ## Project layout

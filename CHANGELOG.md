@@ -4,6 +4,21 @@ All notable changes to CleanX are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.8] - 2026-11-06
+
+### Fixed
+- **Updates now reach the browser.** LuCI loads every script at an address
+  that only changes when the router's package database changes, and the
+  standalone installer never changed it. Browsers therefore kept running the
+  previous CleanX menu, dashboard and Network Map scripts after an update —
+  for example, "UniWRT Theme" still showed in the menu after updating to
+  0.6.7. Installing, updating and removing CleanX now mark the package
+  database as changed (its contents stay the same), so the next page load
+  fetches the new scripts.
+- The theme's files in the standalone archive carried a 1970 date, which the
+  router's web server passes on to browsers and which makes them keep a cached
+  copy for years. Files are now dated to the release.
+
 ## [0.6.7] - 2026-11-06
 
 ### Added
@@ -406,6 +421,7 @@ was found that way and is now covered by an automated test.
 - Overview Network and Wireless sections space labels and values cleanly.
 - Modern compact Show/Hide buttons.
 
+[0.6.8]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.7...v0.6.8
 [0.6.7]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/Ox1d3x3/cleanwrt-luci/compare/v0.6.4...v0.6.5

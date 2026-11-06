@@ -396,6 +396,29 @@ check "stale X1Wrt entry removed" [ -z "$(uciget luci.themes.X1Wrt)" ]
 check "stale UniWRT entry removed (no UniWRT files present)" [ -z "$(uciget luci.themes.UniWRT)" ]
 check "LuCI moved off the missing theme to CleanX" [ "$(uciget luci.main.mediaurlbase)" = /luci-static/cleanx ]
 
+SECTION="13c. browsers are told the theme's scripts changed"; echo "== 13c. browsers are told the theme's scripts changed =="
+# LuCI puts the package database's mtime in every script address
+# (?v=<version>-<mtime>), so each install, update and removal must bump it.
+mtime() { stat -c %Y "$1"; }
+new_root 13c; mkdir -p "$CLEANX_ROOT/lib/apk/db"
+printf 'P:luci-base\nV:1-r1\n\n' > "$CLEANX_ROOT/lib/apk/db/installed"; touch -d @1000000000 "$CLEANX_ROOT/lib/apk/db/installed"
+check "install succeeds (apk database present)" run --file "$ARCHIVE"
+check "install bumps the apk database time" [ "$(mtime "$CLEANX_ROOT/lib/apk/db/installed")" -gt 1000000000 ]
+check "…without changing its contents" grep -qx "P:luci-base" "$CLEANX_ROOT/lib/apk/db/installed"
+touch -d @1000000000 "$CLEANX_ROOT/lib/apk/db/installed"
+check "update (re-run) succeeds" run --file "$ARCHIVE"
+check "update bumps it again" [ "$(mtime "$CLEANX_ROOT/lib/apk/db/installed")" -gt 1000000000 ]
+touch -d @1000000000 "$CLEANX_ROOT/lib/apk/db/installed"
+check "uninstall succeeds" run --uninstall
+check "uninstall bumps it too" [ "$(mtime "$CLEANX_ROOT/lib/apk/db/installed")" -gt 1000000000 ]
+new_root 13c-opkg; mkdir -p "$CLEANX_ROOT/usr/lib/opkg"
+printf 'Package: luci-base\nStatus: install user installed\n\n' > "$CLEANX_ROOT/usr/lib/opkg/status"; touch -d @1000000000 "$CLEANX_ROOT/usr/lib/opkg/status"
+check "install succeeds (opkg database present)" run --file "$ARCHIVE"
+check "install bumps the opkg status time" [ "$(mtime "$CLEANX_ROOT/usr/lib/opkg/status")" -gt 1000000000 ]
+new_root 13c-none
+check "install succeeds with no package database at all" run --file "$ARCHIVE"
+check "…and creates none" bash -c "[ ! -e '$CLEANX_ROOT/lib/apk/db/installed' ] && [ ! -e '$CLEANX_ROOT/usr/lib/opkg/status' ]"
+
 SECTION="13. rejects a wrong archive"; echo "== 13. rejects a wrong archive =="
 new_root 13; mkdir -p "$T/bogus/etc"; echo hi > "$T/bogus/etc/x"; tar czf "$T/luci-theme-cleanx-standalone.tar.gz" -C "$T/bogus" .
 check "non-CleanX archive refused" runfail --file "$T/luci-theme-cleanx-standalone.tar.gz"
